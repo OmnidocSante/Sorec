@@ -25,6 +25,9 @@
   section {
     @apply my-12 md:my-16;
   }
+  button{
+    @apply cursor-pointer
+  }
 
   :root {
     --background: 0 0% 100%;
