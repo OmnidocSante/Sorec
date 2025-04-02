@@ -20,10 +20,6 @@ public class AuthController {
         return ResponseEntity.ok(authenticationService.login(user));
     }
 
-    @PostMapping("/create")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<AuthenticationResponse> create(@RequestBody @Valid User user) {
-        return ResponseEntity.ok(authenticationService.createUser(user));
-    }
+
 
 }

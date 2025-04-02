@@ -37,7 +37,7 @@ public class User implements UserDetails {
 
     @NotNull(message = "Sexe is required")
     @Column(nullable = false)
-    private Character sexe; // Changed from char to Character for @NotNull
+    private Character sexe;
 
     @NotNull(message = "Date de naissance is required")
     @Past(message = "Date must be in the past")
@@ -55,11 +55,11 @@ public class User implements UserDetails {
 
     @NotNull(message = "Phone number is required")
     @Column(nullable = false)
-    private Integer telephone; 
+    private Integer telephone;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @NotBlank(message = "SOREC ID is required")

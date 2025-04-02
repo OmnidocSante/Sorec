@@ -1,6 +1,6 @@
 package omnidoc.backend.entity.enums;
 
 public enum Role {
-    ADMIN, USER, MEDECIN
+    ADMIN, USER, MEDECIN, JOCKEY
 
 }

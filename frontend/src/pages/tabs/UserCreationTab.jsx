@@ -1,18 +1,21 @@
-import useToken from "@/auth/useToken";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import instance from "@/auth/AxiosInstance";
+import { useAtom } from "jotai";
+import { usersAtom } from "@/main";
 
 const Role = {
   MEDECIN: "MEDECIN",
   USER: "USER",
+  JOCKEY: "JOCKEY",
 };
+
 const userSchema = z.object({
   nom: z.string().min(1, "Nom est requis"),
   prénom: z.string().min(1, "Prénom est requis"),
@@ -34,16 +37,15 @@ const userSchema = z.object({
   password: z
     .string()
     .min(8, "Le mot de passe doit avoir au moins 8 caractères"),
-  role: z.enum(["USER", "MEDECIN"], { message: "Rôle invalide" }),
+  role: z.enum(["USER", "MEDECIN", "JOCKEY"], { message: "Rôle invalide" }),
 });
 
-export default function UserCreationForm() {
+export default function UserCreationTab() {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(userSchema) });
-  const [token] = useToken();
 
   const [showAlert, setShowAlert] = useState(false);
   const [alertContent, setAlertContent] = useState({
@@ -51,22 +53,27 @@ export default function UserCreationForm() {
     description: "",
   });
 
+  const [, setUsers] = useAtom(usersAtom);
+
   const onSubmit = async (data) => {
     try {
-      await axios.post("http://localhost:4000/api/auth/create", data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      if (data.role === "JOCKEY") {
+        await instance.post("/api/jockeys", data);
+      } else {
+        await instance.post("/api/users", data);
+      }
+      const response = await instance.get("/api/users");
+      setUsers(response.data);
+
       setAlertContent({
         title: "succès",
         description: "utilisateur créé avec succès",
       });
       setShowAlert(true);
     } catch (error) {
-      console.log(error);
-
       setAlertContent({
         title: "Erreur de connexion",
-        description: error.message,
+        description: error.response.data.message,
       });
       setShowAlert(true);
     }
@@ -230,7 +237,7 @@ export default function UserCreationForm() {
             <label className="block text-bay-of-many-700 mb-1">Rôle</label>
             <select
               {...register("role")}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-bay-of-many-400"
+              className="w-full p-2  border rounded focus:ring-2 focus:ring-bay-of-many-400"
             >
               {Object.values(Role).map((role) => (
                 <option key={role} value={role.toUpperCase()}>

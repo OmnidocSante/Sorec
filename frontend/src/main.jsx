@@ -10,6 +10,13 @@ import DoctorPanel from "./pages/panels/DoctorPanel";
 import UserPanel from "./pages/panels/UserPanel";
 import Unauthorized from "./pages/auth/Unauthorized";
 import NotFound from "./pages/NotFound";
+import { atom } from "jotai";
+import instance from "./auth/AxiosInstance";
+
+export const usersAtom = atom(async () => {
+  const response = await instance.get("/api/users");
+  return response.data;
+});
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

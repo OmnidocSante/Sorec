@@ -25,8 +25,11 @@
   section {
     @apply my-12 md:my-16;
   }
-  button{
-    @apply cursor-pointer
+  button {
+    @apply cursor-pointer;
+  }
+  option {
+    font-family: "Archivo", sans-serif;
   }
 
   :root {

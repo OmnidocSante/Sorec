@@ -29,8 +29,8 @@ public class AuthenticationService {
     public UserRepo userRepo;
 
     public AuthenticationResponse login(User user) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
         User authenticatedUser = userRepo.findByEmail(user.getEmail()).orElseThrow();
         Map<String, Object> role = new HashMap<>();
         role.put("role", authenticatedUser.getRole());
@@ -40,15 +40,5 @@ public class AuthenticationService {
         return new AuthenticationResponse(token);
     }
 
-    public AuthenticationResponse createUser(User user) {
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashedPassword);
-        User savedUser = userRepo.save(user);
-        Map<String, Object> role = new HashMap<>();
-        role.put("role", savedUser.getRole());
-
-        String token = jwtService.generateToken(role, savedUser);
-        return new AuthenticationResponse(token);
-    }
 
 }
