@@ -1,8 +1,16 @@
 import { usersAtom } from "@/main";
 import { useAtom } from "jotai";
+import { useEffect } from "react";
 
 export default function DashboardTab() {
-  const [users] = useAtom(usersAtom);
+  const [users, setUsers] = useAtom(usersAtom);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setUsers("REFRESH");
+    };
+    fetchUsers();
+  }, [setUsers]);
 
   return (
     <div>

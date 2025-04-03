@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { usersAtom } from "@/main";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import instance from "@/auth/AxiosInstance";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -16,28 +16,26 @@ import {
 } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Zod validation schema
 const userFormSchema = z.object({
   email: z.string().email("Email invalide"),
-  password: z
-    .string()
-    .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
-  role: z.enum(["doctor", "jockey", "admin"]),
-  sexe: z.enum(["male", "female"]),
+
+  role: z.enum(["MEDECIN", "JOCKEY", "USER"]),
+  sexe: z.enum(["M", "F"]),
   adresse: z.string().min(1, "L'adresse est requise"),
-  sorec_id: z.string().min(1, "L'ID SOREC est requis"),
 });
 
 export default function UsersTab() {
   const [users, setUsers] = useAtom(usersAtom);
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  console.log(currentUser);
+
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
   } = useForm({
     resolver: zodResolver(userFormSchema),
@@ -51,17 +49,16 @@ export default function UsersTab() {
     setValue("adresse", user.adresse);
     setIsEditDialogOpen(true);
   };
+  console.log(errors);
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
     try {
-      const response = await instance.put(`/api/users/${currentUser.id}`, data);
-      setUsers(users.map((u) => (u.id === currentUser.id ? response.data : u)));
+      await instance.patch(`/api/users/${currentUser.id}`, data);
+      setUsers("REFRESH");
+
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating user:", error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -113,7 +110,7 @@ export default function UsersTab() {
                     <td className="p-3">
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
-                          user.role === "doctor"
+                          user.role === "MEDECIN"
                             ? "bg-bay-of-many-100 text-bay-of-many-800"
                             : "bg-gray-100 text-gray-800"
                         }`}
@@ -174,9 +171,11 @@ export default function UsersTab() {
                                   {...register("role")}
                                   className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
                                 >
-                                  <option value="doctor">Médecin</option>
-                                  <option value="jockey">Jockey</option>
-                                  <option value="admin">Administrateur</option>
+                                  <option value="MEDECIN">Médecin</option>
+                                  <option value="JOCKEY">Jockey</option>
+                                  <option value="USER">
+                                    Utilisateur de consultation
+                                  </option>
                                 </select>
                                 {errors.role && (
                                   <p className="text-red-500 text-sm mt-1">
@@ -193,8 +192,8 @@ export default function UsersTab() {
                                   {...register("sexe")}
                                   className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
                                 >
-                                  <option value="male">Masculin</option>
-                                  <option value="female">Féminin</option>
+                                  <option value="M">Masculin</option>
+                                  <option value="F">Féminin</option>
                                 </select>
                                 {errors.sexe && (
                                   <p className="text-red-500 text-sm mt-1">

@@ -17,11 +17,5 @@ public class JockeyController {
     @Autowired
     public JockeyService jockeyService;
 
-    @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> create(@RequestBody User user) {
-        jockeyService.createJockey(user);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
 
-    }
 }

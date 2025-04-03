@@ -55,7 +55,7 @@ public class User implements UserDetails {
 
     @NotNull(message = "Phone number is required")
     @Column(nullable = false)
-    private Integer telephone;
+    private String telephone;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")

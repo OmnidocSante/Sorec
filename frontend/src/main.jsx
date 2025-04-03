@@ -13,10 +13,30 @@ import NotFound from "./pages/NotFound";
 import { atom } from "jotai";
 import instance from "./auth/AxiosInstance";
 
-export const usersAtom = atom(async () => {
-  const response = await instance.get("/api/users");
-  return response.data;
-});
+const usersAsyncAtom = atom([]);
+
+export const usersAtom = atom(
+  (get) => get(usersAsyncAtom),
+  async (get, set, action) => {
+    console.log(action);
+
+    let refreshed;
+
+    switch (action) {
+      case "REFRESH": {
+        refreshed = await instance.get("/api/users");
+        console.log(refreshed.data);
+
+        set(usersAsyncAtom, refreshed.data);
+        break;
+      }
+
+      default:
+        throw new Error("Unknown action type");
+    }
+  }
+);
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

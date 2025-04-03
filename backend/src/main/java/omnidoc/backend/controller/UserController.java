@@ -4,6 +4,7 @@ package omnidoc.backend.controller;
 import jakarta.validation.Valid;
 import omnidoc.backend.entity.users.User;
 import omnidoc.backend.records.UserRecord;
+import omnidoc.backend.request.ModificationUserRequest;
 import omnidoc.backend.response.AuthenticationResponse;
 import omnidoc.backend.service.AuthenticationService;
 import omnidoc.backend.service.UserService;
@@ -36,10 +37,10 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsers());
     }
 
-    @PatchMapping
+    @PatchMapping("/{userId}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> changeUser(@RequestBody @Valid User user) {
-        userService.modifyUser(user);
+    public ResponseEntity<Void> changeUser(@RequestBody @Valid ModificationUserRequest user, @PathVariable int userId) {
+        userService.modifyUser(user, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

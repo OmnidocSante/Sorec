@@ -1,6 +1,5 @@
 package omnidoc.backend.records;
 
-import jakarta.validation.constraints.*;
 import omnidoc.backend.entity.enums.Role;
 
 import java.util.Date;
@@ -17,7 +16,7 @@ public record UserRecord(int id, String nom,
 
                          String adresse,
 
-                         Integer telephone,
+                         String telephone,
 
                          String email,
 

@@ -56,14 +56,11 @@ export default function UserCreationTab() {
   const [, setUsers] = useAtom(usersAtom);
 
   const onSubmit = async (data) => {
+    console.log(data);
+    
     try {
-      if (data.role === "JOCKEY") {
-        await instance.post("/api/jockeys", data);
-      } else {
-        await instance.post("/api/users", data);
-      }
-      const response = await instance.get("/api/users");
-      setUsers(response.data);
+      await instance.post("/api/users", data);
+      await setUsers("REFRESH");
 
       setAlertContent({
         title: "succès",
@@ -73,7 +70,7 @@ export default function UserCreationTab() {
     } catch (error) {
       setAlertContent({
         title: "Erreur de connexion",
-        description: error.response.data.message,
+        description: error?.response?.data?.message || error.message,
       });
       setShowAlert(true);
     }
