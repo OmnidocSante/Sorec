@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Menu, X, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import DashboardTab from "../tabs/DashboardTab";
-import UsersTab from "../tabs/UsersTab";
-import DataCorrectionTab from "../tabs/DataCorrectionTab";
-import AppointmentsTab from "../tabs/AppointmentsTab";
-import UserCreationTab from "../tabs/UserCreationTab";
+import DashboardTab from "../adminTabs/DashboardTab";
+import UsersTab from "../adminTabs/UsersTab";
+import DataCorrectionTab from "../adminTabs/DataCorrectionTab";
+import AppointmentsTab from "../adminTabs/AppointmentsTab";
+import UserCreationTab from "../adminTabs/UserCreationTab";
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard");

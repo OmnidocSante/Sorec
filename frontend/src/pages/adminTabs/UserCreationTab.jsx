@@ -56,7 +56,6 @@ export default function UserCreationTab() {
   const [, setUsers] = useAtom(usersAtom);
 
   const onSubmit = async (data) => {
-    console.log(data);
     
     try {
       await instance.post("/api/users", data);

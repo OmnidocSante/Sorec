@@ -15,6 +15,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, AlertCircleIcon } from "lucide-react";
 
 const userFormSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -26,11 +28,11 @@ const userFormSchema = z.object({
 
 export default function UsersTab() {
   const [users, setUsers] = useAtom(usersAtom);
+  const [alertContent, setAlertContent] = useState(null);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  console.log(currentUser);
-
 
   const {
     register,
@@ -49,16 +51,59 @@ export default function UsersTab() {
     setValue("adresse", user.adresse);
     setIsEditDialogOpen(true);
   };
-  console.log(errors);
+
+  const handleCloseClick = (user) => {
+    setCurrentUser(user);
+    setIsDeleteDialogOpen(true);
+  };
 
   const onSubmit = async (data) => {
     try {
       await instance.patch(`/api/users/${currentUser.id}`, data);
       setUsers("REFRESH");
-
-      setIsEditDialogOpen(false);
+      setAlertContent({
+        status: "success",
+        content: "utilisateur avec succès",
+      });
+      setTimeout(() => {
+        setAlertContent(null);
+        setIsEditDialogOpen(false);
+      }, 2000);
     } catch (error) {
       console.error("Error updating user:", error);
+
+      setAlertContent({
+        status: "error",
+        content: error?.response?.data?.message || error.message,
+      });
+      setTimeout(() => {
+        setAlertContent(null);
+        setIsEditDialogOpen(false);
+      }, 2000);
+    }
+  };
+
+  const handleCloseConfirm = async () => {
+    try {
+      await instance.delete(`/api/users/${currentUser.id}`);
+      setAlertContent({
+        status: "success",
+        content: "utilisateur supprimé avec succés",
+      });
+      setTimeout(() => {
+        setUsers("REFRESH");
+        setAlertContent(null);
+        setIsDeleteDialogOpen(false);
+      }, 3000);
+    } catch (error) {
+      setAlertContent({
+        status: "error",
+        content: error?.response?.data?.message || error.message,
+      });
+      setTimeout(() => {
+        setAlertContent(null);
+        setIsDeleteDialogOpen(false);
+      }, 3000);
     }
   };
 
@@ -134,6 +179,32 @@ export default function UsersTab() {
                           </motion.button>
                         </DialogTrigger>
                         <DialogContent className="bg-white p-6 rounded-lg shadow-lg border border-bay-of-many-200 max-w-[600px]">
+                          <AnimatePresence>
+                            {alertContent && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="mt-5"
+                              >
+                                <Alert
+                                  className={`${
+                                    alertContent.status === "error"
+                                      ? "text-red-500"
+                                      : "text-green-500"
+                                  }`}
+                                >
+                                  <AlertCircleIcon className="size-4" />
+                                  <AlertTitle>Erreur</AlertTitle>
+                                  <AlertDescription>
+                                    {alertContent.content}
+                                  </AlertDescription>
+                                </Alert>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
                           <DialogHeader>
                             <DialogTitle className="text-xl font-bold text-bay-of-many-900">
                               Modifier l'utilisateur
@@ -242,14 +313,81 @@ export default function UsersTab() {
                           </form>
                         </DialogContent>
                       </Dialog>
-
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-red-600 hover:text-red-800 text-sm"
+                      <Dialog
+                        open={isDeleteDialogOpen && currentUser?.id === user.id}
+                        onOpenChange={setIsDeleteDialogOpen}
                       >
-                        Supprimer
-                      </motion.button>
+                        <DialogTrigger asChild>
+                          <motion.button
+                            onClick={() => handleCloseClick(user)}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="text-red-500 hover:text-red-800 text-sm"
+                          >
+                            Supprimer
+                          </motion.button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-white p-6 rounded-lg shadow-lg border border-bay-of-many-200 max-w-[600px]">
+                          <AnimatePresence>
+                            {alertContent && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="mt-5"
+                              >
+                                <Alert
+                                  className={`${
+                                    alertContent.status === "error"
+                                      ? "text-red-500"
+                                      : "text-green-500"
+                                  }`}
+                                >
+                                  <AlertCircleIcon className="size-4" />
+                                  <AlertTitle>Erreur</AlertTitle>
+                                  <AlertDescription>
+                                    {alertContent.content}
+                                  </AlertDescription>
+                                </Alert>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                          <DialogHeader>
+                            <DialogTitle className="text-xl font-bold text-bay-of-many-900">
+                              Confirmation de suppression
+                            </DialogTitle>
+                            <DialogDescription className="text-bay-of-many-600">
+                              Vous êtes sur le point de supprimer {user.nom}
+                              {user.prénom}
+                            </DialogDescription>
+                          </DialogHeader>
+                          Êtes-vous sûr de vouloir continuer ?
+                          <DialogFooter>
+                            <motion.button
+                              type="submit"
+                              disabled={isSubmitting}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="px-4 py-2 w-fit bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+                              onClick={handleCloseConfirm}
+                            >
+                              {isSubmitting
+                                ? "Suppression en cours..."
+                                : "Confirmer la suppression"}
+                            </motion.button>
+                            <motion.button
+                              type="button"
+                              onClick={() => setIsDeleteDialogOpen(false)}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="px-4 py-2 border border-bay-of-many-300 rounded-md hover:bg-bay-of-many-50 transition-colors"
+                            >
+                              Annuler
+                            </motion.button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </td>
                   </motion.tr>
                 ))

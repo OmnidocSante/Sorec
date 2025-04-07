@@ -97,4 +97,16 @@ public class UserService {
             }
         }
     }
+
+
+    public void deleteUser(int userId) {
+        User user = userRepo.findById(userId).orElseThrow(() -> new ApiException("User not found"));
+        Role role = user.getRole();
+        if (role.name().equals(Role.MEDECIN.name())) {
+            medecinRepo.deleteByUser_Id(userId);
+        } else if (role.name().equals(Role.JOCKEY.name())) {
+            jockeyRepo.deleteByUser_Id(userId);
+        }
+        userRepo.deleteById(userId);
+    }
 }

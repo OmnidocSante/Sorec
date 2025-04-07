@@ -1,9 +1,11 @@
+import useUser from "@/auth/useUser";
 import { usersAtom } from "@/main";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 
 export default function DashboardTab() {
   const [users, setUsers] = useAtom(usersAtom);
+  const user = useUser();
 
   useEffect(() => {
     const fetchUsers = async () => {

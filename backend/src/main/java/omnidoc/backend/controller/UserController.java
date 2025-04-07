@@ -45,4 +45,12 @@ public class UserController {
     }
 
 
+    @DeleteMapping("/{userId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable int userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+
 }

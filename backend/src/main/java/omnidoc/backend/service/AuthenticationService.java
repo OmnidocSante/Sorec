@@ -17,12 +17,9 @@ import java.util.Map;
 public class AuthenticationService {
     @Autowired
     public JwtService jwtService;
-    @Autowired
-    public UserDetailsService userDetailsService;
+
     @Autowired
     public AuthenticationManager authenticationManager;
-    @Autowired
-    public PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserRepo userRepo;
