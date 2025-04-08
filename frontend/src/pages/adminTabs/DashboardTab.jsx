@@ -1,11 +1,9 @@
-import useUser from "@/auth/useUser";
 import { usersAtom } from "@/main";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 
 export default function DashboardTab() {
   const [users, setUsers] = useAtom(usersAtom);
-  const user = useUser();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -19,7 +17,7 @@ export default function DashboardTab() {
       <h1 className="text-2xl font-bold text-bay-of-many-900 mb-6">
         Tableau de Bord
       </h1>
-      <div className="grid grid-cols-4 gap-6 mb-8">
+      <div className=" space-y-4 md:space-y-0 md:grid grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-bay-of-many-600">Utilisateurs Totaux</h3>
           <p className="text-3xl font-bold text-bay-of-many-900">

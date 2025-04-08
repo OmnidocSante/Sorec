@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import omnidoc.backend.entity.enums.Status;
 
+import java.sql.Blob;
+
 @Entity
 @Table(name = "jockeys")
 @Getter
@@ -22,6 +24,11 @@ public class Jockey {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+
+    @JsonIgnore
+    @Lob
+    private Blob image;
 
     @Enumerated(EnumType.STRING)
     private Status status;

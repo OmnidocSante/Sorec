@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "rdvs", uniqueConstraints = {@UniqueConstraint(name = "uc_medecin_time", columnNames = {"medecin_id", "date"}), @UniqueConstraint(name = "uc_jockey_time", columnNames = {"jockey_id", "date"})})
+@Table(name = "rdvs")
 public class Rdv {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,12 +30,12 @@ public class Rdv {
     public LocalDateTime date;
 
     @NotNull(message = "Le médecin est obligatoire")
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "medecin_id", referencedColumnName = "id", nullable = false)
     public Medecin medecin;
 
     @NotNull(message = "Le jockey est obligatoire")
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "jockey_id", referencedColumnName = "id", nullable = false)
     public Jockey jockey;
 

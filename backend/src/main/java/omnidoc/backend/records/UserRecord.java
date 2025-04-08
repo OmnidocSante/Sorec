@@ -14,6 +14,7 @@ public record UserRecord(int id, String nom,
 
                          String cinId,
 
+                         String ville,
                          String adresse,
 
                          String telephone,

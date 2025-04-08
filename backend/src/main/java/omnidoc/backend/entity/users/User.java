@@ -49,9 +49,14 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String cinId;
 
+    @NotBlank(message = "ville is required")
+    @Column(nullable = false)
+    private String ville;
+
     @NotBlank(message = "Address is required")
     @Column(nullable = false)
     private String adresse;
+
 
     @NotNull(message = "Phone number is required")
     @Column(nullable = false)

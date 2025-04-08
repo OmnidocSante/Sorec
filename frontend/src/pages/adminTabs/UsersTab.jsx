@@ -23,7 +23,7 @@ const userFormSchema = z.object({
 
   role: z.enum(["MEDECIN", "JOCKEY", "USER"]),
   sexe: z.enum(["M", "F"]),
-  adresse: z.string().min(1, "L'adresse est requise"),
+  ville: z.string().min(1, "L'ville est requise"),
 });
 
 export default function UsersTab() {
@@ -48,6 +48,7 @@ export default function UsersTab() {
     setValue("email", user.email);
     setValue("role", user.role);
     setValue("sexe", user.sexe);
+    setValue("ville", user.ville);
     setValue("adresse", user.adresse);
     setIsEditDialogOpen(true);
   };
@@ -274,6 +275,20 @@ export default function UsersTab() {
                               </div>
                             </div>
 
+                            <div>
+                              <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
+                                Ville
+                              </label>
+                              <input
+                                {...register("ville")}
+                                className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
+                              />
+                              {errors.ville && (
+                                <p className="text-red-500 text-sm mt-1">
+                                  {errors.ville.message}
+                                </p>
+                              )}
+                            </div>
                             <div>
                               <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
                                 Adresse

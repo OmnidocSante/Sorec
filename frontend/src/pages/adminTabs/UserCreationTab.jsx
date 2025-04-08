@@ -26,8 +26,8 @@ const userSchema = z.object({
   cinId: z
     .string()
     .regex(/^[A-Z]{1,2}\d{6}$/, "Format CIN invalide (ex: A123456)"),
-  adresse: z.string().min(1, "Adresse est requise"),
   ville: z.string().min(1, "ville est requise"),
+  adresse: z.string().min(1, "adresse est requise"),
   telephone: z
     .string()
     .min(10, "Numéro de téléphone invalide")
@@ -56,7 +56,6 @@ export default function UserCreationTab() {
   const [, setUsers] = useAtom(usersAtom);
 
   const onSubmit = async (data) => {
-    
     try {
       await instance.post("/api/users", data);
       await setUsers("REFRESH");
@@ -208,7 +207,7 @@ export default function UserCreationTab() {
           </div>
 
           <div>
-            <label className="block text-bay-of-many-700 mb-1">ville</label>
+            <label className="block text-bay-of-many-700 mb-1">Ville</label>
             <input
               {...register("ville")}
               className="w-full p-2 border rounded focus:ring-2 focus:ring-bay-of-many-400"

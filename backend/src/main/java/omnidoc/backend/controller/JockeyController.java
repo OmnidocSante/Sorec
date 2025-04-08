@@ -1,14 +1,24 @@
 package omnidoc.backend.controller;
 
+import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.User;
 import omnidoc.backend.records.UserRecord;
 import omnidoc.backend.service.JockeyService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URLConnection;
+import java.sql.Blob;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -22,5 +32,21 @@ public class JockeyController {
         return ResponseEntity.ok(jockeyService.getJockeys());
     }
 
+
+
+//    @PatchMapping("/{userId}")
+//    public ResponseEntity<Void> updateImage(@RequestParam("image") MultipartFile image, @PathVariable int userId) throws SQLException, IOException {
+//        jockeyService.addImage(image, userId);
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
+//
+//    @GetMapping("/{userId}/image")
+//    public ResponseEntity<byte[]> viewImageJockey(@PathVariable int userId) throws SQLException, IOException {
+//        byte[] imageBytes = jockeyService.getJockeyImage(userId);
+//        String mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imageBytes));
+//        if (mimeType == null) mimeType = "application/octet-stream";
+//        return ResponseEntity.ok().contentType(MediaType.parseMediaType(mimeType)).body(imageBytes);
+//    }
+//
 
 }

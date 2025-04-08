@@ -17,7 +17,10 @@ import omnidoc.backend.entity.enums.Role;
 @NoArgsConstructor
 public class ModificationUserRequest {
 
-    @NotBlank(message = "Address is required")
+    @NotBlank(message = "ville is required")
+    private String ville;
+
+    @NotBlank(message = "ville is required")
     private String adresse;
     @NotNull(message = "Sexe is required")
     private Character sexe;

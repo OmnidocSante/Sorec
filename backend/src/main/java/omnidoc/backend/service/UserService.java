@@ -40,7 +40,7 @@ public class UserService {
     public MedecinRepo medecinRepo;
 
     public List<UserRecord> getUsers() {
-        return userRepo.findAll().stream().map(user -> new UserRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole())).toList();
+        return userRepo.findAll().stream().map(user -> new UserRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getAdresse(), user.getRole())).toList();
     }
 
 
@@ -83,6 +83,7 @@ public class UserService {
         foundUser.setEmail(user.getEmail());
         foundUser.setRole(user.getRole());
         foundUser.setSexe(user.getSexe());
+        foundUser.setVille(user.getVille());
         foundUser.setAdresse(user.getAdresse());
 
         User savedUser = userRepo.save(foundUser);

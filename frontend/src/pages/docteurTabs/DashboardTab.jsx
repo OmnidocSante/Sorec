@@ -4,29 +4,16 @@ import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input"; // Make sure to install shadcn/ui input component
-
-const mockAssignedJockeys = {
-  "2025-04-07": [
-    { id: 1, name: "Jean Dupont", status: "Apte" },
-    { id: 2, name: "Marie Lambert", status: "En attente" },
-  ],
-  "2024-05-16": [
-    { id: 3, name: "Pierre Durand", status: "Apte" },
-    { id: 4, name: "Sophie Martin", status: "Apte" },
-    { id: 5, name: "Lucie Petit", status: "Inapte" },
-  ],
-  "2024-05-17": [{ id: 6, name: "Thomas Moreau", status: "En attente" }],
-  "2024-05-20": [
-    { id: 7, name: "Emma Bernard", status: "Apte" },
-    { id: 8, name: "Nicolas Roux", status: "En attente" },
-  ],
-};
+import instance from "@/auth/AxiosInstance";
+import { isSameDate } from "@/utils/isSameDate";
+import { STATUS_RDV } from "@/utils/enums";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { CalendarT } from "@/components/CalendarT";
 
 export default function DashboardTab() {
   const [users, setUsers] = useAtom(usersAtom);
   const [date, setDate] = useState(() => new Date());
-  const [selectedJockeys, setSelectedJockeys] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -35,24 +22,32 @@ export default function DashboardTab() {
     fetchUsers();
   }, [setUsers]);
 
-  useEffect(() => {
-    if (date) {
-      const dateString = date.toISOString().split("T")[0];
-      const jockeys = mockAssignedJockeys[dateString] || [];
-      setSelectedJockeys(jockeys);
-    }
-  }, [date]);
+  const [appointments, setAppointments] = useState([]);
 
-  const filteredJockeys = selectedJockeys.filter((jockey) =>
-    jockey.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAppointments = appointments.filter((appointment) => {
+    const appointmentDate = new Date(appointment.dateTime);
+    if (appointmentDate && date) {
+      return isSameDate(appointmentDate, date);
+    } else {
+      return appointments;
+    }
+  });
+
+  const fetchAppointments = async () => {
+    const response = await instance.get("/api/rdvs/doctor");
+    setAppointments(response.data);
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-bay-of-many-900 mb-6">
         Tableau de Bord
       </h1>
-      <div className="grid grid-cols-4 gap-6 mb-8">
+      <div className=" space-y-4 md:space-y-0 md:grid grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-bay-of-many-600">Utilisateurs Totaux</h3>
           <p className="text-3xl font-bold text-bay-of-many-900">
@@ -73,32 +68,15 @@ export default function DashboardTab() {
         </div>
       </div>
 
-      {/* Jockeys Assignés Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="col-span-1 bg-white">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-6 md:gap-x-6">
+        <Card className="col-span-1 bg-white w-full">
           <CardHeader>
             <CardTitle className="text-bay-of-many-900">
               Calendrier des Jockeys
             </CardTitle>
           </CardHeader>
-          <CardContent className={"grid place-items-center"}>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border w-fit"
-              modifiers={{
-                hasJockeys: Object.keys(mockAssignedJockeys).map(
-                  (dateStr) => new Date(dateStr)
-                ),
-              }}
-              modifiersStyles={{
-                hasJockeys: {
-                  border: "2px solid var(--color-bay-of-many-500)",
-                  backgroundColor: "var(--color-bay-of-many-100)",
-                },
-              }}
-            />
+          <CardContent className={"grid place-items-center h-full"}>
+            <CalendarT onDateSelect={setDate} className="w-fit" />
           </CardContent>
         </Card>
 
@@ -106,65 +84,107 @@ export default function DashboardTab() {
           <CardHeader>
             <div className="flex justify-between items-center w-full ">
               <CardTitle className="text-bay-of-many-900">
-                Jockeys Assignés -{" "}
-                {date?.toLocaleDateString("fr-FR", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                Jockeys Assignés{" "}
+                {date
+                  ? date.toLocaleDateString("fr-FR", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : new Date().toLocaleDateString("fr-Fr", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
               </CardTitle>
-              <div className="w-64">
-                <Input
-                  type="text"
-                  placeholder="Rechercher un jockey..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="bg-white border-bay-of-many-200 focus-visible:ring-bay-of-many-500"
-                />
-              </div>
             </div>
           </CardHeader>
-          <CardContent>
-            {filteredJockeys.length > 0 ? (
-              <div className="space-y-4">
-                {filteredJockeys.map((jockey) => (
-                  <div
-                    key={jockey.id}
-                    className="p-4 border rounded-lg hover:bg-bay-of-many-50 transition-colors"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-medium text-bay-of-many-900">
-                          {jockey.name}
-                        </h3>
-                        <p
-                          className={`text-sm ${
-                            jockey.status === "Apte"
-                              ? "text-green-600"
-                              : jockey.status === "Inapte"
-                              ? "text-red-600"
-                              : "text-yellow-600"
-                          }`}
+          <CardContent
+            className={`${filteredAppointments.length > 0 && "p-0"}`}
+          >
+            {filteredAppointments.length > 0 ? (
+              <div className="bg-white p-6 rounded-lg shadow">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-bay-of-many-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
                         >
-                          Statut: {jockey.status}
-                        </p>
-                      </div>
-                      <button className="px-3 py-1 bg-bay-of-many-600 text-white rounded-md text-sm hover:bg-bay-of-many-700 transition-colors">
-                        Voir dossier
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                          Date et Heure
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
+                        >
+                          Patient
+                        </th>
+
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
+                        >
+                          Statut
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
+                        >
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {appointments.map((appointment, index) => (
+                        <tr key={index}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {format(new Date(appointment.dateTime), "PPPp", {
+                              locale: fr,
+                            })}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {appointment.userLastName} {appointment.userName}
+                          </td>
+
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {appointment.statusRDV === STATUS_RDV.PLANIFIE && (
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Plannifié
+                              </span>
+                            )}
+                            {appointment.statusRDV ===
+                              STATUS_RDV.PATIENT_ABSENT && (
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-500">
+                                patient absent
+                              </span>
+                            )}
+                            {appointment.statusRDV === STATUS_RDV.TERMINE && (
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-500">
+                                Terminé
+                              </span>
+                            )}
+                            {appointment.statusRDV === STATUS_RDV.ANNULE && (
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-500">
+                                Annulé
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-500">
+                              Voir dossier
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ) : (
-              <div className="text-center py-8 text-bay-of-many-500">
-                <p>
-                  {searchTerm
-                    ? "Aucun jockey ne correspond à votre recherche"
-                    : "Aucun jockey assigné pour cette date"}
-                </p>
-              </div>
+              <p className="text-bay-of-many-600">Aucun rendez-vous planifié</p>
             )}
           </CardContent>
         </Card>
