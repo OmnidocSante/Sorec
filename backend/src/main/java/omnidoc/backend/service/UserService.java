@@ -2,7 +2,6 @@ package omnidoc.backend.service;
 
 
 import omnidoc.backend.entity.enums.Role;
-import omnidoc.backend.entity.enums.Status;
 import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.Medecin;
 import omnidoc.backend.entity.users.User;
@@ -13,8 +12,6 @@ import omnidoc.backend.repository.MedecinRepo;
 import omnidoc.backend.repository.UserRepo;
 import omnidoc.backend.request.ModificationUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,12 +20,7 @@ import java.util.List;
 
 @Service
 public class UserService {
-    @Autowired
-    public JwtService jwtService;
-    @Autowired
-    public UserDetailsService userDetailsService;
-    @Autowired
-    public AuthenticationManager authenticationManager;
+
     @Autowired
     public PasswordEncoder passwordEncoder;
 
@@ -40,7 +32,7 @@ public class UserService {
     public MedecinRepo medecinRepo;
 
     public List<UserRecord> getUsers() {
-        return userRepo.findAll().stream().map(user -> new UserRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getAdresse(), user.getRole())).toList();
+        return userRepo.findAll().stream().map(user -> new UserRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole())).toList();
     }
 
 

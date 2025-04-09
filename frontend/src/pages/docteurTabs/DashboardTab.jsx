@@ -15,6 +15,7 @@ export default function DashboardTab() {
   const [users, setUsers] = useAtom(usersAtom);
   const [date, setDate] = useState(() => new Date());
 
+
   useEffect(() => {
     const fetchUsers = async () => {
       setUsers("REFRESH");
@@ -26,6 +27,7 @@ export default function DashboardTab() {
 
   const filteredAppointments = appointments.filter((appointment) => {
     const appointmentDate = new Date(appointment.dateTime);
+
     if (appointmentDate && date) {
       return isSameDate(appointmentDate, date);
     } else {
@@ -35,6 +37,7 @@ export default function DashboardTab() {
 
   const fetchAppointments = async () => {
     const response = await instance.get("/api/rdvs/doctor");
+
     setAppointments(response.data);
   };
 
@@ -107,7 +110,7 @@ export default function DashboardTab() {
             {filteredAppointments.length > 0 ? (
               <div className="bg-white p-6 rounded-lg shadow">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-full divide-y w-full divide-gray-200">
                     <thead className="bg-bay-of-many-50">
                       <tr>
                         <th
@@ -122,7 +125,6 @@ export default function DashboardTab() {
                         >
                           Patient
                         </th>
-
                         <th
                           scope="col"
                           className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
@@ -138,7 +140,7 @@ export default function DashboardTab() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {appointments.map((appointment, index) => (
+                      {filteredAppointments.map((appointment, index) => (
                         <tr key={index}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {format(new Date(appointment.dateTime), "PPPp", {
@@ -173,7 +175,7 @@ export default function DashboardTab() {
                             )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-500">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 cursor-pointer  text-blue-500">
                               Voir dossier
                             </span>
                           </td>

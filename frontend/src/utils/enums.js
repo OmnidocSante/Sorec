@@ -4,3 +4,4 @@ export const STATUS_RDV = {
   ANNULE: "ANNULE",
   PATIENT_ABSENT: "PATIENT_ABSENT",
 };
+

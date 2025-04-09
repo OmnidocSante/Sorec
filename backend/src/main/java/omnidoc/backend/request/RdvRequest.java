@@ -20,7 +20,7 @@ public class RdvRequest {
     private int jockeyId;
 
     @Min(value = 1, message = "L'identifiant du médecin doit être valide")
-    private int medecinId;
+    private Integer medecinId;
 
     @NotNull(message = "La date du rendez-vous est obligatoire")
     @FutureOrPresent(message = "La date du rendez-vous doit être dans le présent ou le futur")

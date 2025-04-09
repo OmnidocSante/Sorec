@@ -25,7 +25,6 @@ public class Rdv {
     public int id;
 
     @NotNull(message = "La date du rendez-vous est obligatoire")
-    @FutureOrPresent(message = "La date du rendez-vous doit être dans le présent ou le futur")
     @Column(nullable = false)
     public LocalDateTime date;
 
