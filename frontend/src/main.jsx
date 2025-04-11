@@ -12,6 +12,8 @@ import Unauthorized from "./pages/auth/Unauthorized";
 import NotFound from "./pages/NotFound";
 import { atom } from "jotai";
 import instance from "./auth/AxiosInstance";
+import PatientTab from "./pages/patientTabs/PatientTab";
+import AntecedentPersonnel from "./pages/patientTabs/AntecedentPersonnel";
 
 const usersAsyncAtom = atom([]);
 
@@ -50,6 +52,17 @@ createRoot(document.getElementById("root")).render(
 
         <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
           <Route path="/user" Component={UserPanel} />
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={["MEDECIN", "ADMIN"]} />}>
+          <Route path="/medecin/patient/:id" Component={PatientTab} />
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={["MEDECIN", "ADMIN"]} />}>
+          <Route
+            path="/medecin/patient/:id/antecedent_personel"
+            Component={AntecedentPersonnel}
+          />
         </Route>
 
         <Route path="/unauthorized" Component={Unauthorized} />

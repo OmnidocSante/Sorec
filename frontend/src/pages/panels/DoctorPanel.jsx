@@ -7,6 +7,7 @@ import AppointmentsTab from "../docteurTabs/AppointmentsTab";
 
 export default function DoctorPanel() {
   const [activeTab, setActiveTab] = useState("dashboard");
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -22,9 +23,9 @@ export default function DoctorPanel() {
 
       case "data":
         return <DataCorrectionTab />;
-
       case "appointments":
         return <AppointmentsTab />;
+
       default:
         return <DashboardTab />;
     }
@@ -58,7 +59,9 @@ export default function DoctorPanel() {
               : "-translate-x-full md:translate-x-0"
           }`}
       >
-        <h2 className="text-xl font-bold mb-8 hidden md:block">SOREC M{"é"}decin</h2>
+        <h2 className="text-xl font-bold mb-8 hidden md:block">
+          SOREC M{"é"}decin
+        </h2>
         <nav>
           <button
             onClick={() => {

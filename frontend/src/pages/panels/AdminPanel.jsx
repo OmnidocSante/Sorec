@@ -6,9 +6,13 @@ import UsersTab from "../adminTabs/UsersTab";
 import DataCorrectionTab from "../adminTabs/DataCorrectionTab";
 import AppointmentsTab from "../adminTabs/AppointmentsTab";
 import UserCreationTab from "../adminTabs/UserCreationTab";
+import PatientTab from "../patientTabs/PatientTab";
 
-export default function AdminPanel() {
+export default function AdminPanel({ tab }) {
   const [activeTab, setActiveTab] = useState("dashboard");
+  if (tab && tab !== "dashboard") {
+    setActiveTab(tab);
+  }
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -29,6 +33,7 @@ export default function AdminPanel() {
         return <UserCreationTab />;
       case "appointments":
         return <AppointmentsTab />;
+
       default:
         return <DashboardTab />;
     }

@@ -30,11 +30,10 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "react-day-picker";
+import { useNavigate } from "react-router-dom";
 
 const appointmentSchema = z.object({
   jockeyId: z.string().min(1, "Jockey est requis"),
@@ -53,6 +52,7 @@ export default function AppointmentsTab() {
   const [users] = useAtom(usersAtom);
   const [jockeySearch, setJockeySearch] = useState("");
   const [jockeyCityFilter, setJockeyCityFilter] = useState("all");
+  const navigate = useNavigate();
 
   const filteredAppointments = appointments.filter((appointment) => {
     const appointmentDate = new Date(appointment.dateTime);
@@ -105,7 +105,7 @@ export default function AppointmentsTab() {
 
   const fetchAppointments = async () => {
     const response = await instance.get("/api/rdvs/doctor");
-
+    console.log(response.data);
     setAppointments(response.data);
   };
 
@@ -136,6 +136,8 @@ export default function AppointmentsTab() {
       });
     }
   };
+
+  const [openStates, setOpenStates] = useState({});
 
   useEffect(() => {
     fetchAppointments();
@@ -314,15 +316,15 @@ export default function AppointmentsTab() {
         </div>
       </form>
 
-      <div className="md:flex md:gap-x-5">
-        <div className="bg-white p-6 rounded-lg shadow border-red-500 grid place-items-center md:w-fit w-full mb-5 md:mb-0">
+      <div className=" md:grid md:grid-cols-4 md:gap-x-5">
+        <div className="bg-white p-6 rounded-lg shadow md:col-span-1 border-red-500 grid place-items-center h-fit md:w-fit w-full mb-5 md:mb-0">
           <h1 className="text-xl font-bold my-2 text-bay-of-many-900">
             Rechercher RDV
           </h1>
           <CalendarT onDateSelect={setDateSelect} className="w-fit" />
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow w-full">
+        <div className="bg-white p-6 rounded-lg shadow w-full md:col-span-3">
           <h3 className="text-lg font-semibold text-bay-of-many-800 mb-4">
             Rendez-vous à venir
           </h3>
@@ -375,8 +377,14 @@ export default function AppointmentsTab() {
 
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Dialog
-                            open={isDialogOpen}
-                            onOpenChange={setIsDialogOpen}
+                            key={appointment.id}
+                            open={openStates[appointment.id] || false}
+                            onOpenChange={(open) =>
+                              setOpenStates((prev) => ({
+                                ...prev,
+                                [appointment.id]: open,
+                              }))
+                            }
                           >
                             <DialogTrigger
                               onClick={() => {
@@ -524,7 +532,14 @@ export default function AppointmentsTab() {
                           </Dialog>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 cursor-pointer  text-blue-500">
+                          <span
+                            onClick={() =>
+                              navigate(
+                                `/medecin/patient/${appointment.jockeyId}`
+                              )
+                            }
+                            className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 cursor-pointer  text-blue-500"
+                          >
                             Voir dossier
                           </span>
                         </td>

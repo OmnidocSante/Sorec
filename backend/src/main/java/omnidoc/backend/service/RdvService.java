@@ -51,7 +51,7 @@ public class RdvService {
     }
 
     public List<RdvRecord> getAllAppointments() {
-        return rdvRepo.findAll().stream().map(rdv -> new RdvRecord(rdv.getId(), rdv.getDate(), rdv.getJockey().getUser().getNom(), rdv.getJockey().getUser().getPrénom(), rdv.getMedecin().getUser().getNom(), rdv.getMedecin().getUser().getPrénom(), rdv.getStatusRDV())).toList();
+        return rdvRepo.findAll().stream().map(rdv -> new RdvRecord(rdv.getId(), rdv.getDate(), rdv.getJockey().getUser().getNom(), rdv.getJockey().getUser().getPrénom(), rdv.getMedecin().getUser().getNom(), rdv.getMedecin().getUser().getPrénom(), rdv.getStatusRDV(), rdv.getJockey().getId())).toList();
     }
 
     public List<RdvRecord> getDoctorAppointments(String jwt) {
@@ -59,7 +59,7 @@ public class RdvService {
         String username = jwtService.extractUsername(token);
         Medecin medecin = medecinRepo.findByUser_Email(username).orElseThrow(() -> new ApiException("Doctor not found"));
 
-        return rdvRepo.findRdvsByMedecin(medecin).stream().map(rdv -> new RdvRecord(rdv.getId(), rdv.getDate(), rdv.getJockey().getUser().getNom(), rdv.getJockey().getUser().getPrénom(), rdv.getMedecin().getUser().getNom(), rdv.getMedecin().getUser().getPrénom(), rdv.getStatusRDV())).toList();
+        return rdvRepo.findRdvsByMedecin(medecin).stream().map(rdv -> new RdvRecord(rdv.getId(), rdv.getDate(), rdv.getJockey().getUser().getNom(), rdv.getJockey().getUser().getPrénom(), rdv.getMedecin().getUser().getNom(), rdv.getMedecin().getUser().getPrénom(), rdv.getStatusRDV(),rdv.getJockey().getId())).toList();
 
 
     }
