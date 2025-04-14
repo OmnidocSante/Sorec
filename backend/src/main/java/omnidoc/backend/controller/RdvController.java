@@ -18,7 +18,7 @@ import java.util.List;
 @RequestMapping("/api/rdvs")
 public class RdvController {
     @Autowired
-    public RdvService rdvService;
+    private RdvService rdvService;
 
 
     @PostMapping

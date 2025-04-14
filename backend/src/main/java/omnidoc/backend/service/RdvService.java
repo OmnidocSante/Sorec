@@ -21,16 +21,18 @@ import java.util.List;
 @Service
 public class RdvService {
     @Autowired
-    public JwtService jwtService;
+    private JwtService jwtService;
     @Autowired
-    public RdvRepo rdvRepo;
-    @Autowired
-    public UserRepo userRepo;
+    private RdvRepo rdvRepo;
 
     @Autowired
-    public JockeyRepo jockeyRepo;
+    private JockeyRepo jockeyRepo;
     @Autowired
-    public MedecinRepo medecinRepo;
+    private MedecinRepo medecinRepo;
+
+    @Autowired
+    private EmailService emailService;
+
 
     public void createRdv(@Valid RdvRequest rdvRequest) {
 
@@ -42,6 +44,7 @@ public class RdvService {
             rdv.setJockey(jockey);
             rdv.setMedecin(medecin);
             rdvRepo.save(rdv);
+            emailService.sendEmail(medecin.getUser().getEmail(), "Nouveau rendez-vous médical programmé", "Bonjour Dr " + medecin.getUser().getNom() + ",\n\n" + "Un nouveau rendez-vous a été fixé avec le jockey " + jockey.getUser().getNom() + " " + jockey.getUser().getPrénom() + " le " + rdv.getDate().toString() + ".\n\n" + "Merci de bien vouloir le noter dans votre agenda.\n\n" + "Cordialement,\nL'équipe Omnidoc");
 
         } catch (Exception e) {
             throw new ApiException(e.getMessage());
@@ -59,7 +62,7 @@ public class RdvService {
         String username = jwtService.extractUsername(token);
         Medecin medecin = medecinRepo.findByUser_Email(username).orElseThrow(() -> new ApiException("Doctor not found"));
 
-        return rdvRepo.findRdvsByMedecin(medecin).stream().map(rdv -> new RdvRecord(rdv.getId(), rdv.getDate(), rdv.getJockey().getUser().getNom(), rdv.getJockey().getUser().getPrénom(), rdv.getMedecin().getUser().getNom(), rdv.getMedecin().getUser().getPrénom(), rdv.getStatusRDV(),rdv.getJockey().getId())).toList();
+        return rdvRepo.findRdvsByMedecin(medecin).stream().map(rdv -> new RdvRecord(rdv.getId(), rdv.getDate(), rdv.getJockey().getUser().getNom(), rdv.getJockey().getUser().getPrénom(), rdv.getMedecin().getUser().getNom(), rdv.getMedecin().getUser().getPrénom(), rdv.getStatusRDV(), rdv.getJockey().getId())).toList();
 
 
     }

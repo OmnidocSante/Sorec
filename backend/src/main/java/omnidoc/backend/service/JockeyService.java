@@ -23,9 +23,9 @@ import java.util.List;
 @Service
 public class JockeyService {
     @Autowired
-    public JockeyRepo jockeyRepo;
+    private JockeyRepo jockeyRepo;
     @Autowired
-    public UserService userService;
+    private UserService userService;
 
     public List<UserRecord> getJockeys() {
         List<UserRecord> userRecords = userService.getUsers();

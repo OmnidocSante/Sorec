@@ -21,7 +21,7 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
     @Autowired
-    public UserService userService;
+    private UserService userService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")

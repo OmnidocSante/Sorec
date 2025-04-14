@@ -14,7 +14,7 @@ import java.util.Optional;
 @RequestMapping("/api/dossiers")
 public class DossierController {
     @Autowired
-    public DossierMedicaleService dossierMedicaleService;
+    private DossierMedicaleService dossierMedicaleService;
 
     @PostMapping
     public ResponseEntity<Void> createFolder(@RequestBody DossierRequest dossierRequest) {

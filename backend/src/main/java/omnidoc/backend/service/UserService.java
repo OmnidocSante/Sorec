@@ -22,14 +22,14 @@ import java.util.List;
 public class UserService {
 
     @Autowired
-    public PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserRepo userRepo;
+    private UserRepo userRepo;
     @Autowired
-    public JockeyRepo jockeyRepo;
+    private JockeyRepo jockeyRepo;
     @Autowired
-    public MedecinRepo medecinRepo;
+    private MedecinRepo medecinRepo;
 
     public List<UserRecord> getUsers() {
         return userRepo.findAll().stream().map(user -> new UserRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole())).toList();

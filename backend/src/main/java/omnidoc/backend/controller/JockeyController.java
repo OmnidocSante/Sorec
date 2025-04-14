@@ -25,7 +25,7 @@ import java.util.List;
 @RequestMapping("/api/jockeys")
 public class JockeyController {
     @Autowired
-    public JockeyService jockeyService;
+    private JockeyService jockeyService;
 
     @GetMapping
     public ResponseEntity<List<UserRecord>> getJockeys() {

@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class DossierMedicaleService {
     @Autowired
-    public DossierMedicaleRepo dossierMedicaleRepo;
+    private DossierMedicaleRepo dossierMedicaleRepo;
     @Autowired
-    public JockeyRepo jockeyRepo;
+    private JockeyRepo jockeyRepo;
 
     public void createDossier(DossierRequest dossierRequest) {
         Jockey jockey = jockeyRepo.findById(dossierRequest.getJockeyId()).orElseThrow(() -> new ApiException("Jockey not found"));

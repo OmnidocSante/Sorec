@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/medecins")
 public class MedecinController {
     @Autowired
-    public MedecinService medecinService;
+    private MedecinService medecinService;
 
     @GetMapping
     public ResponseEntity<List<UserRecord>> getMedecins() {

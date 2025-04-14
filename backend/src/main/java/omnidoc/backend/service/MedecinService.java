@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 public class MedecinService {
     @Autowired
-    public UserService userService;
+    private UserService userService;
 
     public List<UserRecord> getMedecins() {
         return userService.getUsers().stream().filter(userRecord -> userRecord.role() == Role.MEDECIN).toList();

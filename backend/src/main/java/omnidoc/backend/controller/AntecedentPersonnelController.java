@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/dossier/{dossierId}/antecedentPersonnel")
 public class AntecedentPersonnelController {
     @Autowired
-    public AntecedantPersonnelService antecedantPersonnelService;
+    private AntecedantPersonnelService antecedantPersonnelService;
 
     @PostMapping
     public void saveAntecedentPersonnel(@RequestBody AntecedentPersonnel antecedentPersonnel, @PathVariable int dossierId) throws Exception {

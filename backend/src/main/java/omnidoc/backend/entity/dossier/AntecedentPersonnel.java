@@ -5,6 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "antécédents_personnels")
@@ -22,6 +27,10 @@ public class AntecedentPersonnel {
     public String appareilTest;
 
     public String bloodTest;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
+    private Map<String, String> test = new HashMap<>();
 
     @OneToOne
     @JoinColumn(name = "dossier_id", referencedColumnName = "id")
