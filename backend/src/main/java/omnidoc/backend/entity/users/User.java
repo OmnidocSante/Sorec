@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -72,14 +73,14 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 8)
     private String sorecId;
 
-    @NotBlank(message = "Password is required")
-    @Column(nullable = false)
     private String password;
 
     @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(unique = true)
+    private String passwordCreationToken  = UUID.randomUUID().toString();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

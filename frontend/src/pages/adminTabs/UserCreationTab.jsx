@@ -34,9 +34,7 @@ const userSchema = z.object({
     .max(10, "Numéro de téléphone invalide"),
   email: z.string().email("Email invalide"),
   sorecId: z.string().max(8, "SOREC ID doit avoir max 8 caractères"),
-  password: z
-    .string()
-    .min(8, "Le mot de passe doit avoir au moins 8 caractères"),
+
   role: z.enum(["USER", "MEDECIN", "JOCKEY"], { message: "Rôle invalide" }),
 });
 
@@ -242,20 +240,6 @@ export default function UserCreationTab() {
             </select>
             {errors.role && (
               <p className="text-red-600 text-sm">{errors.role.message}</p>
-            )}
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-bay-of-many-700 mb-1">
-              Mot de passe
-            </label>
-            <input
-              type="password"
-              {...register("password")}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-bay-of-many-400"
-            />
-            {errors.password && (
-              <p className="text-red-600 text-sm">{errors.password.message}</p>
             )}
           </div>
         </div>

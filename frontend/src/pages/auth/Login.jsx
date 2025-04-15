@@ -49,7 +49,7 @@ export default function Login() {
     } catch (error) {
       setAlertContent({
         title: "Erreur de connexion",
-        description: error.message,
+        description: error?.response?.data?.message || error.message,
       });
       setShowAlert(true);
     }

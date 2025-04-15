@@ -14,6 +14,7 @@ import { atom } from "jotai";
 import instance from "./auth/AxiosInstance";
 import PatientTab from "./pages/patientTabs/PatientTab";
 import AntecedentPersonnel from "./pages/patientTabs/AntecedentPersonnel";
+import PasswordCreation from "./pages/auth/PasswordCreation";
 
 const usersAsyncAtom = atom([]);
 
@@ -41,6 +42,8 @@ createRoot(document.getElementById("root")).render(
       <Routes>
         <Route path="/" Component={App} />
         <Route path="/login" Component={Login} />
+        <Route path="/create-password" Component={PasswordCreation} />
+
 
         <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
           <Route path="/admin" Component={AdminPanel} />

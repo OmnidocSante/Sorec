@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -30,6 +31,9 @@ public class UserService {
     private JockeyRepo jockeyRepo;
     @Autowired
     private MedecinRepo medecinRepo;
+
+    @Autowired
+    private EmailService emailService;
 
     public List<UserRecord> getUsers() {
         return userRepo.findAll().stream().map(user -> new UserRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole())).toList();
@@ -53,10 +57,14 @@ public class UserService {
             throw new ApiException("Ce numéro de téléphone est déjà associé à un compte");
         }
 
-
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashedPassword);
         User createdUser = userRepo.save(user);
+
+        String subject = "Création de votre mot de passe";
+        String body = "Bonjour,\n\n" + "Un compte vient d'être créé pour vous sur notre plateforme.\n" + "Veuillez cliquer sur le lien suivant pour définir votre mot de passe :\n\n" + "http://localhost:5173/create-password?token=" + createdUser.getPasswordCreationToken() + "\n\n";
+
+        emailService.sendEmail(user.getEmail(), subject, body);
+
+
         if (user.getRole() == Role.JOCKEY) {
             jockeyRepo.save(new Jockey(createdUser));
 
@@ -64,6 +72,14 @@ public class UserService {
             medecinRepo.save(new Medecin(createdUser));
         }
 
+    }
+
+    public void createPassword(String token, String password) {
+        User user = userRepo.findByPasswordCreationToken(token).orElseThrow(() -> new ApiException("token not valid"));
+        String hashedPassword = passwordEncoder.encode(password);
+        user.setPassword(hashedPassword);
+        user.setPasswordCreationToken(UUID.randomUUID().toString());
+        userRepo.save(user);
     }
 
     @Transactional
