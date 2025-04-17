@@ -9,6 +9,7 @@ import UserCreationTab from "../adminTabs/UserCreationTab";
 import PatientTab from "../patientTabs/PatientTab";
 
 export default function AdminPanel({ tab }) {
+  
   const [activeTab, setActiveTab] = useState("dashboard");
   if (tab && tab !== "dashboard") {
     setActiveTab(tab);

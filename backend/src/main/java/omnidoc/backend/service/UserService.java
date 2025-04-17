@@ -75,12 +75,28 @@ public class UserService {
     }
 
     public void createPassword(String token, String password) {
-        User user = userRepo.findByPasswordCreationToken(token).orElseThrow(() -> new ApiException("token not valid"));
+        User user = userRepo.findByPasswordCreationToken(token).orElseThrow(() -> new ApiException("token invalide"));
         String hashedPassword = passwordEncoder.encode(password);
         user.setPassword(hashedPassword);
         user.setPasswordCreationToken(UUID.randomUUID().toString());
         userRepo.save(user);
     }
+
+    public void resetPassword(String token, String password) {
+        User user = userRepo.findByPasswordResetToken(token).orElseThrow(() -> new ApiException("token invalide"));
+        String hashedPassword = passwordEncoder.encode(password);
+        user.setPassword(hashedPassword);
+        user.setPasswordResetToken(UUID.randomUUID().toString());
+        userRepo.save(user);
+    }
+
+    public void sendResetCode(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new ApiException("Aucun utilisateur trouvé avec cet email"));
+        String subject = "Réinitialisation de votre mot de passe";
+        String body = "Bonjour,\n\n" + "Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.\n" + "Veuillez cliquer sur le lien suivant pour définir un nouveau mot de passe :\n\n" + "http://localhost:5173/reset-password?token=" + user.getPasswordResetToken() + "\n\n" + "Si vous n'avez pas fait cette demande, ignorez cet e-mail.\n\n" + "Cordialement,\nL'équipe.";
+        emailService.sendEmail(email, subject, body);
+    }
+
 
     @Transactional
     public void modifyUser(ModificationUserRequest user, int userId) {

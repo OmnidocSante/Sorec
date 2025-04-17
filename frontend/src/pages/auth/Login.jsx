@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import axios from "axios";
 import useToken from "@/auth/useToken";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [showAlert, setShowAlert] = useState(false);
@@ -158,6 +158,12 @@ export default function Login() {
                 </Button>
               </div>
             </form>
+            <Link
+              to="/forgot-password"
+              className="block text-sm font-medium text-red-700 mt-4 hover:text-red-900 transition-colors duration-200 underline underline-offset-4"
+            >
+              Mot de passe oublié ?
+            </Link>
           </div>
         </div>
       </div>

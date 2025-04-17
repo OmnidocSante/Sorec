@@ -28,7 +28,7 @@ const schema = z
     path: ["confirmPassword"],
   });
 
-export default function CreatePassword() {
+export default function PasswordReset() {
   const {
     register,
     handleSubmit,
@@ -51,7 +51,7 @@ export default function CreatePassword() {
   const onSubmit = async (data) => {
     try {
       await axios.patch(
-        `http://localhost:4000/api/auth/create-password?token=${token}`,
+        `http://localhost:4000/api/auth/reset-password?token=${token}`,
         {
           password: data.password,
         }
@@ -60,7 +60,7 @@ export default function CreatePassword() {
       setAlertContent({
         title: "Succès",
         description:
-          "Mot de passe créé avec succès. Vous allez être redirigé vers la page de connexion.",
+          "Mot de passe changé avec succès. Vous allez être redirigé vers la page de connexion.",
       });
       setShowAlert(true);
       setTimeout(() => {
@@ -131,11 +131,11 @@ export default function CreatePassword() {
           </div>
         </div>
         <h2 className="mt-6 text-3xl font-extrabold text-bay-of-many-900">
-          Créez votre mot de passe
+          Modifiez votre mot de passe
         </h2>
         <p className="mt-2 text-sm text-bay-of-many-700">
-          Vous êtes à une étape de l'accès à votre compte. Veuillez définir
-          votre mot de passe.
+          Vous êtes à une étape de la récupération de votre compte. Veuillez
+          choisir un nouveau mot de passe.
         </p>
       </div>
 

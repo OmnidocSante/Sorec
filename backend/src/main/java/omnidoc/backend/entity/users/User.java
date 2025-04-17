@@ -82,6 +82,9 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String passwordCreationToken  = UUID.randomUUID().toString();
 
+    @Column(unique = true)
+    private String passwordResetToken  = UUID.randomUUID().toString();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
