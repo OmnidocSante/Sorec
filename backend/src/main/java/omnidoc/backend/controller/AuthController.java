@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 @RestController
@@ -29,7 +30,7 @@ public class AuthController {
 
 
     @PatchMapping("/create-password")
-    public ResponseEntity<Void> createPassword(@RequestParam("token") String token, @RequestBody HashMap<String, String> requestBody) {
+    public ResponseEntity<Void> createPassword(@RequestParam("token") String token, @RequestBody HashMap<String, String> requestBody) throws Exception {
         String password = requestBody.get("password");
         userService.createPassword(token, password);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -37,7 +38,7 @@ public class AuthController {
 
 
     @PatchMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestParam("token") String token, @RequestBody HashMap<String, String> requestBody) {
+    public ResponseEntity<Void> resetPassword(@RequestParam("token") String token, @RequestBody HashMap<String, String> requestBody) throws Exception {
         String password = requestBody.get("password");
         userService.resetPassword(token, password);
         return ResponseEntity.status(HttpStatus.OK).build();

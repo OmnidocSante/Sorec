@@ -6,15 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import omnidoc.backend.entity.enums.Ville;
 import omnidoc.backend.entity.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -50,9 +48,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String cinId;
 
-    @NotBlank(message = "ville is required")
     @Column(nullable = false)
-    private String ville;
+    @Enumerated(value = EnumType.STRING)
+    private Ville ville;
 
     @NotBlank(message = "Address is required")
     @Column(nullable = false)
@@ -80,10 +78,10 @@ public class User implements UserDetails {
     private Role role;
 
     @Column(unique = true)
-    private String passwordCreationToken  = UUID.randomUUID().toString();
+    private String passwordCreationToken;
 
     @Column(unique = true)
-    private String passwordResetToken  = UUID.randomUUID().toString();
+    private String passwordResetToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -119,4 +117,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

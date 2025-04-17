@@ -26,7 +26,7 @@ public class UserController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> create(@RequestBody @Valid User user) {
+    public ResponseEntity<Void> create(@RequestBody @Valid User user) throws Exception {
         userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

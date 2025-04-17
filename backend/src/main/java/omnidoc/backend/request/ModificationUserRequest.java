@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import omnidoc.backend.entity.enums.Role;
+import omnidoc.backend.entity.enums.Ville;
 
 @Getter
 @Setter
@@ -17,10 +18,10 @@ import omnidoc.backend.entity.enums.Role;
 @NoArgsConstructor
 public class ModificationUserRequest {
 
-    @NotBlank(message = "ville is required")
-    private String ville;
+    @Enumerated(EnumType.STRING)
+    private Ville ville;
 
-    @NotBlank(message = "ville is required")
+    @NotBlank(message = "adresse is required")
     private String adresse;
     @NotNull(message = "Sexe is required")
     private Character sexe;

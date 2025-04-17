@@ -9,6 +9,7 @@ import { z } from "zod";
 import instance from "@/auth/AxiosInstance";
 import { useAtom } from "jotai";
 import { usersAtom } from "@/main";
+import { VILLES } from "@/utils/enums";
 
 const Role = {
   MEDECIN: "MEDECIN",
@@ -26,7 +27,62 @@ const userSchema = z.object({
   cinId: z
     .string()
     .regex(/^[A-Z]{1,2}\d{6}$/, "Format CIN invalide (ex: A123456)"),
-  ville: z.string().min(1, "ville est requise"),
+  ville: z.enum([
+    "CASABLANCA",
+    "RABAT",
+    "FES",
+    "MARRAKECH",
+    "TANGIER",
+    "AGADIR",
+    "MEKNES",
+    "OUJDA",
+    "KENITRA",
+    "TETOUAN",
+    "SAFI",
+    "TEMARA",
+    "MOHAMMEDIA",
+    "KHOURIBGA",
+    "EL_JADIDA",
+    "BERRCHID",
+    "TAZA",
+    "NADOR",
+    "KHEMISSET",
+    "SETTAT",
+    "KHEMIS_ZEMAMRA",
+    "LARACHE",
+    "BOUJDOUR",
+    "BENI_MELLAL",
+    "TIFLET",
+    "ERRACHIDIA",
+    "IFRANE",
+    "MIDELT",
+    "TAROUDANT",
+    "TINGHIR",
+    "ZAGORA",
+    "TAN_TAN",
+    "LAAYOUNE",
+    "DAKHLA",
+    "GUELMIM",
+    "SIDI_IFNI",
+    "AZILAL",
+    "OULED_TEIMA",
+    "AIT_MELLOUL",
+    "SIDI_BENNOUR",
+    "SKHIRAT",
+    "YOUSSOFIA",
+    "CHEFCHAOUEN",
+    "SIDI_KACEM",
+    "TAOUNATE",
+    "BERKANE",
+    "JERADA",
+    "FNIDEQ",
+    "DRIOUCH",
+    "SEFROU",
+    "TAOURIRT",
+    "KASBA_TADLA",
+    "SIDI_SLIMANE",
+    "AL_HOCEIMA",
+  ]),
   adresse: z.string().min(1, "adresse est requise"),
   telephone: z
     .string()
@@ -206,15 +262,20 @@ export default function UserCreationTab() {
 
           <div>
             <label className="block text-bay-of-many-700 mb-1">Ville</label>
-            <input
+            <select
               {...register("ville")}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-bay-of-many-400"
-            />
-            {errors.ville && (
+              className="w-full p-2  border rounded focus:ring-2 focus:ring-bay-of-many-400"
+            >
+              {VILLES.map((ville) => (
+                <option key={ville.value} value={ville.value}>
+                  {ville.label}
+                </option>
+              ))}
+            </select>
+            {errors.role && (
               <p className="text-red-600 text-sm">{errors.ville.message}</p>
             )}
           </div>
-
           <div>
             <label className="block text-bay-of-many-700 mb-1">adresse</label>
             <input

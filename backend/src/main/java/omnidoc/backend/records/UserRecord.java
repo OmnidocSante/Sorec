@@ -1,6 +1,7 @@
 package omnidoc.backend.records;
 
 import omnidoc.backend.entity.enums.Role;
+import omnidoc.backend.entity.enums.Ville;
 
 import java.util.Date;
 
@@ -14,7 +15,7 @@ public record UserRecord(int id, String nom,
 
                          String cinId,
 
-                         String ville,
+                         Ville ville,
                          String adresse,
 
                          String telephone,

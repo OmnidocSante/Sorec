@@ -51,7 +51,7 @@ export default function DashboardTab() {
   const handleStatusUpdate = async (appointmentId, newStatus) => {
     await instance.patch(`/api/rdvs/${appointmentId}`, { status: newStatus });
     fetchAppointments();
-    setIsDialogOpen(false);
+    setOpenStates({});
   };
 
   const fetchAppointments = async () => {
@@ -293,7 +293,12 @@ export default function DashboardTab() {
                               </div>
                               <DialogFooter className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                                 <button
-                                  onClick={() => setIsDialogOpen(false)}
+                                  onClick={() => {
+                                    setOpenStates((prev) => ({
+                                      ...prev,
+                                      [appointment.id]: false,
+                                    }));
+                                  }}
                                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500"
                                 >
                                   Annuler

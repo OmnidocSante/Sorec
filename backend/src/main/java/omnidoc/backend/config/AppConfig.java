@@ -3,6 +3,7 @@ package omnidoc.backend.config;
 import jakarta.annotation.PostConstruct;
 import omnidoc.backend.repository.UserRepo;
 import omnidoc.backend.util.AESUtil;
+import omnidoc.backend.util.HmacUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -51,6 +52,7 @@ public class AppConfig {
     @PostConstruct
     public void init() {
         AESUtil.setSecretKey(secretKey);
+        HmacUtil.setSecretKey(secretKey);
     }
 
 

@@ -17,13 +17,70 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, AlertCircleIcon } from "lucide-react";
+import { VILLES } from "@/utils/enums";
 
 const userFormSchema = z.object({
   email: z.string().email("Email invalide"),
 
   role: z.enum(["MEDECIN", "JOCKEY", "USER"]),
   sexe: z.enum(["M", "F"]),
-  ville: z.string().min(1, "L'ville est requise"),
+  ville: z.enum([
+    "CASABLANCA",
+    "RABAT",
+    "FES",
+    "MARRAKECH",
+    "TANGIER",
+    "AGADIR",
+    "MEKNES",
+    "OUJDA",
+    "KENITRA",
+    "TETOUAN",
+    "SAFI",
+    "TEMARA",
+    "MOHAMMEDIA",
+    "KHOURIBGA",
+    "EL_JADIDA",
+    "BERRCHID",
+    "TAZA",
+    "NADOR",
+    "KHEMISSET",
+    "SETTAT",
+    "KHEMIS_ZEMAMRA",
+    "LARACHE",
+    "BOUJDOUR",
+    "BENI_MELLAL",
+    "TIFLET",
+    "ERRACHIDIA",
+    "IFRANE",
+    "MIDELT",
+    "TAROUDANT",
+    "TINGHIR",
+    "ZAGORA",
+    "TAN_TAN",
+    "LAAYOUNE",
+    "DAKHLA",
+    "GUELMIM",
+    "SIDI_IFNI",
+    "AZILAL",
+    "OULED_TEIMA",
+    "AIT_MELLOUL",
+    "SIDI_BENNOUR",
+    "SKHIRAT",
+    "YOUSSOFIA",
+    "CHEFCHAOUEN",
+    "SIDI_KACEM",
+    "TAOUNATE",
+    "BERKANE",
+    "JERADA",
+    "FNIDEQ",
+    "DRIOUCH",
+    "SEFROU",
+    "TAOURIRT",
+    "KASBA_TADLA",
+    "SIDI_SLIMANE",
+    "AL_HOCEIMA",
+  ]),
+  adresse: z.string().min(1, "adresse est requise"),
 });
 
 export default function UsersTab() {
@@ -63,7 +120,7 @@ export default function UsersTab() {
       await instance.patch(`/api/users/${currentUser.id}`, data);
       setUsers("REFRESH");
       setAlertContent({
-        status: "success",
+        status: "succés",
         content: "utilisateur avec succès",
       });
       setTimeout(() => {
@@ -197,7 +254,7 @@ export default function UsersTab() {
                                   }`}
                                 >
                                   <AlertCircleIcon className="size-4" />
-                                  <AlertTitle>Erreur</AlertTitle>
+                                  <AlertTitle>{alertContent.status}</AlertTitle>
                                   <AlertDescription>
                                     {alertContent.content}
                                   </AlertDescription>
@@ -276,15 +333,21 @@ export default function UsersTab() {
                             </div>
 
                             <div>
-                              <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
+                              <label className="block text-bay-of-many-700 mb-1">
                                 Ville
                               </label>
-                              <input
+                              <select
                                 {...register("ville")}
-                                className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
-                              />
-                              {errors.ville && (
-                                <p className="text-red-500 text-sm mt-1">
+                                className="w-full p-2  border rounded focus:ring-2 focus:ring-bay-of-many-400"
+                              >
+                                {VILLES.map((ville) => (
+                                  <option key={ville.value} value={ville.value}>
+                                    {ville.label}
+                                  </option>
+                                ))}
+                              </select>
+                              {errors.role && (
+                                <p className="text-red-600 text-sm">
                                   {errors.ville.message}
                                 </p>
                               )}

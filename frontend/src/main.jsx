@@ -24,10 +24,12 @@ export const usersAtom = atom(
   (get) => get(usersAsyncAtom),
   async (get, set, action) => {
     let refreshed;
+    console.log("hi");
+    
 
     switch (action) {
       case "REFRESH": {
-        refreshed = await instance.get("/api/users");
+        refreshed = await instance.get("/api/users");        
         set(usersAsyncAtom, refreshed.data);
         break;
       }

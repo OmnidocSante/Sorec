@@ -11,6 +11,7 @@ import omnidoc.backend.repository.JockeyRepo;
 import omnidoc.backend.repository.MedecinRepo;
 import omnidoc.backend.repository.UserRepo;
 import omnidoc.backend.request.ModificationUserRequest;
+import omnidoc.backend.util.HmacUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+
 
 @Service
 public class UserService {
@@ -39,7 +41,6 @@ public class UserService {
         return userRepo.findAll().stream().map(user -> new UserRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole())).toList();
     }
 
-
     public void createUser(User user) {
         if (userRepo.existsByEmail(user.getEmail())) {
             throw new ApiException("Cet email est déjà utilisé");
@@ -56,53 +57,82 @@ public class UserService {
         if (userRepo.existsByTelephone(user.getTelephone())) {
             throw new ApiException("Ce numéro de téléphone est déjà associé à un compte");
         }
+        if (userRepo.existsByNomAndPrénom(user.getNom(), user.getPrénom())) {
+            throw new ApiException("Un compte avec ce nom et prénom est déjà enregistré");
+        }
+
+        String rawPasswordCreationToken = UUID.randomUUID().toString();
+
+        String encryptedToken = HmacUtil.hmac(rawPasswordCreationToken);
+
+        user.setPasswordCreationToken(encryptedToken);
 
         User createdUser = userRepo.save(user);
 
         String subject = "Création de votre mot de passe";
-        String body = "Bonjour,\n\n" + "Un compte vient d'être créé pour vous sur notre plateforme.\n" + "Veuillez cliquer sur le lien suivant pour définir votre mot de passe :\n\n" + "http://localhost:5173/create-password?token=" + createdUser.getPasswordCreationToken() + "\n\n";
+        String body = "Bonjour,\n\n" + "Un compte vient d'être créé pour vous sur notre plateforme.\n" + "Veuillez cliquer sur le lien suivant pour définir votre mot de passe :\n\n" + "http://localhost:5173/create-password?token=" + rawPasswordCreationToken + "\n\n";
 
         emailService.sendEmail(user.getEmail(), subject, body);
 
-
         if (user.getRole() == Role.JOCKEY) {
             jockeyRepo.save(new Jockey(createdUser));
-
         } else if (user.getRole() == Role.MEDECIN) {
             medecinRepo.save(new Medecin(createdUser));
         }
-
     }
 
-    public void createPassword(String token, String password) {
-        User user = userRepo.findByPasswordCreationToken(token).orElseThrow(() -> new ApiException("token invalide"));
-        String hashedPassword = passwordEncoder.encode(password);
-        user.setPassword(hashedPassword);
-        user.setPasswordCreationToken(UUID.randomUUID().toString());
+
+    public void createPassword(String rawToken, String password) throws ApiException {
+        if (rawToken == null || rawToken.isEmpty()) {
+            throw new ApiException("Token manquant");
+
+        }
+        String hashedToken = HmacUtil.hmac(rawToken);
+
+        User user = userRepo.findByPasswordCreationToken(hashedToken).orElseThrow(() -> new ApiException("Token invalide"));
+
+        user.setPassword(passwordEncoder.encode(password));
+        user.setPasswordCreationToken(null);
+
         userRepo.save(user);
     }
 
-    public void resetPassword(String token, String password) {
-        User user = userRepo.findByPasswordResetToken(token).orElseThrow(() -> new ApiException("token invalide"));
-        String hashedPassword = passwordEncoder.encode(password);
-        user.setPassword(hashedPassword);
-        user.setPasswordResetToken(UUID.randomUUID().toString());
+    public void resetPassword(String rawToken, String password) throws ApiException {
+        if (rawToken == null || rawToken.isEmpty()) {
+            throw new ApiException("Token manquant");
+
+        }
+
+        String hashedToken = HmacUtil.hmac(rawToken);
+
+        User user = userRepo.findByPasswordResetToken(hashedToken).orElseThrow(() -> new ApiException("Token invalide"));
+
+        user.setPassword(passwordEncoder.encode(password));
+
+        user.setPasswordResetToken(null);
+
         userRepo.save(user);
     }
 
-    public void sendResetCode(String email) {
+    public void sendResetCode(String email) throws ApiException {
         User user = userRepo.findByEmail(email).orElseThrow(() -> new ApiException("Aucun utilisateur trouvé avec cet email"));
-        String subject = "Réinitialisation de votre mot de passe";
-        String body = "Bonjour,\n\n" + "Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.\n" + "Veuillez cliquer sur le lien suivant pour définir un nouveau mot de passe :\n\n" + "http://localhost:5173/reset-password?token=" + user.getPasswordResetToken() + "\n\n" + "Si vous n'avez pas fait cette demande, ignorez cet e-mail.\n\n" + "Cordialement,\nL'équipe.";
-        emailService.sendEmail(email, subject, body);
-    }
 
+        String rawToken = UUID.randomUUID().toString();
+        user.setPasswordResetToken(HmacUtil.hmac(rawToken));
+        userRepo.save(user);
+
+        String resetLink = "http://localhost:5173/reset-password?token=" + rawToken;
+        String body = "Bonjour,\n\nNous avons reçu une demande de réinitialisation...\n" + resetLink + "\n\nCordialement,\nL'équipe.";
+        emailService.sendEmail(email, "Réinitialisation de votre mot de passe", body);
+    }
 
     @Transactional
     public void modifyUser(ModificationUserRequest user, int userId) {
-        User foundUser = userRepo.findById(userId).orElseThrow(() -> new ApiException("User not found"));
+        System.out.println(user.getVille());
 
+        User foundUser = userRepo.findById(userId).orElseThrow(() -> new ApiException("User not found"));
         boolean isRoleChanging = !foundUser.getRole().name().equals(user.getRole().name());
+
 
         foundUser.setEmail(user.getEmail());
         foundUser.setRole(user.getRole());
