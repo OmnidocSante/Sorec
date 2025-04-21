@@ -139,9 +139,7 @@ public class UserService {
         foundUser.setSexe(user.getSexe());
         foundUser.setVille(user.getVille());
         foundUser.setAdresse(user.getAdresse());
-
         User savedUser = userRepo.save(foundUser);
-
         if (isRoleChanging && (user.getRole() == Role.MEDECIN || user.getRole() == Role.JOCKEY)) {
             if (user.getRole() == Role.MEDECIN) {
                 jockeyRepo.deleteByUser_Id(userId);

@@ -1,29 +1,24 @@
-package omnidoc.backend.entity.users;
+package omnidoc.backend.entity.antecent_personnel;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import omnidoc.backend.entity.enums.SystemeMedical;
 
-@Entity
-@Table(name = "medecins")
+@Table(name = "systemes")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Medecin {
-
+@Entity
+public class Systeme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+    @Enumerated(EnumType.STRING)
+    private SystemeMedical nom;
 
-    public Medecin(User user) {
-        this.user = user;
-
-    }
 }

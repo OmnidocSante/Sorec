@@ -25,11 +25,10 @@ export const usersAtom = atom(
   async (get, set, action) => {
     let refreshed;
     console.log("hi");
-    
 
     switch (action) {
       case "REFRESH": {
-        refreshed = await instance.get("/api/users");        
+        refreshed = await instance.get("/api/users");
         set(usersAsyncAtom, refreshed.data);
         break;
       }
@@ -66,7 +65,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/medecin/patient/:id" Component={PatientTab} />
         </Route>
 
-        <Route element={<ProtectedRoute allowedRoles={["MEDECIN", "ADMIN"]} />}>
+        <Route element={<ProtectedRoute allowedRoles={["MEDECIN"]} />}>
           <Route
             path="/medecin/patient/:id/antecedent_personel"
             Component={AntecedentPersonnel}
