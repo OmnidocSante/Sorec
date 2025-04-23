@@ -1,123 +1,134 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, ClipboardList, Edit, Save, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ClipboardList,
+  Edit,
+  Save,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import instance from "@/auth/AxiosInstance";
 
 export default function AntecedentPersonnel() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
-  const [activeTab, setActiveTab] = useState("Antécédents Médicaux");
+  const [expandedSystem, setExpandedSystem] = useState(null);
+  const [systemData, setSystemData] = useState([]);
 
-  const [formData, setFormData] = useState({
-    medicalHistory: {
-      chronicDiseases: "Diabète type 2",
-      hospitalizations: "Appendicectomie en 2015",
-      allergies: "Pénicilline",
-    },
-    surgicalHistory: {
-      interventions: "Appendicectomie",
-      complications: "Aucune",
-      dates: "2015",
-    },
-    lifestyle: {
-      smoking: "Ancien fumeur (10 paquets/année)",
-      alcohol: "Occasionnel",
-      physicalActivity: "3 fois/semaine",
-    },
-  });
+  const formatAntecedentPersonnels = (antecedentPersonnels) => {
+    const systemsData = [];
+    const systemsMap = new Map();
 
-  const formSections = [
-    {
-      title: "Antécédents Médicaux",
-      icon: <ClipboardList className="w-5 h-5 text-pink-600" />,
-      key: "medicalHistory",
-      inputs: [
-        {
-          name: "chronicDiseases",
-          label: "Maladies chroniques",
-          placeholder: "Diabète, hypertension...",
-        },
-        {
-          name: "hospitalizations",
-          label: "Hospitalisations",
-          placeholder: "Dates et raisons",
-        },
-        {
-          name: "allergies",
-          label: "Allergies",
-          placeholder: "Médicaments, aliments...",
-        },
-      ],
-    },
-    {
-      title: "Antécédents Chirurgicaux",
-      icon: <ClipboardList className="w-5 h-5 text-purple-600" />,
-      key: "surgicalHistory",
-      inputs: [
-        {
-          name: "interventions",
-          label: "Interventions",
-          placeholder: "Appendicectomie, 2015...",
-        },
-        {
-          name: "complications",
-          label: "Complications",
-          placeholder: "Décrivez les complications",
-        },
-        {
-          name: "dates",
-          label: "Dates",
-          placeholder: "Dates des interventions",
-        },
-      ],
-    },
-    {
-      title: "Habitudes de Vie",
-      icon: <ClipboardList className="w-5 h-5 text-green-600" />,
-      key: "lifestyle",
-      inputs: [
-        {
-          name: "smoking",
-          label: "Tabagisme",
-          placeholder: "Paquets/année, durée...",
-        },
-        {
-          name: "alcohol",
-          label: "Alcool",
-          placeholder: "Consommation hebdomadaire",
-        },
-        {
-          name: "physicalActivity",
-          label: "Activité physique",
-          placeholder: "Fréquence, type...",
-        },
-      ],
-    },
-  ];
+    antecedentPersonnels.forEach((item) => {
+      const systemName = item.condition.systeme.nom;
+      const systemId = item.condition.systeme.id;
 
-  const handleInputChange = (section, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }));
+      if (!systemsMap.has(systemId)) {
+        systemsMap.set(systemId, {
+          id: systemId,
+          name: systemName,
+          displayName: systemName
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" "),
+          conditions: [],
+        });
+        systemsData.push(systemsMap.get(systemId));
+      }
+
+      systemsMap.get(systemId).conditions.push({
+        id: item.id,
+        name: item.condition.nom,
+        displayName: item.condition.nom
+          .replace(/_/g, " ")
+          .toLowerCase()
+          .split(" ")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" "),
+        hasCondition: item.hasCondition,
+        remarques: item.remarques,
+      });
+    });
+
+    return systemsData;
   };
 
-  const handleSave = () => {
-    console.log("Saving data:", formData);
+  const revertFormattedAntecedentPersonnels = (systemsData) => {
+    const antecedentPersonnels = [];
+
+    systemsData.forEach((system) => {
+      system.conditions.forEach((condition) => {
+        antecedentPersonnels.push({
+          id: condition.id,
+          condition: {
+            id: condition.id,
+            nom: condition.name,
+            systeme: {
+              id: system.id,
+              nom: system.name,
+            },
+          },
+          hasCondition: condition.hasCondition,
+          remarques: condition.remarques,
+        });
+      });
+    });
+
+    return antecedentPersonnels;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await instance.get("/api/dossier_medicale/5");
+      const formatted = formatAntecedentPersonnels(response.data);
+      console.log(formatted);
+
+      setSystemData(formatted);
+    };
+    fetchData();
+  }, []);
+
+  const toggleSystem = (systemId) => {
+    setExpandedSystem(expandedSystem === systemId ? null : systemId);
+  };
+
+  const handleConditionChange = (systemId, conditionId, field, value) => {
+    setSystemData((prevData) =>
+      prevData.map((system) =>
+        system.id === systemId
+          ? {
+              ...system,
+              conditions: system.conditions.map((condition) =>
+                condition.id === conditionId
+                  ? { ...condition, [field]: value }
+                  : condition
+              ),
+            }
+          : system
+      )
+    );
+  };
+
+  const handleSave = async () => {
+    await instance.put(
+      "/api/dossier_medicale/8",
+      revertFormattedAntecedentPersonnels(systemData)
+    );
     setEditMode(false);
   };
 
   const handleCancel = () => {
+    setSystemData(systemData);
     setEditMode(false);
   };
-
-  const activeSection = formSections.find(
-    (section) => section.title === activeTab
-  );
+  console.log(systemData);
 
   return (
     <motion.div
@@ -176,76 +187,140 @@ export default function AntecedentPersonnel() {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-4 mb-6">
-        {formSections.map((section) => (
-          <button
-            key={section.title}
-            onClick={() => setActiveTab(section.title)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${
-              activeTab === section.title
-                ? "bg-bay-of-many-600/80 text-white border-bay-of-many-600"
-                : "bg-white text-bay-of-many-700 border-bay-of-many-200 hover:bg-bay-of-many-100"
-            }`}
-          >
-            {section.icon}
-            <span>{section.title}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Active Section */}
-      {activeSection && (
-        <motion.div
-          key={activeSection.title}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="bg-white rounded-xl shadow-md border border-bay-of-many-100 overflow-hidden"
-        >
-          {/* Section Header */}
-          <div className="flex items-center bg-bay-of-many-50 px-6 py-4 border-b border-bay-of-many-100">
-            {activeSection.icon}
-            <h2 className="ml-3 text-lg font-semibold text-bay-of-many-800">
-              {activeSection.title}
-            </h2>
-          </div>
-
-          {/* Inputs */}
-          <div className="p-6 space-y-4">
-            {activeSection.inputs.map((input, idx) => (
+      {/* Systems List */}
+      <div className="space-y-4">
+        {systemData.length > 1 &&
+          systemData.map((system) => (
+            <motion.div
+              key={system.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white rounded-xl shadow-md border border-bay-of-many-100 overflow-hidden"
+            >
+              {/* System Header */}
               <motion.div
-                key={idx}
-                // whileHover={{ scale: editMode ? 1.01 : 1 }}
-                className="space-y-1"
+                whileHover={{ backgroundColor: "#f0f4ff" }}
+                className="flex items-center justify-between px-6 py-4 border-b border-bay-of-many-100 cursor-pointer"
+                onClick={() => toggleSystem(system.id)}
               >
-                <label className="block text-sm font-medium text-bay-of-many-700">
-                  {input.label}
-                </label>
-                {editMode ? (
-                  <input
-                    type="text"
-                    value={formData[activeSection.key][input.name]}
-                    onChange={(e) =>
-                      handleInputChange(
-                        activeSection.key,
-                        input.name,
-                        e.target.value
-                      )
-                    }
-                    placeholder={input.placeholder}
-                    className="w-full px-4 py-2 border border-bay-of-many-200 rounded-lg focus:ring-2 focus:ring-bay-of-many-500 focus:border-bay-of-many-500 transition-all hover:border-bay-of-many-600"
+                <div className="flex items-center">
+                  <ClipboardList
+                    className={`w-5 h-5 ${getSystemColor(system.id)}`}
                   />
+                  <h2 className="ml-3 text-lg font-semibold text-bay-of-many-800">
+                    {system.displayName}
+                  </h2>
+                </div>
+                {expandedSystem === system.id ? (
+                  <ChevronUp className="w-5 h-5 text-bay-of-many-600" />
                 ) : (
-                  <div className="w-full px-4 py-2 bg-bay-of-many-50 rounded-lg">
-                    {formData[activeSection.key][input.name] || "Non renseigné"}
-                  </div>
+                  <ChevronDown className="w-5 h-5 text-bay-of-many-600" />
                 )}
               </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      )}
+
+              {/* Conditions List - Animated */}
+              {expandedSystem === system.id && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-6 space-y-6">
+                    {system.conditions.map((condition) => (
+                      <div key={condition.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            {editMode ? (
+                              <div className="flex items-center space-x-3">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={condition.hasCondition}
+                                    onChange={(e) =>
+                                      handleConditionChange(
+                                        system.id,
+                                        condition.id,
+                                        "hasCondition",
+                                        e.target.checked
+                                      )
+                                    }
+                                    className="sr-only peer"
+                                  />
+                                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                                </label>
+                                <span className="text-sm font-medium text-bay-of-many-700">
+                                  {condition.displayName}
+                                </span>
+                              </div>
+                            ) : (
+                              <>
+                                {condition.hasCondition ? (
+                                  <Check className="w-5 h-5 text-green-500 mr-2" />
+                                ) : (
+                                  <X className="w-5 h-5 text-red-500 mr-2" />
+                                )}
+                                <span className="text-sm font-medium text-bay-of-many-700">
+                                  {condition.displayName}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {(condition.hasCondition || editMode) && (
+                          <div className="ml-8">
+                            <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
+                              Remarques
+                            </label>
+                            {editMode ? (
+                              <input
+                                type="text"
+                                value={condition.remarques}
+                                onChange={(e) =>
+                                  handleConditionChange(
+                                    system.id,
+                                    condition.id,
+                                    "remarques",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Ajouter des remarques..."
+                                className="w-full px-4 py-2 border border-bay-of-many-200 rounded-lg focus:ring-2 focus:ring-bay-of-many-500 focus:border-bay-of-many-500 transition-all hover:border-bay-of-many-600"
+                              />
+                            ) : (
+                              <div className="w-full px-4 py-2 bg-bay-of-many-50 rounded-lg">
+                                {condition.remarques || "Aucune remarque"}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          ))}
+      </div>
     </motion.div>
   );
+}
+
+// Helper function to get color based on system
+function getSystemColor(systemId) {
+  const colors = [
+    "text-red-600", // Cardio
+    "text-blue-600", // Respiratoire
+    "text-purple-600", // Nerveux
+    "text-pink-600", // ORL
+    "text-yellow-600", // Allergies
+    "text-orange-600", // Traumatologie
+    "text-green-600", // Digestif
+    "text-indigo-600", // Endocrinologie
+    "text-gray-600", // Autres
+  ];
+  return colors[systemId - 1] || "text-gray-600";
 }
