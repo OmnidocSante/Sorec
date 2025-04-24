@@ -535,7 +535,7 @@ export default function AppointmentsTab() {
                           <span
                             onClick={() =>
                               navigate(
-                                `/medecin/patient/${appointment.jockeyId}`
+                                `/medecin/jockey/${appointment.jockeyId}`
                               )
                             }
                             className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 cursor-pointer  text-blue-500"

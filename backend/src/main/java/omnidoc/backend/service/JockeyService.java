@@ -2,9 +2,12 @@ package omnidoc.backend.service;
 
 import omnidoc.backend.entity.enums.Role;
 import omnidoc.backend.entity.users.Jockey;
+import omnidoc.backend.entity.users.User;
 import omnidoc.backend.exceptions.ApiException;
+import omnidoc.backend.records.JockeyRecord;
 import omnidoc.backend.records.UserRecord;
 import omnidoc.backend.repository.JockeyRepo;
+import omnidoc.backend.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,13 +29,23 @@ public class JockeyService {
     private JockeyRepo jockeyRepo;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepo userRepo;
 
     public List<UserRecord> getJockeys() {
         List<UserRecord> userRecords = userService.getUsers();
         return userRecords.stream().filter(userRecord -> userRecord.role() == Role.JOCKEY).toList();
     }
 
-    public List<Jockey> getJockey(){
+    public JockeyRecord getJockey(int jockeyId) {
+
+        Jockey jockey = jockeyRepo.findById(jockeyId).orElseThrow(() -> new ApiException("Not found"));
+        User user = jockey.getUser();
+        return new JockeyRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole(),jockey.getStatus());
+
+    }
+
+    public List<Jockey> getJockey() {
         return jockeyRepo.findAll();
     }
 //

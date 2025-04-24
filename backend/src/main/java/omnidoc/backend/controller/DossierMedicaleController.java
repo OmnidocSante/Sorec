@@ -21,8 +21,8 @@ public class DossierMedicaleController {
     }
 
     @PutMapping("/{patientId}")
-    public ResponseEntity<Void> ChangeAntecedantsByPatientId(@PathVariable int patientId, @RequestBody List<AntecedentPersonnel> antecedentPersonnels) {
-        dossierMedicaleService.changeAntecedantPersonnelByPatientId(patientId, antecedentPersonnels);
+    public ResponseEntity<Void> ChangeAntecedantsByPatientId(@PathVariable int patientId, @RequestBody List<AntecedentPersonnel> antecedentPersonnels) throws Exception {
+        dossierMedicaleService.changeAntecedantPersonnelByPatientId(antecedentPersonnels);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

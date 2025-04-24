@@ -18,4 +18,5 @@ public interface DossierMedicaleRepo extends JpaRepository<DossierMedicale, Inte
 
     Optional<DossierMedicale> getDossierMedicaleByJockey_IdAndIsCurrent(Integer jockeyId, Boolean isCurrent);
 
+
 }

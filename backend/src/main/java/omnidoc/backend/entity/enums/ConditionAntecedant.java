@@ -8,6 +8,7 @@ public enum ConditionAntecedant {
     MALADIE_DES_VAISSEAUX("Maladie des vaisseaux"),
     OPERATION_CARDIO_VASCULAIRE("Opération cardio-vasculaire"),
     SOUFFLE_CARDIAQUE_OU_TROUBLE_DU_RYTHME("Souffle cardiaque ou trouble du rythme"),
+    EPREUVE_DEFFORT_MAXIMALE("Epreuve d’effort maximale"),
     ELECTROCARDIOGRAMME("Electrocardiogramme"),
     ECHOCARDIOGRAMME("Echocardiogramme"),
     MALAISE_OU_PERTE_DE_CONNAISSANCE("Malaise ou perte de connaissance"),

@@ -2,6 +2,7 @@ package omnidoc.backend.controller;
 
 import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.User;
+import omnidoc.backend.records.JockeyRecord;
 import omnidoc.backend.records.UserRecord;
 import omnidoc.backend.service.JockeyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +28,18 @@ public class JockeyController {
     @Autowired
     private JockeyService jockeyService;
 
+    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
     @GetMapping
     public ResponseEntity<List<UserRecord>> getJockeys() {
         return ResponseEntity.ok(jockeyService.getJockeys());
     }
 
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
+    @GetMapping("/{jockeyId}")
+    public ResponseEntity<JockeyRecord> getJockey(@PathVariable int jockeyId) {
+        return ResponseEntity.ok(jockeyService.getJockey(jockeyId));
+    }
 
 
 //    @PatchMapping("/{userId}")

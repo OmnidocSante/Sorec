@@ -62,12 +62,12 @@ createRoot(document.getElementById("root")).render(
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["MEDECIN", "ADMIN"]} />}>
-          <Route path="/medecin/patient/:id" Component={PatientTab} />
+          <Route path="/medecin/jockey/:id" Component={PatientTab} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["MEDECIN"]} />}>
           <Route
-            path="/medecin/patient/:id/antecedent_personel"
+            path="/medecin/jockey/:id/antecedent_personel"
             Component={AntecedentPersonnel}
           />
         </Route>

@@ -14,7 +14,7 @@ import org.hibernate.annotations.BatchSize;
 @NoArgsConstructor
 @Getter
 @Setter
-@BatchSize(size = 52)
+@BatchSize(size = 51)
 @Table(
         name = "antécédents_personnels",
         indexes = {
@@ -26,7 +26,7 @@ import org.hibernate.annotations.BatchSize;
 public class AntecedentPersonnel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "condition_id", referencedColumnName = "id")
@@ -40,7 +40,7 @@ public class AntecedentPersonnel {
     private boolean hasCondition;
 
     @Lob
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String remarques;
 
 

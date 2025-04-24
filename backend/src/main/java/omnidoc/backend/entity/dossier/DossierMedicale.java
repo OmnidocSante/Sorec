@@ -35,7 +35,7 @@ public class DossierMedicale {
     private LocalDateTime date;
 
     @Column(nullable = false)
-    private Boolean isCurrent = true;
+    private Boolean isCurrent;
 
     @OneToMany(mappedBy = "dossierMedicale")
     private List<AntecedentPersonnel> antecedentPersonnels;
