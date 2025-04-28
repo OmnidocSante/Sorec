@@ -4,6 +4,7 @@ package omnidoc.backend.records;
 import omnidoc.backend.entity.enums.Role;
 import omnidoc.backend.entity.enums.Status;
 import omnidoc.backend.entity.enums.Ville;
+import omnidoc.backend.request.JockeyModificationRequest;
 
 import java.util.Date;
 
@@ -26,6 +27,6 @@ public record JockeyRecord(int id, String nom,
                            String sorecId,
 
 
-                           Role role, Status status) {
+                           Role role, Status status, Float plisDroit,Float plisGauche,Float matieresGrasses) {
 
 }

@@ -17,6 +17,8 @@ import AntecedentPersonnel from "./pages/patientTabs/AntecedentPersonnel";
 import PasswordCreation from "./pages/auth/PasswordCreation";
 import PasswordReset from "./pages/auth/PasswordReset";
 import PasswordForgot from "./pages/auth/PasswordForgot";
+import Examens from "./pages/patientTabs/Examens";
+import ExamenCardioVasculaire from "./pages/examens/ExamenCardioVasculaire";
 
 const usersAsyncAtom = atom([]);
 
@@ -71,7 +73,18 @@ createRoot(document.getElementById("root")).render(
             Component={AntecedentPersonnel}
           />
         </Route>
-
+        <Route element={<ProtectedRoute allowedRoles={["MEDECIN"]} />}>
+          <Route
+            path="/medecin/jockey/:id/examens"
+            Component={Examens}
+          />
+        </Route>
+        <Route element={<ProtectedRoute allowedRoles={["MEDECIN"]} />}>
+          <Route
+            path="/medecin/jockey/:id/examens/cardiovasculaire"
+            Component={ExamenCardioVasculaire}
+          />
+        </Route>
         <Route path="/unauthorized" Component={Unauthorized} />
         <Route path="*" Component={NotFound} />
       </Routes>

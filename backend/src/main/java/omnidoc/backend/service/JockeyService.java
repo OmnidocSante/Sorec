@@ -8,6 +8,8 @@ import omnidoc.backend.records.JockeyRecord;
 import omnidoc.backend.records.UserRecord;
 import omnidoc.backend.repository.JockeyRepo;
 import omnidoc.backend.repository.UserRepo;
+import omnidoc.backend.request.JockeyModificationRequest;
+import omnidoc.backend.util.AESUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,12 +39,31 @@ public class JockeyService {
         return userRecords.stream().filter(userRecord -> userRecord.role() == Role.JOCKEY).toList();
     }
 
-    public JockeyRecord getJockey(int jockeyId) {
-
+    public JockeyRecord getJockey(int jockeyId) throws Exception {
         Jockey jockey = jockeyRepo.findById(jockeyId).orElseThrow(() -> new ApiException("Not found"));
         User user = jockey.getUser();
-        return new JockeyRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole(),jockey.getStatus());
 
+        Float DecryptedPlisDroit = null;
+        Float DecryptedPlisGauche = null;
+        Float DecryptedMatieresGrasses = null;
+
+        if (jockey.getMatieresGrasses() != null)
+            DecryptedMatieresGrasses = Float.parseFloat(AESUtil.decrypt(jockey.getMatieresGrasses()));
+        if (jockey.getPlisGauche() != null)
+            DecryptedPlisGauche = Float.parseFloat(AESUtil.decrypt(jockey.getPlisGauche()));
+        if (jockey.getPlisDroit() != null)
+            DecryptedPlisDroit = Float.parseFloat(AESUtil.decrypt(jockey.getPlisDroit()));
+
+        return  new JockeyRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole(), jockey.getStatus(), DecryptedPlisDroit, DecryptedPlisGauche, DecryptedMatieresGrasses);
+    }
+
+
+    public void changeJockey(int jockeyId, JockeyModificationRequest jockeyModificationRequest) throws Exception {
+        Jockey jockey = jockeyRepo.findById(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        jockey.setMatieresGrasses(AESUtil.encrypt(String.valueOf(jockeyModificationRequest.getMatieresGrasses())));
+        jockey.setPlisGauche(AESUtil.encrypt(String.valueOf(jockeyModificationRequest.getPlisGauche())));
+        jockey.setPlisDroit(AESUtil.encrypt(String.valueOf(jockeyModificationRequest.getPlisDroit())));
+        jockeyRepo.save(jockey);
     }
 
     public List<Jockey> getJockey() {

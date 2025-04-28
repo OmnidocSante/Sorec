@@ -5,6 +5,8 @@ import omnidoc.backend.entity.antecent_personnel.AntecedentPersonnel;
 import omnidoc.backend.entity.antecent_personnel.Condition;
 import omnidoc.backend.entity.dossier.DossierMedicale;
 import omnidoc.backend.entity.enums.Role;
+import omnidoc.backend.entity.examens.ExamenCardioVasculauire;
+import omnidoc.backend.entity.examens.ExamenParametres;
 import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.Medecin;
 import omnidoc.backend.entity.users.User;
@@ -107,6 +109,10 @@ public class UserService {
             }
 
             antecedentPersonnelRepo.saveAll(defaultAntecedents);
+
+
+
+
 
         } else if (user.getRole() == Role.MEDECIN) {
             medecinRepo.save(new Medecin(createdUser));

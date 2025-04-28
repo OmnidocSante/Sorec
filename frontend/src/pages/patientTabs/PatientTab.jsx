@@ -1,4 +1,14 @@
 import instance from "@/auth/AxiosInstance";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
 import { motion } from "framer-motion";
 import {
@@ -9,23 +19,48 @@ import {
   Pill,
   ClipboardList,
   ChevronRight,
+  Pencil,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
+import { z } from "zod";
 
 export default function PatientTab() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [jockey, setJockey] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const detailsSchema = z.object({
+    plisDroit: z.number(),
+    plisGauche: z.number(),
+    matieresGrasses: z
+      .number()
+      .max(100, { message: "Le pourcentage ne peut pas dépasser 100%." }),
+  });
+
+  const {
+    handleSubmit,
+    formState: { errors },
+    register,
+    setValue,
+  } = useForm({
+    resolver: zodResolver(detailsSchema),
+  });
+
+  const fetchData = async () => {
+    const response = await instance.get(`/api/jockeys/${id}`);
+    setJockey(response.data);
+
+    setValue("plisDroit", response.data.plisDroit);
+    setValue("plisGauche", response.data.plisGauche);
+    setValue("matieresGrasses", response.data.matieresGrasses);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await instance.get(`/api/jockeys/${id}`);
-      setJockey(response.data);
-    };
     fetchData();
   }, [id]);
-  console.log(jockey);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -38,6 +73,13 @@ export default function PatientTab() {
     EN_ATTENTE_DE_REEVALUATION: "bg-amber-100 text-amber-800",
     EXAMEN_ANNUEL_A_PREVOIR: "bg-blue-100 text-blue-800",
   };
+
+  const onSubmit = async (data) => {
+    await instance.patch(`/api/jockeys/${id}`, data);
+    setIsDialogOpen(false);
+    fetchData();
+  };
+
   if (!jockey) {
     return (
       <motion.div
@@ -90,23 +132,117 @@ export default function PatientTab() {
             transition={{ delay: 0.2 }}
             className="bg-white p-6 rounded-xl shadow-md border border-bay-of-many-100 flex-1"
           >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="bg-bay-of-many-100 p-3 rounded-full">
-                <User className="w-6 h-6 text-bay-of-many-600" />
+            <div className="flex w-full items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-bay-of-many-100 p-3 rounded-full">
+                  <User className="w-6 h-6 text-bay-of-many-600" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-bay-of-many-900">
+                    {jockey.nom} {jockey.prénom}
+                  </h1>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      statusColor[jockey.status]
+                    }`}
+                  >
+                    {jockey.status}
+                  </span>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-bay-of-many-900">
-                  {jockey.nom} {jockey.prénom}
-                </h1>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    statusColor[jockey.status]
-                  }`}
-                >
-                  {jockey.status}
-                </span>
-              </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger onClick={() => setIsDialogOpen(true)}>
+                  <button className="px-4 py-2 bg-transparent border border-bay-of-many-600 text-bay-of-many-600 rounded-lg text-sm font-medium hover:bg-bay-of-many-300 duration-300 transition-all flex items-center justify-around gap-x-4">
+                    <Pencil className="size-4" />
+                    <p>Modifier les informations</p>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Modifier les informations</DialogTitle>
+                    <div className="flex flex-col gap-4 mt-4">
+                      <div className="flex flex-col gap-1">
+                        <label
+                          className="text-sm font-medium text-bay-of-many-600"
+                          htmlFor="plis-cutané-plisDroit"
+                        >
+                          Plis Cutané Droit (mm)
+                        </label>
+                        <input
+                          {...register("plisDroit", { valueAsNumber: true })}
+                          id="plis-cutané-plisDroit"
+                          type="number"
+                          placeholder="Ex: 12.5"
+                          className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
+                        />
+                        {errors.plisDroit && (
+                          <p className="text-red-600 text-sm">
+                            {errors.plisDroit.message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label
+                          className="text-sm font-medium text-bay-of-many-600"
+                          htmlFor="plis-cutané-plisGauche"
+                        >
+                          Plis Cutané Gauche (mm)
+                        </label>
+                        <input
+                          {...register("plisGauche", { valueAsNumber: true })}
+                          id="plis-cutané-plisGauche"
+                          type="number"
+                          placeholder="Ex: 13.2"
+                          className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
+                        />
+                        {errors.plisGauche && (
+                          <p className="text-red-600 text-sm">
+                            {errors.plisGauche.message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label
+                          className="text-sm font-medium text-bay-of-many-600"
+                          htmlFor="matiere-grasse"
+                        >
+                          Matière Grasse (%)
+                        </label>
+                        <input
+                          {...register("matieresGrasses", {
+                            valueAsNumber: true,
+                          })}
+                          id="matiere-grasse"
+                          type="number"
+                          placeholder="Ex: 18.5"
+                          className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
+                        />
+                        {errors.matieresGrasses && (
+                          <p className="text-red-600 text-sm">
+                            {errors.matieresGrasses.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </DialogHeader>
+                  <DialogFooter className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500"
+                      onClick={() => setIsDialogOpen(false)}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      className="px-4 py-2 text-sm font-medium text-white bg-bay-of-many-600 rounded-md hover:bg-bay-of-many-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleSubmit(onSubmit)}
+                    >
+                      Confirmer
+                    </button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-bay-of-many-50 p-4 rounded-lg">
                 <p className="text-sm text-bay-of-many-600">
@@ -176,9 +312,7 @@ export default function PatientTab() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -5 }}
-            onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_familiaux/examens`)
-            }
+            onClick={() => navigate(`/medecin/jockey/${id}/examens`)}
             className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 cursor-pointer transition-all hover:shadow-md"
           >
             <div className="flex justify-between items-start mb-4">

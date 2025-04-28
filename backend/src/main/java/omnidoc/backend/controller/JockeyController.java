@@ -4,6 +4,7 @@ import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.User;
 import omnidoc.backend.records.JockeyRecord;
 import omnidoc.backend.records.UserRecord;
+import omnidoc.backend.request.JockeyModificationRequest;
 import omnidoc.backend.service.JockeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -37,9 +38,18 @@ public class JockeyController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
     @GetMapping("/{jockeyId}")
-    public ResponseEntity<JockeyRecord> getJockey(@PathVariable int jockeyId) {
+    public ResponseEntity<JockeyRecord> getJockey(@PathVariable int jockeyId) throws Exception {
         return ResponseEntity.ok(jockeyService.getJockey(jockeyId));
     }
+
+    @PreAuthorize("hasAuthority('MEDECIN')")
+    @PatchMapping("/{jockeyId}")
+    public ResponseEntity<Void> changeJockey(@PathVariable int jockeyId,@RequestBody JockeyModificationRequest jockeyModificationRequest) throws Exception {
+        jockeyService.changeJockey(jockeyId,jockeyModificationRequest);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
 
 
 //    @PatchMapping("/{userId}")

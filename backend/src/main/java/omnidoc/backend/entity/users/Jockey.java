@@ -33,10 +33,18 @@ public class Jockey {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public Jockey(User user, Status status) {
-        this.user = user;
-        this.status = status;
-    }
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String plisDroit;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String plisGauche;
+
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String matieresGrasses;
 
     public Jockey(User user) {
         this.user = user;
