@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExamenCardioVasculauire {
+public class ExamenCardioVasculaire {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -27,7 +27,7 @@ public class ExamenCardioVasculauire {
 
     @OneToMany
     @JoinColumn(name = "parametre_id", referencedColumnName = "id")
-    private List<ExamenParametres> examenParametres;
+    private List<ParametresExamen> parametresExamen;
 
     private int frequenceCouche;
     private int frequenceDebout;
@@ -44,6 +44,7 @@ public class ExamenCardioVasculauire {
 
     private int ausculationCouche;
     private int ausculationDebout;
+
     @Lob
     @Column(columnDefinition = "TEXT")
     private String ausculationObservation;
