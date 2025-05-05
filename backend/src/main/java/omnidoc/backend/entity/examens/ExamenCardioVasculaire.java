@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import omnidoc.backend.entity.dossier.DossierMedicale;
+import omnidoc.backend.entity.examens.parametresExamens.ParametresExamenCardioVasculaire;
 
 import java.util.List;
 
@@ -20,30 +21,46 @@ public class ExamenCardioVasculaire {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "dossier_id", referencedColumnName = "id")
-    @JsonIgnore
     private DossierMedicale dossierMedicale;
 
-    @OneToMany
-    @JoinColumn(name = "parametre_id", referencedColumnName = "id")
-    private List<ParametresExamen> parametresExamen;
+    @OneToMany(mappedBy = "examenCardioVasculaire")
+    private List<ParametresExamenCardioVasculaire> parametresExamenCardioVasculaires;
 
-    private int frequenceCouche;
-    private int frequenceDebout;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String frequenceCouche;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String frequenceDebout;
 
     @Lob
     @Column(columnDefinition = "TEXT")
     private String frequenceObservation;
 
-    private int tensionCouche;
-    private int tensionDebout;
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String tensionCouche;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String tensionDebout;
+
     @Lob
     @Column(columnDefinition = "TEXT")
     private String tensionObservation;
 
-    private int ausculationCouche;
-    private int ausculationDebout;
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String ausculationCouche;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String ausculationDebout;
 
     @Lob
     @Column(columnDefinition = "TEXT")

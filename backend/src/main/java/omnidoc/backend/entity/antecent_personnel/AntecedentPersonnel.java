@@ -20,7 +20,6 @@ import org.hibernate.annotations.BatchSize;
         indexes = {
                 @Index(name = "idx_condition_id", columnList = "condition_id"),
                 @Index(name = "idx_dossier_medicale_id", columnList = "dossier_medicale_id"),
-                @Index(name = "idx_has_condition", columnList = "hasCondition")
         }
 )
 public class AntecedentPersonnel {
@@ -37,7 +36,11 @@ public class AntecedentPersonnel {
     @JoinColumn(name = "dossier_medicale_id", referencedColumnName = "id")
     private DossierMedicale dossierMedicale;
 
-    private boolean hasCondition;
+
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String hasCondition;
 
     @Lob
     @Column(columnDefinition = "TEXT")

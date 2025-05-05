@@ -1,6 +1,5 @@
 package omnidoc.backend.repository;
 
-import omnidoc.backend.entity.antecent_personnel.AntecedentPersonnel;
 import omnidoc.backend.entity.dossier.DossierMedicale;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -16,7 +15,7 @@ public interface DossierMedicaleRepo extends JpaRepository<DossierMedicale, Inte
     @Query("UPDATE DossierMedicale d SET d.isCurrent = false WHERE d.jockey.id = :jockeyId")
     void deactivateOldVersions(@Param("jockeyId") int jockeyId);
 
-    Optional<DossierMedicale> getDossierMedicaleByJockey_IdAndIsCurrent(Integer jockeyId, Boolean isCurrent);
+    Optional<DossierMedicale> getDossierMedicaleByJockey_IdAndIsCurrentTrue(Integer jockeyId);
 
 
 }

@@ -1,21 +1,18 @@
 package omnidoc.backend.service;
 
 import jakarta.validation.Valid;
-import omnidoc.backend.entity.antecent_personnel.AntecedentPersonnel;
-import omnidoc.backend.entity.dossier.DossierMedicale;
 import omnidoc.backend.entity.enums.StatusRDV;
 import omnidoc.backend.entity.rdv.Rdv;
 import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.Medecin;
-import omnidoc.backend.entity.users.User;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.records.RdvRecord;
 import omnidoc.backend.repository.*;
 import omnidoc.backend.request.RdvRequest;
+import omnidoc.backend.util.DossierMedicaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -34,9 +31,8 @@ public class RdvService {
     private EmailService emailService;
 
     @Autowired
-    private DossierMedicaleRepo dossierMedicaleRepo;
-    @Autowired
-    private AntecedentPersonnelRepo antecedentPersonnelRepo;
+    private DossierMedicaleUtil dossierMedicaleUtil;
+
 
     public void createRdv(@Valid RdvRequest rdvRequest) {
 
@@ -45,31 +41,7 @@ public class RdvService {
 
 
         try {
-            DossierMedicale oldDossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrent(jockey.getId(), true).orElseThrow(() -> new ApiException("Dossier not found"));
-
-            dossierMedicaleRepo.deactivateOldVersions(jockey.getId()); // Deactivate old versions
-
-            DossierMedicale dossierMedicale = new DossierMedicale();
-            dossierMedicale.setJockey(jockey);
-            dossierMedicale.setIsCurrent(true);
-
-// Save the DossierMedicale first
-            dossierMedicaleRepo.save(dossierMedicale);  // This saves the DossierMedicale and generates its ID
-
-// Now copy AntecedentPersonnel to new DossierMedicale
-            List<AntecedentPersonnel> copiedAntecedents = oldDossierMedicale.getAntecedentPersonnels().stream().map(oldAp -> {
-                AntecedentPersonnel newAp = new AntecedentPersonnel();
-                newAp.setCondition(oldAp.getCondition()); // Assuming condition is shared and immutable
-                newAp.setHasCondition(oldAp.isHasCondition());
-                newAp.setRemarques(oldAp.getRemarques());
-                newAp.setDossierMedicale(dossierMedicale); // Link to the newly saved DossierMedicale
-                return newAp;
-            }).toList();
-
-// Now save AntecedentPersonnel entities
-            antecedentPersonnelRepo.saveAll(copiedAntecedents); // Save antecedents after DossierMedicale is saved
-
-
+            dossierMedicaleUtil.copyDossier(jockey);
             Rdv rdv = new Rdv();
             rdv.setDate(rdvRequest.getDate());
             rdv.setJockey(jockey);
@@ -106,29 +78,7 @@ public class RdvService {
         Medecin medecin = medecinRepo.findByUser_Email(username).orElseThrow(() -> new ApiException("Doctor not found"));
 
         try {
-
-            DossierMedicale oldDossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrent(jockey.getId(), true).orElseThrow(() -> new ApiException("Dossier not found"));
-
-            dossierMedicaleRepo.deactivateOldVersions(jockey.getId());
-
-            DossierMedicale dossierMedicale = new DossierMedicale();
-            dossierMedicale.setJockey(jockey);
-            dossierMedicale.setIsCurrent(true);
-
-            dossierMedicaleRepo.save(dossierMedicale);
-
-            List<AntecedentPersonnel> copiedAntecedents = oldDossierMedicale.getAntecedentPersonnels().stream().map(oldAp -> {
-                AntecedentPersonnel newAp = new AntecedentPersonnel();
-                newAp.setCondition(oldAp.getCondition());
-                newAp.setHasCondition(oldAp.isHasCondition());
-                newAp.setRemarques(oldAp.getRemarques());
-                newAp.setDossierMedicale(dossierMedicale);
-                return newAp;
-            }).toList();
-
-            antecedentPersonnelRepo.saveAll(copiedAntecedents);
-
-
+            dossierMedicaleUtil.copyDossier(jockey);
             Rdv rdv = new Rdv();
             rdv.setDate(rdvRequest.getDate());
             rdv.setJockey(jockey);

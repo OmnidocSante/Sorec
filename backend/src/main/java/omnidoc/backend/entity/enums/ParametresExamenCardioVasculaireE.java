@@ -1,9 +1,10 @@
 package omnidoc.backend.entity.enums;
 
-public enum ParametresE {
+public enum ParametresExamenCardioVasculaireE {
     POULS_NORMAL,
     BRUITS_CARDIAQUES_NORMAUX,
     BATTEMENT_CARDIAQUES_NORMAUX,
-    POULS_PERIPHERIQIE_NORMAL,
-    PRESSION_ARTERIELLE_NORMALE
+    POULS_PERIPHERIQUE_NORMAL,
+    PRESSION_ARTERIELLE_NORMALE,
+
 }

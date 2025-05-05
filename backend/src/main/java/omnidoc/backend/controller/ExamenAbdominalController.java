@@ -1,0 +1,30 @@
+package omnidoc.backend.controller;
+
+import omnidoc.backend.entity.examens.ExamenAbdominal;
+import omnidoc.backend.entity.examens.ExamenNeurologique;
+import omnidoc.backend.service.ExamenAbdominalService;
+import omnidoc.backend.service.ExamenNeurologiqueService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/jockey/{jockeyId}/examen-abdominal")
+public class ExamenAbdominalController {
+
+    private final ExamenAbdominalService examenAbdominalService;
+
+    public ExamenAbdominalController(ExamenAbdominalService examenAbdominalService) {
+        this.examenAbdominalService = examenAbdominalService;
+    }
+
+    @GetMapping
+    public ResponseEntity<ExamenAbdominal> fetchExamenNeurologique(@PathVariable int jockeyId) throws Exception {
+        return ResponseEntity.ok(examenAbdominalService.fetchExamenAbdominal(jockeyId));
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> updateExamenNeurologique(@PathVariable int jockeyId, @RequestBody ExamenAbdominal examenAbdominal) throws Exception {
+        examenAbdominalService.updateExamenAbdominal(jockeyId, examenAbdominal);
+        return ResponseEntity.ok().build();
+    }
+}

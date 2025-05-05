@@ -1,12 +1,7 @@
 package omnidoc.backend.service;
 
 
-import omnidoc.backend.entity.antecent_personnel.AntecedentPersonnel;
-import omnidoc.backend.entity.antecent_personnel.Condition;
-import omnidoc.backend.entity.dossier.DossierMedicale;
 import omnidoc.backend.entity.enums.Role;
-import omnidoc.backend.entity.examens.ExamenCardioVasculauire;
-import omnidoc.backend.entity.examens.ExamenParametres;
 import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.Medecin;
 import omnidoc.backend.entity.users.User;
@@ -14,13 +9,13 @@ import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.records.UserRecord;
 import omnidoc.backend.repository.*;
 import omnidoc.backend.request.ModificationUserRequest;
+import omnidoc.backend.util.DossierMedicaleUtil;
 import omnidoc.backend.util.HmacUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,18 +37,13 @@ public class UserService {
     private EmailService emailService;
 
     @Autowired
-    private AntecedentPersonnelRepo antecedentPersonnelRepo;
-
-    @Autowired
-    private DossierMedicaleRepo dossierMedicaleRepo;
-    @Autowired
-    private ConditionRepo conditionRepo;
+    private DossierMedicaleUtil dossierMedicaleUtil;
 
     public List<UserRecord> getUsers() {
         return userRepo.findAll().stream().map(user -> new UserRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole())).toList();
     }
 
-    public void createUser(User user) {
+    public void createUser(User user) throws Exception {
         if (userRepo.existsByEmail(user.getEmail())) {
             throw new ApiException("Cet email est déjà utilisé");
         }
@@ -87,33 +77,7 @@ public class UserService {
         emailService.sendEmail(user.getEmail(), subject, body);
 
         if (user.getRole() == Role.JOCKEY) {
-            Jockey jockey = new Jockey();
-            jockey.setUser(createdUser);
-            jockeyRepo.save(jockey);
-
-            DossierMedicale dossierMedicale = new DossierMedicale();
-            dossierMedicale.setJockey(jockey);
-            dossierMedicale.setIsCurrent(true);
-            dossierMedicaleRepo.save(dossierMedicale);
-
-            List<Condition> conditions = conditionRepo.findAll();
-            List<AntecedentPersonnel> defaultAntecedents = new ArrayList<>();
-
-            for (Condition c : conditions) {
-                AntecedentPersonnel ap = new AntecedentPersonnel();
-                ap.setCondition(c);
-                ap.setDossierMedicale(dossierMedicale);
-                ap.setHasCondition(false);
-                ap.setRemarques(null);
-                defaultAntecedents.add(ap);
-            }
-
-            antecedentPersonnelRepo.saveAll(defaultAntecedents);
-
-
-
-
-
+            dossierMedicaleUtil.createDossier(createdUser);
         } else if (user.getRole() == Role.MEDECIN) {
             medecinRepo.save(new Medecin(createdUser));
         }
