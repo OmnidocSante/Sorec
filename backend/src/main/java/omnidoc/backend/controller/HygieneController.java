@@ -19,7 +19,7 @@ public class HygieneController {
         return ResponseEntity.ok(hygieneService.fetchHygieneByPatientId(jockeyId));
     }
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateHygiene(@PathVariable  int jockeyId,@RequestBody  Hygiene hygiene) throws Exception {
         hygieneService.modifyHygiene(jockeyId,hygiene);
         return ResponseEntity.ok().build();

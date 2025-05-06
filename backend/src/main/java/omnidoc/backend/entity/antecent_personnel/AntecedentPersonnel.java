@@ -37,7 +37,6 @@ public class AntecedentPersonnel {
     private DossierMedicale dossierMedicale;
 
 
-
     @Lob
     @Column(columnDefinition = "TEXT")
     private String hasCondition;

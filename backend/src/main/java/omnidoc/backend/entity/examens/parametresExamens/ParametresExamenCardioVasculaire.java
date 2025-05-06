@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import omnidoc.backend.entity.examens.ExamenCardioVasculaire;
-import omnidoc.backend.entity.examens.ExamenLocomoteur;
 
 @Entity
 @Getter

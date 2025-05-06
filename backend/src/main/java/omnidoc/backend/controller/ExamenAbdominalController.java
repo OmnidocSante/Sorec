@@ -1,9 +1,7 @@
 package omnidoc.backend.controller;
 
 import omnidoc.backend.entity.examens.ExamenAbdominal;
-import omnidoc.backend.entity.examens.ExamenNeurologique;
 import omnidoc.backend.service.ExamenAbdominalService;
-import omnidoc.backend.service.ExamenNeurologiqueService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +20,7 @@ public class ExamenAbdominalController {
         return ResponseEntity.ok(examenAbdominalService.fetchExamenAbdominal(jockeyId));
     }
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateExamenNeurologique(@PathVariable int jockeyId, @RequestBody ExamenAbdominal examenAbdominal) throws Exception {
         examenAbdominalService.updateExamenAbdominal(jockeyId, examenAbdominal);
         return ResponseEntity.ok().build();

@@ -5,7 +5,6 @@ import omnidoc.backend.entity.examens.ExamenPleuroPulmonaire;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.repository.DossierMedicaleRepo;
 import omnidoc.backend.repository.ExamenPleuroPulmonaireRepo;
-import omnidoc.backend.util.Util;
 import org.springframework.stereotype.Service;
 
 import static omnidoc.backend.util.Util.decryptIfNotNull;
@@ -22,8 +21,11 @@ public class ExamenPleuroPulmonaireService {
     }
 
     public ExamenPleuroPulmonaire fetchExamenPleuroPulmonique(int jockeyId) throws Exception {
+
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+
         ExamenPleuroPulmonaire examenPleuroPulmonaire = dossierMedicale.getExamenPleuroPulmonaire();
+        examenPleuroPulmonaire.setDossierMedicale(dossierMedicale);
         examenPleuroPulmonaire.setAustucultation(decryptIfNotNull(examenPleuroPulmonaire.getAustucultation()));
         examenPleuroPulmonaire.setFrequence_respiratoire(decryptIfNotNull(examenPleuroPulmonaire.getFrequence_respiratoire()));
         examenPleuroPulmonaire.setInspection(decryptIfNotNull(examenPleuroPulmonaire.getInspection()));

@@ -2,7 +2,6 @@ package omnidoc.backend.service;
 
 import omnidoc.backend.entity.dossier.DossierMedicale;
 import omnidoc.backend.entity.examens.ExamenLocomoteur;
-import omnidoc.backend.entity.examens.parametresExamens.ParametresExamenCardioVasculaire;
 import omnidoc.backend.entity.examens.parametresExamens.ParametresExamenLocomoteur;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.repository.DossierMedicaleRepo;
@@ -30,6 +29,7 @@ public class ExamenLocomoteurService {
     public ExamenLocomoteur fetchExamenLocomoteur(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         ExamenLocomoteur examenLocomoteur = dossierMedicale.getExamenLocomoteur();
+        examenLocomoteur.setDossierMedicale(dossierMedicale);
         examenLocomoteur.setForceGenoux(Util.decryptIfNotNull(examenLocomoteur.getForceGenoux()));
         examenLocomoteur.setForceTendons(Util.decryptIfNotNull(examenLocomoteur.getForceTendons()));
         examenLocomoteur.setForceEpaule(Util.decryptIfNotNull(examenLocomoteur.getForceEpaule()));

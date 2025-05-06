@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import omnidoc.backend.entity.antecent_personnel.Condition;
 
 @Getter
 @Setter
@@ -13,7 +12,7 @@ import omnidoc.backend.entity.antecent_personnel.Condition;
 public class AntecedentPersonnelDTO {
     private Integer id;
 
-    private Condition condition;
+    private String name;
 
     private boolean hasCondition;
 

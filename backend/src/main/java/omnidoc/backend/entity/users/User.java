@@ -1,5 +1,6 @@
 package omnidoc.backend.entity.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -71,15 +72,21 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 8)
     private String sorecId;
 
+
+    @JsonIgnore
     private String password;
 
     @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
     private Role role;
 
+
+    @JsonIgnore
     @Column(unique = true)
     private String passwordCreationToken;
 
+
+    @JsonIgnore
     @Column(unique = true)
     private String passwordResetToken;
 

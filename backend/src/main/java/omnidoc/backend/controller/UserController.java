@@ -5,8 +5,7 @@ import jakarta.validation.Valid;
 import omnidoc.backend.entity.users.User;
 import omnidoc.backend.records.UserRecord;
 import omnidoc.backend.request.ModificationUserRequest;
-import omnidoc.backend.response.AuthenticationResponse;
-import omnidoc.backend.service.AuthenticationService;
+
 import omnidoc.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 
 

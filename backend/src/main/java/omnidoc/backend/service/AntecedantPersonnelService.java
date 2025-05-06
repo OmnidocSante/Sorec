@@ -3,6 +3,7 @@ package omnidoc.backend.service;
 import omnidoc.backend.DTOS.AntecedentPersonnelDTO;
 import omnidoc.backend.entity.antecent_personnel.AntecedentPersonnel;
 import omnidoc.backend.entity.dossier.DossierMedicale;
+import omnidoc.backend.entity.enums.SystemeMedical;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.repository.AntecedentPersonnelRepo;
 import omnidoc.backend.repository.DossierMedicaleRepo;
@@ -23,15 +24,32 @@ public class AntecedantPersonnelService {
     @Autowired
     private DossierMedicaleRepo dossierMedicaleRepo;
 
-    public List<AntecedentPersonnelDTO> getAntecedantPersonnelsByPatientId(int patientId) throws Exception {
-        DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(patientId).orElseThrow(() -> new ApiException("Dossier not found"));
-        List<AntecedentPersonnel> antecedents = dossierMedicale.getAntecedentPersonnels();
-        List<AntecedentPersonnelDTO> dtoList = new ArrayList<>();
 
+
+    @Transactional
+    public void changeAntecedantPersonnelByPatientId(List<AntecedentPersonnel> antecedents) throws Exception {
         for (AntecedentPersonnel ap : antecedents) {
+            if (ap.getHasCondition() != null) {
+                String encryptedCondition = Util.parseBooleanString(Boolean.valueOf(ap.getHasCondition()));
+                ap.setHasCondition(encryptedCondition);
+            }
+            System.out.println(ap.getRemarques());
+
+            String encryptedRemarques = ap.getRemarques() != null ? AESUtil.encrypt(ap.getRemarques()) : null;
+
+            antecedentPersonnelRepo.updateAntecedent(ap.getId(), ap.getHasCondition(), encryptedRemarques);
+        }
+    }
+
+    public List<AntecedentPersonnelDTO> getAntecedentBysysteme(int jockeyId,SystemeMedical systemeMedical) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow();
+        List<AntecedentPersonnel> antecedentPersonnels = antecedentPersonnelRepo.findAntecedentPersonnelsByCondition_Systeme_NomAndDossierMedicale(systemeMedical,dossierMedicale);
+
+        List<AntecedentPersonnelDTO> dtoList = new ArrayList<>();
+        for (AntecedentPersonnel ap : antecedentPersonnels) {
             AntecedentPersonnelDTO dto = new AntecedentPersonnelDTO();
             dto.setId(ap.getId());
-            dto.setCondition(ap.getCondition());
+            dto.setName(ap.getCondition().getNom().getLabel());
             if (ap.getHasCondition() != null) {
                 dto.setHasCondition(Util.parseStringToBoolean(ap.getHasCondition()));
             }
@@ -46,24 +64,9 @@ public class AntecedantPersonnelService {
 
             dtoList.add(dto);
         }
-
         return dtoList;
 
-    }
 
-
-    @Transactional
-    public void changeAntecedantPersonnelByPatientId(List<AntecedentPersonnel> antecedents) throws Exception {
-        for (AntecedentPersonnel ap : antecedents) {
-            if (ap.getHasCondition() != null) {
-                String encryptedCondition = Util.parseBooleanString(Boolean.valueOf(ap.getHasCondition()));
-                ap.setHasCondition(encryptedCondition);
-            }
-
-            String encryptedRemarques = ap.getRemarques() != null ? AESUtil.encrypt(ap.getRemarques()) : null;
-
-            antecedentPersonnelRepo.updateAntecedent(ap.getId(), ap.getHasCondition(), encryptedRemarques);
-        }
     }
 
 

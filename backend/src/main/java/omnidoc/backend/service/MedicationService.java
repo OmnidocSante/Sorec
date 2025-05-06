@@ -2,14 +2,10 @@ package omnidoc.backend.service;
 
 import omnidoc.backend.entity.dossier.DossierMedicale;
 import omnidoc.backend.entity.dossier.Medication;
-import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.Medecin;
-import omnidoc.backend.entity.users.User;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.repository.*;
-import omnidoc.backend.util.AESUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,7 +42,9 @@ public class MedicationService {
 
     public void addMedication(int jockeyId, List<Medication> medications, String jwt) throws Exception {
         String token = jwt.substring(7);
+        System.out.println(token);
         String username = jwtService.extractUsername(token);
+        System.out.println(username);
 
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("Dossier médical non trouvé"));
 
@@ -68,6 +66,7 @@ public class MedicationService {
 
         medicationRepo.saveAll(medications);
     }
+
 
 
     public void deleteMedication(int medicationId) {

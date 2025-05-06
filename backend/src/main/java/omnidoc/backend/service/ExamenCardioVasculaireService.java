@@ -31,6 +31,7 @@ public class ExamenCardioVasculaireService {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("Dossier médical non trouvé"));
 
         ExamenCardioVasculaire examenCardioVasculaire = dossierMedicale.getExamenCardioVasculaire();
+        examenCardioVasculaire.setDossierMedicale(dossierMedicale);
 
         examenCardioVasculaire.setAusculationDebout(decryptIfNotNull(examenCardioVasculaire.getAusculationDebout()));
         examenCardioVasculaire.setAusculationObservation(decryptIfNotNull(examenCardioVasculaire.getAusculationObservation()));
@@ -75,6 +76,7 @@ public class ExamenCardioVasculaireService {
         examenCardioVasculaire.setFrequenceCouche(encryptIfNotNull(examenCardioVasculaire.getFrequenceCouche()));
         examenCardioVasculaire.setFrequenceDebout(encryptIfNotNull(examenCardioVasculaire.getFrequenceDebout()));
         examenCardioVasculaire.setFrequenceObservation(encryptIfNotNull(examenCardioVasculaire.getFrequenceObservation()));
+        System.out.println("done");
 
         List<ParametresExamenCardioVasculaire> encryptedParams = examenCardioVasculaire.getParametresExamenCardioVasculaires().stream().map(param -> {
             try {

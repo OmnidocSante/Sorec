@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import omnidoc.backend.entity.antecedents_familiaux.AntecedentFamiliaux;
 import omnidoc.backend.entity.antecent_personnel.AntecedentPersonnel;
 import omnidoc.backend.entity.examens.*;
 import omnidoc.backend.entity.examens.electrocardiogrammes.ElectrocardiogrammeEffort;
@@ -78,5 +79,7 @@ public class DossierMedicale {
     private ResultatExamenParaclinique resultatExamenParaclinique;
     @OneToOne(mappedBy = "dossierMedicale")
     private Conclusion conclusion;
+    @OneToOne(mappedBy = "dossierMedicale")
+    private AntecedentFamiliaux antecedentFamiliaux;
 
 }

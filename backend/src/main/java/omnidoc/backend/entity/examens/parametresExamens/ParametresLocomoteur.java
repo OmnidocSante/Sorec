@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import omnidoc.backend.entity.enums.ParametresExamenCardioVasculaireE;
 import omnidoc.backend.entity.enums.ParametresExamenLocomoteurE;
 
 @Entity

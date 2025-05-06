@@ -22,7 +22,7 @@ public class ExamenPleuroPulmoniqueController {
     }
 
     @PreAuthorize("hasAnyAuthority('MEDECIN')")
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateExamenPleuro(@PathVariable int jockeyId, @RequestBody ExamenPleuroPulmonaire examenPleuroPulmonaire) throws Exception {
         examenPleuroPulmonaireService.updateExamenPleuroPulmonique(jockeyId, examenPleuroPulmonaire);
         return ResponseEntity.ok().build();

@@ -2,6 +2,7 @@ package omnidoc.backend.util;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class AESUtil {
@@ -27,7 +28,7 @@ public class AESUtil {
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
         cipher.init(Cipher.ENCRYPT_MODE, key);
 
-        byte[] encrypted = cipher.doFinal(input.getBytes("UTF-8"));
+        byte[] encrypted = cipher.doFinal(input.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(encrypted);
     }
 

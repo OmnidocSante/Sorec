@@ -1,0 +1,227 @@
+import instance from "@/auth/AxiosInstance";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { ArrowLeft, Edit, Save } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useParams } from "react-router-dom";
+import { z } from "zod";
+export default function ExamenPleuroPulmonaire() {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [loading, setLoading] = useState(true);
+  const fetchData = async () => {
+    try {
+      const response = await instance.get(`/api/jockey/${id}/examen-pleuro`);
+      reset({
+        id: response.data.id,
+        frequence_respiratoire: response.data.frequence_respiratoire || "",
+        inspection: response.data.inspection || "",
+        austucultation: response.data.austucultation || "",
+      });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, [id]);
+
+  const onSubmit = (data) => {
+    console.log(data);
+    handleSave(data);
+    setIsEditMode(false);
+  };
+
+  const examenPleuroPulmonaireSchema = z.object({
+    id: z.number().optional(),
+    frequence_respiratoire: z.string(),
+    inspection: z.string(),
+    austucultation: z.string(),
+  });
+
+  const {
+    handleSubmit,
+    formState: { errors },
+    register,
+    reset,
+  } = useForm({
+    resolver: zodResolver(examenPleuroPulmonaireSchema),
+    defaultValues: {
+      id: 0,
+      frequence_respiratoire: "",
+      inspection: "",
+      austucultation: "",
+    },
+  });
+
+  const handleSave = async (data) => {
+    await instance.put(`/api/jockey/${id}/examen-pleuro`, data);
+    fetchData();
+    setIsEditMode(false);
+
+  };
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen flex items-center justify-center bg-bay-of-many-50"
+      >
+        <motion.div
+          className="flex flex-col items-center space-y-4 p-6 bg-white border border-bay-of-many-200 rounded-xl shadow-md"
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+        >
+          <motion.div
+            className="w-12 h-12 border-4 border-bay-of-many-400 border-t-transparent rounded-full animate-spin"
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          />
+          <p className="text-bay-of-many-700 font-medium text-sm tracking-wide">
+            Chargement des informations
+          </p>
+        </motion.div>
+      </motion.div>
+    );
+  } else {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
+      >
+        {/* Header Section */}
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ArrowLeft className="h-6 w-6 text-gray-700" />
+          </button>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Examen CardioVasculaire
+          </h1>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsEditMode(true)}
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-blue-50 hover:-translate-y-0.5"
+              }`}
+              disabled={isEditMode}
+            >
+              <Edit className="h-6 w-6 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">
+                Modifier
+              </span>
+            </button>
+
+            <button
+              onClick={handleSubmit(onSubmit)}
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                !isEditMode
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-green-50 hover:-translate-y-0.5"
+              }`}
+              disabled={!isEditMode}
+            >
+              <Save className="h-6 w-6 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Enregistrer
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Conditions Container */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                fréquence respiratoire
+              </h2>
+            </div>
+
+            <input
+              {...register("frequence_respiratoire")}
+              placeholder="Remarques..."
+              disabled={!isEditMode}
+              rows={3}
+              className={`w-full px-4 py-3 border ${
+                isEditMode ? "border-blue-200" : "border-gray-200"
+              } rounded-lg focus:outline-none focus:ring-2 ${
+                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
+              } transition-all resize-none ${
+                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
+              }`}
+            />
+            {errors.frequence_respiratoire && (
+              <p className="text-red-500 text-sm mt-4 ml-2">
+                {errors.frequence_respiratoire.message}
+              </p>
+            )}
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Inspection
+              </h2>
+            </div>
+
+            <input
+              {...register("inspection")}
+              placeholder="Remarques..."
+              disabled={!isEditMode}
+              rows={3}
+              className={`w-full px-4 py-3 border ${
+                isEditMode ? "border-blue-200" : "border-gray-200"
+              } rounded-lg focus:outline-none focus:ring-2 ${
+                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
+              } transition-all resize-none ${
+                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
+              }`}
+            />
+            {errors.inspection && (
+              <p className="text-red-500 text-sm mt-4 ml-2">
+                {errors.inspection.message}
+              </p>
+            )}
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                austuculation
+              </h2>
+            </div>
+
+            <input
+              {...register("austucultation")}
+              placeholder="Remarques..."
+              disabled={!isEditMode}
+              rows={3}
+              className={`w-full px-4 py-3 border ${
+                isEditMode ? "border-blue-200" : "border-gray-200"
+              } rounded-lg focus:outline-none focus:ring-2 ${
+                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
+              } transition-all resize-none ${
+                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
+              }`}
+            />
+            {errors.austucultation && (
+              <p className="text-red-500 text-sm mt-4 ml-2">
+                {errors.austucultation.message}
+              </p>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+}

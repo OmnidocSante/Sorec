@@ -2,7 +2,6 @@ package omnidoc.backend.service;
 
 import omnidoc.backend.entity.dossier.DossierMedicale;
 import omnidoc.backend.entity.examens.ExamenAbdominal;
-import omnidoc.backend.entity.examens.ExamenNeurologique;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.repository.DossierMedicaleRepo;
 import omnidoc.backend.repository.ExamenAbdominalRepo;
@@ -25,6 +24,7 @@ public class ExamenAbdominalService {
     public ExamenAbdominal fetchExamenAbdominal(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         ExamenAbdominal examenAbdominal = dossierMedicale.getExamenAbdominal();
+        examenAbdominal.setDossierMedicale(dossierMedicale);
         examenAbdominal.setOropharynx(decryptIfNotNull(examenAbdominal.getOropharynx()));
         examenAbdominal.setFoie(decryptIfNotNull(examenAbdominal.getFoie()));
         examenAbdominal.setRate(decryptIfNotNull(examenAbdominal.getRate()));

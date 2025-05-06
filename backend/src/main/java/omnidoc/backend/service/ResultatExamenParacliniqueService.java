@@ -23,6 +23,7 @@ public class ResultatExamenParacliniqueService {
     public ResultatExamenParaclinique fetchResultatExamenParaclinique(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         ResultatExamenParaclinique resultatExamenParaclinique = dossierMedicale.getResultatExamenParaclinique();
+        resultatExamenParaclinique.setDossierMedicale(dossierMedicale);
         resultatExamenParaclinique.setEchocardiographie(decryptIfNotNull(resultatExamenParaclinique.getEchocardiographie()));
         resultatExamenParaclinique.setTensionArtériellALeffort(decryptIfNotNull(resultatExamenParaclinique.getTensionArtériellALeffort()));
         resultatExamenParaclinique.setTensionArterielleAuRepos(decryptIfNotNull(resultatExamenParaclinique.getTensionArterielleAuRepos()));

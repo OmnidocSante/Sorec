@@ -5,7 +5,6 @@ import omnidoc.backend.entity.examens.ExamenOphtalmogique;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.repository.DossierMedicaleRepo;
 import omnidoc.backend.repository.ExamenOphtalmogiqueRepo;
-import omnidoc.backend.util.Util;
 import org.springframework.stereotype.Service;
 
 import static omnidoc.backend.util.Util.decryptIfNotNull;
@@ -24,6 +23,7 @@ public class ExamenOphtalmogiqueService {
     public ExamenOphtalmogique fetchExamenOphtalmogique(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         ExamenOphtalmogique examenOphtalmogique = dossierMedicale.getExamenOphtalmogique();
+        examenOphtalmogique.setDossierMedicale(dossierMedicale);
         examenOphtalmogique.setOgCorrige(decryptIfNotNull(examenOphtalmogique.getOgCorrige()));
         examenOphtalmogique.setOgNonCorrige(decryptIfNotNull(examenOphtalmogique.getOgNonCorrige()));
         examenOphtalmogique.setOdNonCorrige(decryptIfNotNull(examenOphtalmogique.getOdNonCorrige()));

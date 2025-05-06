@@ -21,6 +21,7 @@ public class ExamenAuditifService {
     public ExamenAuditif fetchExamenAuditif(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         ExamenAuditif examenAuditif = dossierMedicale.getExamenAuditif();
+        examenAuditif.setDossierMedicale(dossierMedicale);
         examenAuditif.setAcuiteAuditiveADistanceOg(Util.decryptIfNotNull(examenAuditif.getAcuiteAuditiveADistanceOg()));
         examenAuditif.setAcuiteAuditiveADistanceOd(Util.decryptIfNotNull(examenAuditif.getAcuiteAuditiveADistanceOd()));
         examenAuditif.setConduitAuditifEtMembranesTympaniqueNormales(Util.decryptIfNotNull(examenAuditif.getConduitAuditifEtMembranesTympaniqueNormales()));

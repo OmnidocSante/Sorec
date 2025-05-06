@@ -2,9 +2,7 @@ package omnidoc.backend.controller;
 
 
 import omnidoc.backend.entity.examens.electrocardiogrammes.ElectrocardiogrammeEffort;
-import omnidoc.backend.entity.examens.electrocardiogrammes.ElectrocardiogrammeRepos;
 import omnidoc.backend.service.ElectrocardiogrammeEffortService;
-import omnidoc.backend.service.ElectrocardiogrammeReposService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +21,7 @@ public class ElectrocardiogrammeEffortController {
         return ResponseEntity.ok(electrocardiogrammeEffortService.fetchElectrocardiogrammeEffort(jockeyId));
     }
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateElectrocardiogrammeEffort(@PathVariable int jockeyId, @RequestBody ElectrocardiogrammeEffort electrocardiogrammeEffort) throws Exception {
         electrocardiogrammeEffortService.updateElectrocardiogrammeEffort(jockeyId, electrocardiogrammeEffort);
         return ResponseEntity.ok().build();

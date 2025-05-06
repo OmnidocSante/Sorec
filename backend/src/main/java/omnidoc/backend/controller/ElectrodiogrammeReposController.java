@@ -19,7 +19,7 @@ public class ElectrodiogrammeReposController {
         return ResponseEntity.ok(electrocardiogrammeReposService.fetchElectrocardiogrammeRepos(jockeyId));
     }
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateElectrodiogrammeRepo(@PathVariable int jockeyId, @RequestBody ElectrocardiogrammeRepos electrocardiogrammeRepos) throws Exception {
         electrocardiogrammeReposService.updateElectrocardiogrammeRepos(jockeyId, electrocardiogrammeRepos);
         return ResponseEntity.ok().build();

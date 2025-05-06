@@ -5,7 +5,6 @@ import omnidoc.backend.entity.dossier.Hygiene;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.repository.DossierMedicaleRepo;
 import omnidoc.backend.repository.HygieneRepo;
-import omnidoc.backend.util.AESUtil;
 import org.springframework.stereotype.Service;
 
 import static omnidoc.backend.util.Util.decryptIfNotNull;
@@ -26,6 +25,7 @@ public class HygieneService {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(patientId).orElseThrow(() -> new ApiException("not found"));
         Hygiene hygiene = dossierMedicale.getHygiene();
 
+        hygiene.setDossierMedicale(dossierMedicale);
         hygiene.setAutres(decryptIfNotNull(hygiene.getAutres()));
         hygiene.setSommeil(decryptIfNotNull(hygiene.getSommeil()));
         hygiene.setAlcool(decryptIfNotNull(hygiene.getAlcool()));

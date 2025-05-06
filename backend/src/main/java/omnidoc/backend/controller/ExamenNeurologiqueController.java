@@ -18,7 +18,7 @@ public class ExamenNeurologiqueController {
     public ResponseEntity<ExamenNeurologique> fetchExamenNeurologique(@PathVariable int jockeyId) throws Exception {
         return ResponseEntity.ok(examenNeurologiqueService.fetchExamenPleuroPulmonique(jockeyId));
     }
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateExamenNeurologique(@PathVariable int jockeyId,@RequestBody ExamenNeurologique examenNeurologique) throws Exception {
         examenNeurologiqueService.updateExamenNeurologique(jockeyId,examenNeurologique);
         return ResponseEntity.ok().build();

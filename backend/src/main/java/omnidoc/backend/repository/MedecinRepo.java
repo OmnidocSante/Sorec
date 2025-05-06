@@ -1,9 +1,7 @@
 package omnidoc.backend.repository;
 
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import omnidoc.backend.entity.users.Jockey;
+
 import omnidoc.backend.entity.users.Medecin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;

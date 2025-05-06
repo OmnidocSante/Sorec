@@ -19,7 +19,7 @@ public class ExamenLocomoteurController {
         return ResponseEntity.ok(examenLocomoteurService.fetchExamenLocomoteur(jockeyId));
     }
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateExamenLocomoteur(@PathVariable int jockeyId, @RequestBody ExamenLocomoteur examenLocomoteur) throws Exception {
         examenLocomoteurService.updateExamenLocomoteur(jockeyId, examenLocomoteur);
         return ResponseEntity.ok().build();

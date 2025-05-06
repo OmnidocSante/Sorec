@@ -11,18 +11,8 @@ import omnidoc.backend.repository.UserRepo;
 import omnidoc.backend.request.JockeyModificationRequest;
 import omnidoc.backend.util.AESUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.sql.rowset.serial.SerialBlob;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLConnection;
-import java.net.http.HttpHeaders;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.List;
 
 @Service

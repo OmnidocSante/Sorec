@@ -1,6 +1,5 @@
 package omnidoc.backend.controller;
 
-import omnidoc.backend.entity.resultat.Conclusion;
 import omnidoc.backend.entity.resultat.ResultatExamenParaclinique;
 import omnidoc.backend.service.ResultatExamenParacliniqueService;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ public class ResultatExamenParacliniqueController {
         return ResponseEntity.ok(resultatExamenParacliniqueService.fetchResultatExamenParaclinique(jockeyId));
     }
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateResultatExamenParaclinique(@PathVariable int jockeyId, @RequestBody ResultatExamenParaclinique resultatExamenParaclinique) throws Exception {
         resultatExamenParacliniqueService.updateExamenGenitoUrinaire(jockeyId, resultatExamenParaclinique);
         return ResponseEntity.ok().build();

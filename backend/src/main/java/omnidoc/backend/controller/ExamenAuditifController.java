@@ -19,7 +19,7 @@ public class ExamenAuditifController {
         return ResponseEntity.ok(examenAuditifService.fetchExamenAuditif(jockeyId));
     }
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateExamenAuditif(@PathVariable int jockeyId, @RequestBody ExamenAuditif examenAuditif) throws Exception {
         examenAuditifService.updateExamenAuditif(jockeyId, examenAuditif);
         return ResponseEntity.ok().build();

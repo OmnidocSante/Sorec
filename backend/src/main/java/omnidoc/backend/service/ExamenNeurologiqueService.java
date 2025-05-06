@@ -2,7 +2,6 @@ package omnidoc.backend.service;
 
 import omnidoc.backend.entity.dossier.DossierMedicale;
 import omnidoc.backend.entity.examens.ExamenNeurologique;
-import omnidoc.backend.entity.examens.ExamenPleuroPulmonaire;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.repository.DossierMedicaleRepo;
 import omnidoc.backend.repository.ExamenNeurologiqueRepo;
@@ -25,6 +24,7 @@ public class ExamenNeurologiqueService {
     public ExamenNeurologique fetchExamenPleuroPulmonique(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         ExamenNeurologique examenNeurologique = dossierMedicale.getExamenNeurologique();
+        examenNeurologique.setDossierMedicale(dossierMedicale);
         examenNeurologique.setReflexePupillaire(decryptIfNotNull(examenNeurologique.getReflexePupillaire()));
         examenNeurologique.setReflexesOstéoTendineux(decryptIfNotNull(examenNeurologique.getReflexesOstéoTendineux()));
         examenNeurologique.setCoordination(decryptIfNotNull(examenNeurologique.getCoordination()));
@@ -42,12 +42,12 @@ public class ExamenNeurologiqueService {
         examenNeurologique.setDossierMedicale(dossierMedicale);
         examenNeurologique.setReflexePupillaire(encryptIfNotNull(examenNeurologique.getReflexePupillaire()));
         examenNeurologique.setReflexesOstéoTendineux(encryptIfNotNull(examenNeurologique.getReflexesOstéoTendineux()));
-        examenNeurologique.setReflexePupillaire(encryptIfNotNull(examenNeurologique.getReflexePupillaire()));
-        examenNeurologique.setReflexePupillaire(encryptIfNotNull(examenNeurologique.getReflexePupillaire()));
-        examenNeurologique.setReflexePupillaire(encryptIfNotNull(examenNeurologique.getReflexePupillaire()));
-        examenNeurologique.setReflexePupillaire(encryptIfNotNull(examenNeurologique.getReflexePupillaire()));
-        examenNeurologique.setReflexePupillaire(encryptIfNotNull(examenNeurologique.getReflexePupillaire()));
-        examenNeurologique.setReflexePupillaire(encryptIfNotNull(examenNeurologique.getReflexePupillaire()));
+        examenNeurologique.setCoordination(encryptIfNotNull(examenNeurologique.getCoordination()));
+        examenNeurologique.setEquilibre(encryptIfNotNull(examenNeurologique.getEquilibre()));
+        examenNeurologique.setSensibilite(encryptIfNotNull(examenNeurologique.getSensibilite()));
+        examenNeurologique.setMotricite(encryptIfNotNull(examenNeurologique.getMotricite()));
+        examenNeurologique.setTonicite(encryptIfNotNull(examenNeurologique.getTonicite()));
+        examenNeurologique.setAutres(encryptIfNotNull(examenNeurologique.getAutres()));
         examenNeurologiqueRepo.save(examenNeurologique);
     }
 }

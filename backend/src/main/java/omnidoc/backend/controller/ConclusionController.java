@@ -1,6 +1,5 @@
 package omnidoc.backend.controller;
 
-import omnidoc.backend.entity.examens.electrocardiogrammes.ElectrocardiogrammeEffort;
 import omnidoc.backend.entity.resultat.Conclusion;
 import omnidoc.backend.service.ConclusionService;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ public class ConclusionController {
         return ResponseEntity.ok(conclusionService.fetchConclusion(jockeyId));
     }
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> updateConclusion(@PathVariable int jockeyId, @RequestBody Conclusion conclusion) throws Exception {
         conclusionService.updateConclusion(jockeyId, conclusion);
         return ResponseEntity.ok().build();

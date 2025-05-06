@@ -1,5 +1,6 @@
 package omnidoc.backend.util;
 
+import omnidoc.backend.entity.antecedents_familiaux.AntecedentFamiliaux;
 import omnidoc.backend.entity.antecent_personnel.AntecedentPersonnel;
 import omnidoc.backend.entity.antecent_personnel.Condition;
 import omnidoc.backend.entity.dossier.DossierMedicale;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Component
 public class DossierMedicaleUtil {
@@ -71,6 +73,8 @@ public class DossierMedicaleUtil {
     private ResultatExamenParacliniqueRepo resultatExamenParacliniqueRepo;
     @Autowired
     private ConclusionRepo conclusionRepo;
+    @Autowired
+    private AntecedentFamiliauxRepo antecedentFamiliauxRepo;
 
 
     public void createDossier(User createdUser) throws Exception {
@@ -145,6 +149,7 @@ public class DossierMedicaleUtil {
         examenPleuroPulmonaire.setAustucultation(null);
         examenPleuroPulmonaire.setInspection(null);
         examenPleuroPulmonaire.setFrequence_respiratoire(null);
+        examenPleuroPulmonaireRepo.save(examenPleuroPulmonaire);
 
         ExamenOphtalmogique examenOphtalmogique = new ExamenOphtalmogique();
         examenOphtalmogique.setDossierMedicale(dossierMedicale);
@@ -259,6 +264,16 @@ public class DossierMedicaleUtil {
         conclusion.setUrogénital(null);
         conclusion.setParaclinique(null);
         conclusionRepo.save(conclusion);
+
+        AntecedentFamiliaux antecedentFamiliaux = new AntecedentFamiliaux();
+        antecedentFamiliaux.setDossierMedicale(dossierMedicale);
+        antecedentFamiliaux.setAsthme(null);
+        antecedentFamiliaux.setMedicaux(null);
+        antecedentFamiliaux.setMortSubite(null);
+        antecedentFamiliaux.setMaladiesMetaboliques(null);
+        antecedentFamiliaux.setAutres(null);
+        antecedentFamiliauxRepo.save(antecedentFamiliaux);
+
 
 
     }
@@ -464,6 +479,19 @@ public class DossierMedicaleUtil {
         conclusion.setUrogénital(oldConclusion.getUrogénital());
         conclusion.setParaclinique(oldConclusion.getParaclinique());
         conclusionRepo.save(conclusion);
+
+        AntecedentFamiliaux oldAntecedantFamilaux = oldDossierMedicale.getAntecedentFamiliaux();
+        AntecedentFamiliaux antecedentFamiliaux = new AntecedentFamiliaux();
+        antecedentFamiliaux.setDossierMedicale(dossierMedicale);
+        antecedentFamiliaux.setAsthme(oldAntecedantFamilaux.getAsthme());
+        antecedentFamiliaux.setMedicaux(oldAntecedantFamilaux.getMedicaux());
+        antecedentFamiliaux.setMortSubite(oldAntecedantFamilaux.getMortSubite());
+        antecedentFamiliaux.setMaladiesMetaboliques(oldAntecedantFamilaux.getMaladiesMetaboliques());
+        antecedentFamiliaux.setAutres(oldAntecedantFamilaux.getAutres());
+        antecedentFamiliauxRepo.save(antecedentFamiliaux);
+
+
+
 
 
     }

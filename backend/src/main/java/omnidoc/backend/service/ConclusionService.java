@@ -23,6 +23,7 @@ public class ConclusionService {
     public Conclusion fetchConclusion(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         Conclusion conclusion = dossierMedicale.getConclusion();
+        conclusion.setDossierMedicale(dossierMedicale);
         conclusion.setCardioVasculaire(decryptIfNotNull(conclusion.getCardioVasculaire()));
         conclusion.setPleuropulmonaire(decryptIfNotNull(conclusion.getPleuropulmonaire()));
         conclusion.setOphtalmique(decryptIfNotNull(conclusion.getOphtalmique()));
@@ -31,7 +32,6 @@ public class ConclusionService {
         conclusion.setAbdominal(decryptIfNotNull(conclusion.getAbdominal()));
         conclusion.setUrogénital(decryptIfNotNull(conclusion.getUrogénital()));
         conclusion.setParaclinique(decryptIfNotNull(conclusion.getParaclinique()));
-
 
         return conclusion;
     }

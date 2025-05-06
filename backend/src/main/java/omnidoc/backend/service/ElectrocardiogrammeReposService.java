@@ -1,7 +1,6 @@
 package omnidoc.backend.service;
 
 import omnidoc.backend.entity.dossier.DossierMedicale;
-import omnidoc.backend.entity.examens.electrocardiogrammes.ElectrocardiogrammeEffort;
 import omnidoc.backend.entity.examens.electrocardiogrammes.ElectrocardiogrammeRepos;
 import omnidoc.backend.exceptions.ApiException;
 import omnidoc.backend.repository.DossierMedicaleRepo;
@@ -24,6 +23,7 @@ public class ElectrocardiogrammeReposService {
     public ElectrocardiogrammeRepos fetchElectrocardiogrammeRepos(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         ElectrocardiogrammeRepos electrocardiogrammeRepos = dossierMedicale.getElectrocardiogrammeRepos();
+        electrocardiogrammeRepos.setDossierMedicale(dossierMedicale);
         electrocardiogrammeRepos.setFrequenceCardiaque(decryptIfNotNull(electrocardiogrammeRepos.getFrequenceCardiaque()));
         electrocardiogrammeRepos.setRythme(decryptIfNotNull(electrocardiogrammeRepos.getRythme()));
         electrocardiogrammeRepos.setConduction(decryptIfNotNull(electrocardiogrammeRepos.getConduction()));
