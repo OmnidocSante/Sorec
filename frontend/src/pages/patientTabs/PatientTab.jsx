@@ -20,6 +20,8 @@ import {
   ClipboardList,
   ChevronRight,
   Pencil,
+  Brush,
+  FileText,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -328,9 +330,7 @@ export default function PatientTab() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -5 }}
-            onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_familiaux/medications`)
-            }
+            onClick={() => navigate(`/medecin/jockey/${id}/medications`)}
             className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl shadow-sm border border-amber-200 cursor-pointer transition-all hover:shadow-md"
           >
             <div className="flex justify-between items-start mb-4">
@@ -341,6 +341,40 @@ export default function PatientTab() {
               Médication
             </h3>
             <p className="text-sm text-amber-600">Traitements en cours</p>
+          </motion.div>
+          <motion.div
+            variants={cardVariants}
+            whileHover={{ y: -5 }}
+            onClick={() => navigate(`/medecin/jockey/${id}/hygiene`)}
+            className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 cursor-pointer transition-all hover:shadow-md"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <Brush className="w-8 h-8 text-green-600" />
+              <ChevronRight className="w-5 h-5 text-green-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-green-800 mb-1">
+              Hygiène
+            </h3>
+            <p className="text-sm text-green-600">
+              Médication et soins d'hygiène
+            </p>
+          </motion.div>
+          <motion.div
+            variants={cardVariants}
+            whileHover={{ y: -5 }}
+            onClick={() => navigate(`/medecin/jockey/${id}/conclusion`)}
+            className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl shadow-sm border border-indigo-200 cursor-pointer transition-all hover:shadow-md"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <FileText className="w-8 h-8 text-indigo-600" />
+              <ChevronRight className="w-5 h-5 text-indigo-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-indigo-800 mb-1">
+              Conclusion
+            </h3>
+            <p className="text-sm text-indigo-600">
+              Déterminer si le Jockey est apte ou non apte
+            </p>
           </motion.div>
         </motion.div>
       </motion.div>
