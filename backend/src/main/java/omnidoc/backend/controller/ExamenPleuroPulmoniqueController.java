@@ -18,7 +18,7 @@ public class ExamenPleuroPulmoniqueController {
     @PreAuthorize("hasAnyAuthority('MEDECIN')")
     @GetMapping
     public ResponseEntity<ExamenPleuroPulmonaire> fetchExamenPleuro(@PathVariable int jockeyId) throws Exception {
-        return ResponseEntity.ok(examenPleuroPulmonaireService.fetchExamenPleuroPulmonique(jockeyId));
+        return ResponseEntity.ok(examenPleuroPulmonaireService.fetchExamenPleuroPulmoniqueByDossier(jockeyId));
     }
 
     @PreAuthorize("hasAnyAuthority('MEDECIN')")

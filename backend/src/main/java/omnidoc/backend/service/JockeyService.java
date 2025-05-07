@@ -1,6 +1,7 @@
 package omnidoc.backend.service;
 
 import omnidoc.backend.entity.enums.Role;
+import omnidoc.backend.entity.enums.Status;
 import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.User;
 import omnidoc.backend.exceptions.ApiException;
@@ -44,7 +45,7 @@ public class JockeyService {
         if (jockey.getPlisDroit() != null)
             DecryptedPlisDroit = Float.parseFloat(AESUtil.decrypt(jockey.getPlisDroit()));
 
-        return  new JockeyRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole(), jockey.getStatus(), DecryptedPlisDroit, DecryptedPlisGauche, DecryptedMatieresGrasses);
+        return new JockeyRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole(), jockey.getStatus(), DecryptedPlisDroit, DecryptedPlisGauche, DecryptedMatieresGrasses);
     }
 
 
@@ -59,6 +60,13 @@ public class JockeyService {
     public List<Jockey> getJockey() {
         return jockeyRepo.findAll();
     }
+
+    public void changeStatusJockey(int jockeyId, Status status) {
+        Jockey jockey = jockeyRepo.findById(jockeyId).orElseThrow(() -> new ApiException("jockey not found"));
+        jockey.setStatus(status);
+        jockeyRepo.save(jockey);
+    }
+
 //
 //    public void addImage(MultipartFile image, int jockeyId) throws IOException, SQLException {
 //        try {

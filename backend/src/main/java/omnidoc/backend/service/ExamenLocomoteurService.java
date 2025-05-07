@@ -28,6 +28,17 @@ public class ExamenLocomoteurService {
 
     public ExamenLocomoteur fetchExamenLocomoteur(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenLocomoteur(dossierMedicale);
+
+    }
+
+    public ExamenLocomoteur fetchExamenLocomoteurByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenLocomoteur(dossierMedicale);
+
+    }
+
+    private ExamenLocomoteur getExamenLocomoteur(DossierMedicale dossierMedicale) throws Exception {
         ExamenLocomoteur examenLocomoteur = dossierMedicale.getExamenLocomoteur();
         examenLocomoteur.setDossierMedicale(dossierMedicale);
         examenLocomoteur.setForceGenoux(Util.decryptIfNotNull(examenLocomoteur.getForceGenoux()));
@@ -43,7 +54,6 @@ public class ExamenLocomoteurService {
             parametresExamenLocomoteur.setObservations(Util.decryptIfNotNull(parametresExamenLocomoteur.getObservations()));
         }
         return examenLocomoteur;
-
     }
 
 

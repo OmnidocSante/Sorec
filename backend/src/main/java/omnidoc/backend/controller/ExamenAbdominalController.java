@@ -20,6 +20,11 @@ public class ExamenAbdominalController {
         return ResponseEntity.ok(examenAbdominalService.fetchExamenAbdominal(jockeyId));
     }
 
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<ExamenAbdominal> fetchExamenNeurologiqueByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(examenAbdominalService.fetchExamenAbdominalByDossierId(dossierId));
+    }
+
     @PutMapping
     public ResponseEntity<Void> updateExamenNeurologique(@PathVariable int jockeyId, @RequestBody ExamenAbdominal examenAbdominal) throws Exception {
         examenAbdominalService.updateExamenAbdominal(jockeyId, examenAbdominal);

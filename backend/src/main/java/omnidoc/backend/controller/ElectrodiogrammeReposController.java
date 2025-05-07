@@ -19,6 +19,11 @@ public class ElectrodiogrammeReposController {
         return ResponseEntity.ok(electrocardiogrammeReposService.fetchElectrocardiogrammeRepos(jockeyId));
     }
 
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<ElectrocardiogrammeRepos> fetchElectrodiogrammeRepoByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(electrocardiogrammeReposService.fetchElectrocardiogrammeReposByDossierId(dossierId));
+    }
+
     @PutMapping
     public ResponseEntity<Void> updateElectrodiogrammeRepo(@PathVariable int jockeyId, @RequestBody ElectrocardiogrammeRepos electrocardiogrammeRepos) throws Exception {
         electrocardiogrammeReposService.updateElectrocardiogrammeRepos(jockeyId, electrocardiogrammeRepos);

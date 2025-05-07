@@ -22,6 +22,15 @@ public class ResultatExamenParacliniqueService {
 
     public ResultatExamenParaclinique fetchResultatExamenParaclinique(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getResultatExamenParaclinique(dossierMedicale);
+    }
+
+    public ResultatExamenParaclinique fetchResultatExamenParacliniqueByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getResultatExamenParaclinique(dossierMedicale);
+    }
+
+    private ResultatExamenParaclinique getResultatExamenParaclinique(DossierMedicale dossierMedicale) throws Exception {
         ResultatExamenParaclinique resultatExamenParaclinique = dossierMedicale.getResultatExamenParaclinique();
         resultatExamenParaclinique.setDossierMedicale(dossierMedicale);
         resultatExamenParaclinique.setEchocardiographie(decryptIfNotNull(resultatExamenParaclinique.getEchocardiographie()));

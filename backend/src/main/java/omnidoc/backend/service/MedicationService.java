@@ -26,8 +26,20 @@ public class MedicationService {
     private DossierMedicaleRepo dossierMedicaleRepo;
 
     public List<Medication> fetchMedicationByPatientId(int jockeyId) throws Exception {
+
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("Dossier médical non trouvé"));
 
+        return getMedications(dossierMedicale);
+    }
+
+    public List<Medication> fetchMedicationByDossierId(int dossierId) throws Exception {
+
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("Dossier médical non trouvé"));
+
+        return getMedications(dossierMedicale);
+    }
+
+    private List<Medication> getMedications(DossierMedicale dossierMedicale) throws Exception {
         List<Medication> medications = dossierMedicale.getMedications();
 
         for (Medication medication : medications) {

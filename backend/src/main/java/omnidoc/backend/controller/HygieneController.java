@@ -18,6 +18,10 @@ public class HygieneController {
     public ResponseEntity<Hygiene> fetchHygiene(@PathVariable  int jockeyId) throws Exception {
         return ResponseEntity.ok(hygieneService.fetchHygieneByPatientId(jockeyId));
     }
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<Hygiene> fetchHygieneByDossierId(@PathVariable  int dossierId) throws Exception {
+        return ResponseEntity.ok(hygieneService.fetchHygieneByDossierId(dossierId));
+    }
 
     @PutMapping
     public ResponseEntity<Void> updateHygiene(@PathVariable  int jockeyId,@RequestBody  Hygiene hygiene) throws Exception {

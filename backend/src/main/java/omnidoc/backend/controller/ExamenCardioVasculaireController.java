@@ -17,6 +17,11 @@ public class ExamenCardioVasculaireController {
         return ResponseEntity.ok(examenCardioVasculaireService.getExamenByPatientId(jockeyId));
     }
 
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<ExamenCardioVasculaire> fetchExamCardioByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(examenCardioVasculaireService.getExamenByDossierId(dossierId));
+    }
+
     @PutMapping
     public ResponseEntity<Void> changeExamCardio(@PathVariable int jockeyId, @RequestBody ExamenCardioVasculaire examenCardioVasculaire) throws Exception {
         examenCardioVasculaireService.modifyExamenByPatientId(jockeyId, examenCardioVasculaire);

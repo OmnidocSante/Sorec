@@ -20,6 +20,10 @@ public class ElectrocardiogrammeEffortController {
     public ResponseEntity<ElectrocardiogrammeEffort> fetchElectrocardiogrammeEffort(@PathVariable int jockeyId) throws Exception {
         return ResponseEntity.ok(electrocardiogrammeEffortService.fetchElectrocardiogrammeEffort(jockeyId));
     }
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<ElectrocardiogrammeEffort> fetchElectrocardiogrammeEffortByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(electrocardiogrammeEffortService.fetchElectrocardiogrammeEffortByDossierId(dossierId));
+    }
 
     @PutMapping
     public ResponseEntity<Void> updateElectrocardiogrammeEffort(@PathVariable int jockeyId, @RequestBody ElectrocardiogrammeEffort electrocardiogrammeEffort) throws Exception {

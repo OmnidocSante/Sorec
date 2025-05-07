@@ -18,6 +18,10 @@ public class ExamenLocomoteurController {
     public ResponseEntity<ExamenLocomoteur> fetchExamenLocomoteur(@PathVariable int jockeyId) throws Exception {
         return ResponseEntity.ok(examenLocomoteurService.fetchExamenLocomoteur(jockeyId));
     }
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<ExamenLocomoteur> fetchExamenLocomoteurByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(examenLocomoteurService.fetchExamenLocomoteurByDossierId(dossierId));
+    }
 
     @PutMapping
     public ResponseEntity<Void> updateExamenLocomoteur(@PathVariable int jockeyId, @RequestBody ExamenLocomoteur examenLocomoteur) throws Exception {

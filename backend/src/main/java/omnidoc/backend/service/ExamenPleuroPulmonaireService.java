@@ -21,9 +21,20 @@ public class ExamenPleuroPulmonaireService {
     }
 
     public ExamenPleuroPulmonaire fetchExamenPleuroPulmonique(int jockeyId) throws Exception {
-
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
 
+
+        return getExamenPleuroPulmonaire(dossierMedicale);
+    }
+
+    public ExamenPleuroPulmonaire fetchExamenPleuroPulmoniqueByDossier(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+
+
+        return getExamenPleuroPulmonaire(dossierMedicale);
+    }
+
+    private ExamenPleuroPulmonaire getExamenPleuroPulmonaire(DossierMedicale dossierMedicale) throws Exception {
         ExamenPleuroPulmonaire examenPleuroPulmonaire = dossierMedicale.getExamenPleuroPulmonaire();
         examenPleuroPulmonaire.setDossierMedicale(dossierMedicale);
         examenPleuroPulmonaire.setAustucultation(decryptIfNotNull(examenPleuroPulmonaire.getAustucultation()));
@@ -31,6 +42,7 @@ public class ExamenPleuroPulmonaireService {
         examenPleuroPulmonaire.setInspection(decryptIfNotNull(examenPleuroPulmonaire.getInspection()));
         return examenPleuroPulmonaire;
     }
+
 
     public void updateExamenPleuroPulmonique(int jockeyId, ExamenPleuroPulmonaire examenPleuroPulmonaire) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));

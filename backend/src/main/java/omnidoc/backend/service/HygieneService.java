@@ -23,6 +23,15 @@ public class HygieneService {
 
     public Hygiene fetchHygieneByPatientId(int patientId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(patientId).orElseThrow(() -> new ApiException("not found"));
+        return getHygiene(dossierMedicale);
+    }
+
+    public Hygiene fetchHygieneByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getHygiene(dossierMedicale);
+    }
+
+    private Hygiene getHygiene(DossierMedicale dossierMedicale) throws Exception {
         Hygiene hygiene = dossierMedicale.getHygiene();
 
         hygiene.setDossierMedicale(dossierMedicale);

@@ -22,6 +22,14 @@ public class ElectrocardiogrammeEffortService {
 
     public ElectrocardiogrammeEffort fetchElectrocardiogrammeEffort(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getElectrocardiogrammeEffort(dossierMedicale);
+    }
+    public ElectrocardiogrammeEffort fetchElectrocardiogrammeEffortByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getElectrocardiogrammeEffort(dossierMedicale);
+    }
+
+    private ElectrocardiogrammeEffort getElectrocardiogrammeEffort(DossierMedicale dossierMedicale) throws Exception {
         ElectrocardiogrammeEffort electrocardiogrammeEffort = dossierMedicale.getElectrocardiogrammeEffort();
         electrocardiogrammeEffort.setDossierMedicale(dossierMedicale);
         electrocardiogrammeEffort.setFrequenceCardiaque(decryptIfNotNull(electrocardiogrammeEffort.getFrequenceCardiaque()));

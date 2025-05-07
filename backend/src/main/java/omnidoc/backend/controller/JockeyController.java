@@ -1,5 +1,6 @@
 package omnidoc.backend.controller;
 
+import omnidoc.backend.entity.enums.Status;
 import omnidoc.backend.records.JockeyRecord;
 import omnidoc.backend.records.UserRecord;
 import omnidoc.backend.request.JockeyModificationRequest;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -31,14 +33,21 @@ public class JockeyController {
         return ResponseEntity.ok(jockeyService.getJockey(jockeyId));
     }
 
+
     @PreAuthorize("hasAuthority('MEDECIN')")
     @PatchMapping("/{jockeyId}")
-    public ResponseEntity<Void> changeJockey(@PathVariable int jockeyId,@RequestBody JockeyModificationRequest jockeyModificationRequest) throws Exception {
-        jockeyService.changeJockey(jockeyId,jockeyModificationRequest);
+    public ResponseEntity<Void> changeJockey(@PathVariable int jockeyId, @RequestBody JockeyModificationRequest jockeyModificationRequest) throws Exception {
+        jockeyService.changeJockey(jockeyId, jockeyModificationRequest);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-
+    @PreAuthorize("hasAuthority('MEDECIN')")
+    @PatchMapping("/{jockeyId}/status")
+    public ResponseEntity<Void> changeJockey(@PathVariable int jockeyId, @RequestBody HashMap<String, Status> statusRequest) throws Exception {
+        Status status = statusRequest.get("status");
+        jockeyService.changeStatusJockey(jockeyId, status);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
 
 //    @PatchMapping("/{userId}")

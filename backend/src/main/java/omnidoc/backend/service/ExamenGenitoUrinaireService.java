@@ -23,6 +23,14 @@ public class ExamenGenitoUrinaireService {
 
     public ExamenGenitoUrinaire fetchExamenGenitoUrinaire(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenGenitoUrinaire(dossierMedicale);
+    }
+    public ExamenGenitoUrinaire fetchExamenGenitoUrinaireByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenGenitoUrinaire(dossierMedicale);
+    }
+
+    private ExamenGenitoUrinaire getExamenGenitoUrinaire(DossierMedicale dossierMedicale) throws Exception {
         ExamenGenitoUrinaire examenGenitoUrinaire = dossierMedicale.getExamenGenitoUrinaire();
         examenGenitoUrinaire.setDossierMedicale(dossierMedicale);
         examenGenitoUrinaire.setObservationGlucose(decryptIfNotNull(examenGenitoUrinaire.getObservationGlucose()));

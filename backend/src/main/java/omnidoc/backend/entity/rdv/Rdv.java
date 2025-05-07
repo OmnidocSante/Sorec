@@ -39,4 +39,6 @@ public class Rdv {
 
     @Enumerated(value = EnumType.STRING)
     public StatusRDV statusRDV = StatusRDV.PLANIFIE;
+
+
 }

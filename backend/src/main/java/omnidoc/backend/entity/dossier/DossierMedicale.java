@@ -43,43 +43,61 @@ public class DossierMedicale {
     @Column(nullable = false)
     private Boolean isCurrent;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "dossierMedicale")
     private List<AntecedentPersonnel> antecedentPersonnels;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ExamenCardioVasculaire examenCardioVasculaire;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "dossierMedicale")
     private List<Medication> medications;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private Hygiene hygiene;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ExamenPleuroPulmonaire examenPleuroPulmonaire;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ExamenOphtalmogique examenOphtalmogique;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ExamenAuditif examenAuditif;
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ExamenLocomoteur examenLocomoteur;
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ExamenNeurologique examenNeurologique;
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ExamenAbdominal examenAbdominal;
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ExamenGenitoUrinaire examenGenitoUrinaire;
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ElectrocardiogrammeRepos electrocardiogrammeRepos;
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ElectrocardiogrammeEffort electrocardiogrammeEffort;
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private ResultatExamenParaclinique resultatExamenParaclinique;
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private Conclusion conclusion;
+
+    @JsonIgnore
     @OneToOne(mappedBy = "dossierMedicale")
     private AntecedentFamiliaux antecedentFamiliaux;
+
 
 }

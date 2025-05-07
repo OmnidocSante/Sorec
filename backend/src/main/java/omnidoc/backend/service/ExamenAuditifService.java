@@ -20,6 +20,15 @@ public class ExamenAuditifService {
 
     public ExamenAuditif fetchExamenAuditif(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenAuditif(dossierMedicale);
+    }
+
+    public ExamenAuditif fetchExamenAuditifByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenAuditif(dossierMedicale);
+    }
+
+    private ExamenAuditif getExamenAuditif(DossierMedicale dossierMedicale) throws Exception {
         ExamenAuditif examenAuditif = dossierMedicale.getExamenAuditif();
         examenAuditif.setDossierMedicale(dossierMedicale);
         examenAuditif.setAcuiteAuditiveADistanceOg(Util.decryptIfNotNull(examenAuditif.getAcuiteAuditiveADistanceOg()));
@@ -28,7 +37,7 @@ public class ExamenAuditifService {
         return examenAuditif;
     }
 
-    public void updateExamenAuditif(int jockeyId, ExamenAuditif examenAuditif) throws Exception{
+    public void updateExamenAuditif(int jockeyId, ExamenAuditif examenAuditif) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         examenAuditif.setDossierMedicale(dossierMedicale);
         examenAuditif.setAcuiteAuditiveADistanceOg(Util.encryptIfNotNull(examenAuditif.getAcuiteAuditiveADistanceOg()));

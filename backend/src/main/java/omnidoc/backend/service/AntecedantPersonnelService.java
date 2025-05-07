@@ -25,7 +25,6 @@ public class AntecedantPersonnelService {
     private DossierMedicaleRepo dossierMedicaleRepo;
 
 
-
     @Transactional
     public void changeAntecedantPersonnelByPatientId(List<AntecedentPersonnel> antecedents) throws Exception {
         for (AntecedentPersonnel ap : antecedents) {
@@ -41,10 +40,22 @@ public class AntecedantPersonnelService {
         }
     }
 
-    public List<AntecedentPersonnelDTO> getAntecedentBysysteme(int jockeyId,SystemeMedical systemeMedical) throws Exception {
+    public List<AntecedentPersonnelDTO> getAntecedentBysysteme(int jockeyId, SystemeMedical systemeMedical) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow();
-        List<AntecedentPersonnel> antecedentPersonnels = antecedentPersonnelRepo.findAntecedentPersonnelsByCondition_Systeme_NomAndDossierMedicale(systemeMedical,dossierMedicale);
+        return getAntecedentPersonnelDTOS(systemeMedical, dossierMedicale);
 
+
+    }
+
+    public List<AntecedentPersonnelDTO> getAntecedentBysystemeAndDossierId(int dossierId, SystemeMedical systemeMedical) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow();
+        return getAntecedentPersonnelDTOS(systemeMedical, dossierMedicale);
+
+
+    }
+
+    private List<AntecedentPersonnelDTO> getAntecedentPersonnelDTOS(SystemeMedical systemeMedical, DossierMedicale dossierMedicale) throws Exception {
+        List<AntecedentPersonnel> antecedentPersonnels = antecedentPersonnelRepo.findAntecedentPersonnelsByCondition_Systeme_NomAndDossierMedicale(systemeMedical, dossierMedicale);
         List<AntecedentPersonnelDTO> dtoList = new ArrayList<>();
         for (AntecedentPersonnel ap : antecedentPersonnels) {
             AntecedentPersonnelDTO dto = new AntecedentPersonnelDTO();
@@ -65,11 +76,7 @@ public class AntecedantPersonnelService {
             dtoList.add(dto);
         }
         return dtoList;
-
-
     }
-
-
 
 
 }

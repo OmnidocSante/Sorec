@@ -19,6 +19,12 @@ public class ExamenOphtalmogiqueController {
         return ResponseEntity.ok(examenOphtalmogiqueService.fetchExamenOphtalmogique(jockeyId));
     }
 
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<ExamenOphtalmogique> fetchExamenByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(examenOphtalmogiqueService.fetchExamenOphtalmogiqueByDossierId(dossierId));
+    }
+
+
     @PutMapping
     public ResponseEntity<Void> updateExamen(@PathVariable int jockeyId,@RequestBody ExamenOphtalmogique examenOphtalmogique) throws Exception {
         examenOphtalmogiqueService.updateExamenOphtalmogique(jockeyId, examenOphtalmogique);

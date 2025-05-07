@@ -75,4 +75,51 @@ public class AntecedantPersonnelController {
     }
 
 
+
+    @GetMapping("/appareil-cardiovasculaire/historique/{dossierId}")
+    public ResponseEntity<List<AntecedentPersonnelDTO>> getAppareilCardioVasculaireByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysystemeAndDossierId(dossierId, SystemeMedical.APPAREIL_CARDIO_VASCULAIRE));
+    }
+
+    @GetMapping("/appareil-respiratoire/historique/{dossierId}")
+    public ResponseEntity<List<AntecedentPersonnelDTO>> getAppareilRespiratoireByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysystemeAndDossierId(dossierId, SystemeMedical.APPAREIL_RESPIRATOIRE));
+    }
+
+    @GetMapping("/systeme-nerveux/historique/{dossierId}")
+    public ResponseEntity<List<AntecedentPersonnelDTO>> getSystemeNerveuxByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysystemeAndDossierId(dossierId, SystemeMedical.SYSTEME_NERVEUX));
+    }
+
+    @GetMapping("/orl/historique/{dossierId}")
+    public ResponseEntity<List<AntecedentPersonnelDTO>> getOrlByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysystemeAndDossierId(dossierId, SystemeMedical.ORL));
+    }
+
+    @GetMapping("/allergies/historique/{dossierId}")
+    public ResponseEntity<List<AntecedentPersonnelDTO>> getAllergiesByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysystemeAndDossierId(dossierId, SystemeMedical.ALLERGIES));
+    }
+
+    @GetMapping("/traumatologie/historique/{dossierId}")
+    public ResponseEntity<List<AntecedentPersonnelDTO>> getTraumatologieByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysystemeAndDossierId(dossierId, SystemeMedical.TRAUMATOLOGIE));
+    }
+
+    @GetMapping("/appareil-digestif/historique/{dossierId}")
+    public ResponseEntity<List<AntecedentPersonnelDTO>> getAppareilDigestifByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysystemeAndDossierId(dossierId, SystemeMedical.APPAREIL_DIGESTIF));
+    }
+
+    @GetMapping("/endocrinologie/historique/{dossierId}")
+    public ResponseEntity<List<AntecedentPersonnelDTO>> getEndocrinologieByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysystemeAndDossierId(dossierId, SystemeMedical.ENDOCRINOLOGIE));
+    }
+
+    @GetMapping("/autres/historique/{dossierId}")
+    public ResponseEntity<List<AntecedentPersonnelDTO>> getAutresByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysystemeAndDossierId(dossierId, SystemeMedical.AUTRES));
+    }
+
+
 }

@@ -23,6 +23,14 @@ public class ExamenNeurologiqueService {
 
     public ExamenNeurologique fetchExamenPleuroPulmonique(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenNeurologique(dossierMedicale);
+    }
+    public ExamenNeurologique fetchExamenPleuroPulmoniqueByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenNeurologique(dossierMedicale);
+    }
+
+    private ExamenNeurologique getExamenNeurologique(DossierMedicale dossierMedicale) throws Exception {
         ExamenNeurologique examenNeurologique = dossierMedicale.getExamenNeurologique();
         examenNeurologique.setDossierMedicale(dossierMedicale);
         examenNeurologique.setReflexePupillaire(decryptIfNotNull(examenNeurologique.getReflexePupillaire()));

@@ -18,6 +18,10 @@ public class ConclusionController {
     public ResponseEntity<Conclusion> fetchConclusion(@PathVariable int jockeyId) throws Exception {
         return ResponseEntity.ok(conclusionService.fetchConclusion(jockeyId));
     }
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<Conclusion> fetchConclusionByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(conclusionService.fetchConclusionByDossierId(dossierId));
+    }
 
     @PutMapping
     public ResponseEntity<Void> updateConclusion(@PathVariable int jockeyId, @RequestBody Conclusion conclusion) throws Exception {

@@ -23,6 +23,14 @@ public class AntecedentFamiliauxService {
 
     public AntecedentFamiliaux fetchAntecedentFamiliaux(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getAntecedentFamiliaux(dossierMedicale);
+    }
+    public AntecedentFamiliaux fetchAntecedentFamiliauxByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getAntecedentFamiliaux(dossierMedicale);
+    }
+
+    private AntecedentFamiliaux getAntecedentFamiliaux(DossierMedicale dossierMedicale) throws Exception {
         AntecedentFamiliaux antecedentFamiliaux = dossierMedicale.getAntecedentFamiliaux();
         antecedentFamiliaux.setDossierMedicale(dossierMedicale);
         antecedentFamiliaux.setAsthme(decryptIfNotNull(antecedentFamiliaux.getAsthme()));

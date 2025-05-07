@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DossierMedicaleRepo extends JpaRepository<DossierMedicale, Integer> {
@@ -17,5 +18,5 @@ public interface DossierMedicaleRepo extends JpaRepository<DossierMedicale, Inte
 
     Optional<DossierMedicale> getDossierMedicaleByJockey_IdAndIsCurrentTrue(Integer jockeyId);
 
-
+    List<DossierMedicale> getDossierMedicalesByJockey_IdAndIsCurrentFalse(int jockeyId);
 }

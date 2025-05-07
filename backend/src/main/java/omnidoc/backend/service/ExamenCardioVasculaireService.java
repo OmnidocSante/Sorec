@@ -30,6 +30,16 @@ public class ExamenCardioVasculaireService {
     public ExamenCardioVasculaire getExamenByPatientId(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("Dossier médical non trouvé"));
 
+        return getExamenCardioVasculaire(dossierMedicale);
+    }
+
+    public ExamenCardioVasculaire getExamenByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("Dossier médical non trouvé"));
+
+        return getExamenCardioVasculaire(dossierMedicale);
+    }
+
+    private ExamenCardioVasculaire getExamenCardioVasculaire(DossierMedicale dossierMedicale) throws Exception {
         ExamenCardioVasculaire examenCardioVasculaire = dossierMedicale.getExamenCardioVasculaire();
         examenCardioVasculaire.setDossierMedicale(dossierMedicale);
 
@@ -62,7 +72,6 @@ public class ExamenCardioVasculaireService {
 
         return examenCardioVasculaire;
     }
-
 
     public void modifyExamenByPatientId(int jockeyId, ExamenCardioVasculaire examenCardioVasculaire) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("Dossier médical non trouvé"));

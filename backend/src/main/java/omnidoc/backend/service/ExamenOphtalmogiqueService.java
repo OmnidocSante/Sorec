@@ -22,6 +22,17 @@ public class ExamenOphtalmogiqueService {
 
     public ExamenOphtalmogique fetchExamenOphtalmogique(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenOphtalmogique(dossierMedicale);
+
+    }
+
+    public ExamenOphtalmogique fetchExamenOphtalmogiqueByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenOphtalmogique(dossierMedicale);
+
+    }
+
+    private ExamenOphtalmogique getExamenOphtalmogique(DossierMedicale dossierMedicale) throws Exception {
         ExamenOphtalmogique examenOphtalmogique = dossierMedicale.getExamenOphtalmogique();
         examenOphtalmogique.setDossierMedicale(dossierMedicale);
         examenOphtalmogique.setOgCorrige(decryptIfNotNull(examenOphtalmogique.getOgCorrige()));
@@ -30,9 +41,9 @@ public class ExamenOphtalmogiqueService {
         examenOphtalmogique.setOdCorrige(decryptIfNotNull(examenOphtalmogique.getOdCorrige()));
         examenOphtalmogique.setPaupieresEtCorneesNormale(decryptIfNotNull(examenOphtalmogique.getPaupieresEtCorneesNormale()));
         return examenOphtalmogique;
-
     }
-    public void updateExamenOphtalmogique(int jockeyId,ExamenOphtalmogique examenOphtalmogique) throws Exception {
+
+    public void updateExamenOphtalmogique(int jockeyId, ExamenOphtalmogique examenOphtalmogique) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         examenOphtalmogique.setDossierMedicale(dossierMedicale);
         examenOphtalmogique.setOgCorrige(encryptIfNotNull(examenOphtalmogique.getOgCorrige()));

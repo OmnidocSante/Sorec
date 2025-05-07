@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Status } from "@/utils/enums";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
 import { motion } from "framer-motion";
@@ -33,7 +34,7 @@ export default function PatientTab() {
   const navigate = useNavigate();
   const [jockey, setJockey] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  const [status, setStatus] = useState();
   const detailsSchema = z.object({
     plisDroit: z.number(),
     plisGauche: z.number(),
@@ -54,7 +55,6 @@ export default function PatientTab() {
   const fetchData = async () => {
     const response = await instance.get(`/api/jockeys/${id}`);
     setJockey(response.data);
-
     setValue("plisDroit", response.data.plisDroit);
     setValue("plisGauche", response.data.plisGauche);
     setValue("matieresGrasses", response.data.matieresGrasses);
@@ -80,6 +80,22 @@ export default function PatientTab() {
     await instance.patch(`/api/jockeys/${id}`, data);
     setIsDialogOpen(false);
     fetchData();
+  };
+
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+
+  const toggleStatus = async () => {
+    try {
+      await Promise.all([
+        instance.patch(`/api/jockeys/${id}/status`, { status }),
+        instance.post(`/api/jockeys/${id}/historique`, { status }),
+      ]);
+
+      fetchData();
+      setIsStatusDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   };
 
   if (!jockey) {
@@ -152,97 +168,151 @@ export default function PatientTab() {
                   </span>
                 </div>
               </div>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger onClick={() => setIsDialogOpen(true)}>
-                  <button className="px-4 py-2 bg-transparent border border-bay-of-many-600 text-bay-of-many-600 rounded-lg text-sm font-medium hover:bg-bay-of-many-300 duration-300 transition-all flex items-center justify-around gap-x-4">
-                    <Pencil className="size-4" />
-                    <p>Modifier les informations</p>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-white">
-                  <DialogHeader>
-                    <DialogTitle>Modifier les informations</DialogTitle>
-                    <div className="flex flex-col gap-4 mt-4">
-                      <div className="flex flex-col gap-1">
-                        <label
-                          className="text-sm font-medium text-bay-of-many-600"
-                          htmlFor="plis-cutané-plisDroit"
-                        >
-                          Plis Cutané Droit (mm)
-                        </label>
-                        <input
-                          {...register("plisDroit", { valueAsNumber: true })}
-                          id="plis-cutané-plisDroit"
-                          type="number"
-                          placeholder="Ex: 12.5"
-                          className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
-                        />
-                        {errors.plisDroit && (
-                          <p className="text-red-600 text-sm">
-                            {errors.plisDroit.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label
-                          className="text-sm font-medium text-bay-of-many-600"
-                          htmlFor="plis-cutané-plisGauche"
-                        >
-                          Plis Cutané Gauche (mm)
-                        </label>
-                        <input
-                          {...register("plisGauche", { valueAsNumber: true })}
-                          id="plis-cutané-plisGauche"
-                          type="number"
-                          placeholder="Ex: 13.2"
-                          className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
-                        />
-                        {errors.plisGauche && (
-                          <p className="text-red-600 text-sm">
-                            {errors.plisGauche.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label
-                          className="text-sm font-medium text-bay-of-many-600"
-                          htmlFor="matiere-grasse"
-                        >
-                          Matière Grasse (%)
-                        </label>
-                        <input
-                          {...register("matieresGrasses", {
-                            valueAsNumber: true,
-                          })}
-                          id="matiere-grasse"
-                          type="number"
-                          placeholder="Ex: 18.5"
-                          className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
-                        />
-                        {errors.matieresGrasses && (
-                          <p className="text-red-600 text-sm">
-                            {errors.matieresGrasses.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </DialogHeader>
-                  <DialogFooter className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                    <button
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500"
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      Annuler
+              <div className="space-x-4">
+                <Dialog
+                  open={isStatusDialogOpen}
+                  onOpenChange={setIsStatusDialogOpen}
+                >
+                  <DialogTrigger onClick={() => setIsStatusDialogOpen(true)}>
+                    <button className="px-4 py-2 bg-transparent border border-bay-of-many-600 text-bay-of-many-600 rounded-lg text-sm font-medium hover:bg-bay-of-many-300 duration-300 transition-all flex items-center justify-around gap-x-4">
+                      <ClipboardList className="size-4" />
+                      <p>Changement status du jockey</p>
                     </button>
-                    <button
-                      className="px-4 py-2 text-sm font-medium text-white bg-bay-of-many-600 rounded-md hover:bg-bay-of-many-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={handleSubmit(onSubmit)}
-                    >
-                      Confirmer
+                  </DialogTrigger>
+                  <DialogContent className="bg-white">
+                    <DialogHeader>
+                      <DialogTitle>Modifier le statut du jockey</DialogTitle>
+                      <div className="flex flex-col gap-4 mt-4">
+                        <div className="flex flex-col gap-1">
+                          <label
+                            className="text-sm font-medium text-bay-of-many-600"
+                            htmlFor="status"
+                          >
+                            Statut
+                          </label>
+                          <select
+                            onChange={(e) => setStatus(e.target.value)}
+                            id="status"
+                            className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
+                            defaultValue={jockey.status}
+                          >
+                            {Status.map((status) => (
+                              <option key={status.label} value={status.label}>
+                                {status.value}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </DialogHeader>
+                    <DialogFooter className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                      <button
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500"
+                        onClick={() => setIsStatusDialogOpen(false)}
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        className="px-4 py-2 text-sm font-medium text-white bg-bay-of-many-600 rounded-md hover:bg-bay-of-many-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={toggleStatus}
+                      >
+                        Confirmer
+                      </button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger onClick={() => setIsDialogOpen(true)}>
+                    <button className="px-4 py-2 bg-transparent border border-bay-of-many-600 text-bay-of-many-600 rounded-lg text-sm font-medium hover:bg-bay-of-many-300 duration-300 transition-all flex items-center justify-around gap-x-4">
+                      <Pencil className="size-4" />
+                      <p>Modifier les informations</p>
                     </button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                  </DialogTrigger>
+                  <DialogContent className="bg-white">
+                    <DialogHeader>
+                      <DialogTitle>Modifier les informations</DialogTitle>
+                      <div className="flex flex-col gap-4 mt-4">
+                        <div className="flex flex-col gap-1">
+                          <label
+                            className="text-sm font-medium text-bay-of-many-600"
+                            htmlFor="plis-cutané-plisDroit"
+                          >
+                            Plis Cutané Droit (mm)
+                          </label>
+                          <input
+                            {...register("plisDroit", { valueAsNumber: true })}
+                            id="plis-cutané-plisDroit"
+                            type="number"
+                            placeholder="Ex: 12.5"
+                            className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
+                          />
+                          {errors.plisDroit && (
+                            <p className="text-red-600 text-sm">
+                              {errors.plisDroit.message}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label
+                            className="text-sm font-medium text-bay-of-many-600"
+                            htmlFor="plis-cutané-plisGauche"
+                          >
+                            Plis Cutané Gauche (mm)
+                          </label>
+                          <input
+                            {...register("plisGauche", { valueAsNumber: true })}
+                            id="plis-cutané-plisGauche"
+                            type="number"
+                            placeholder="Ex: 13.2"
+                            className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
+                          />
+                          {errors.plisGauche && (
+                            <p className="text-red-600 text-sm">
+                              {errors.plisGauche.message}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label
+                            className="text-sm font-medium text-bay-of-many-600"
+                            htmlFor="matiere-grasse"
+                          >
+                            Matière Grasse (%)
+                          </label>
+                          <input
+                            {...register("matieresGrasses", {
+                              valueAsNumber: true,
+                            })}
+                            id="matiere-grasse"
+                            type="number"
+                            placeholder="Ex: 18.5"
+                            className="border border-bay-of-many-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-bay-of-many-600"
+                          />
+                          {errors.matieresGrasses && (
+                            <p className="text-red-600 text-sm">
+                              {errors.matieresGrasses.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </DialogHeader>
+                    <DialogFooter className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                      <button
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500"
+                        onClick={() => setIsDialogOpen(false)}
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        className="px-4 py-2 text-sm font-medium text-white bg-bay-of-many-600 rounded-md hover:bg-bay-of-many-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleSubmit(onSubmit)}
+                      >
+                        Confirmer
+                      </button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

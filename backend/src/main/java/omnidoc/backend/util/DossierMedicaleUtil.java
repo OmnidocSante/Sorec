@@ -169,6 +169,7 @@ public class DossierMedicaleUtil {
 
 
         ExamenLocomoteur examenLocomoteur = new ExamenLocomoteur();
+        examenLocomoteur.setDossierMedicale(dossierMedicale);
         examenLocomoteur.setForceHanche(null);
         examenLocomoteur.setForceCheville(null);
         examenLocomoteur.setForceCoude(null);
@@ -176,7 +177,6 @@ public class DossierMedicaleUtil {
         examenLocomoteur.setForceEpaule(null);
         examenLocomoteur.setForceGenoux(null);
         examenLocomoteur.setForceTendons(null);
-        examenLocomoteur.setDossierMedicale(dossierMedicale);
         examenLocomoteurRepo.save(examenLocomoteur);
 
 
@@ -236,7 +236,7 @@ public class DossierMedicaleUtil {
 
 
         ElectrocardiogrammeEffort electrocardiogrammeEffort = new ElectrocardiogrammeEffort();
-        electrocardiogrammeRepos.setDossierMedicale(dossierMedicale);
+        electrocardiogrammeEffort.setDossierMedicale(dossierMedicale);
         electrocardiogrammeEffort.setFrequenceCardiaque(null);
         electrocardiogrammeEffort.setRythme(null);
         electrocardiogrammeEffort.setConduction(null);
@@ -273,7 +273,6 @@ public class DossierMedicaleUtil {
         antecedentFamiliaux.setMaladiesMetaboliques(null);
         antecedentFamiliaux.setAutres(null);
         antecedentFamiliauxRepo.save(antecedentFamiliaux);
-
 
 
     }
@@ -369,7 +368,7 @@ public class DossierMedicaleUtil {
         examenOphtalmogique.setPaupieresEtCorneesNormale(oldExamenOphtalmogique.getPaupieresEtCorneesNormale());
         examenOphtalmogiqueRepo.save(examenOphtalmogique);
 
-        ExamenAuditif oldExamAuditif = dossierMedicale.getExamenAuditif();
+        ExamenAuditif oldExamAuditif = oldDossierMedicale.getExamenAuditif();
         ExamenAuditif examenAuditif = new ExamenAuditif();
         examenAuditif.setDossierMedicale(dossierMedicale);
         examenAuditif.setAcuiteAuditiveADistanceOg(oldExamAuditif.getAcuiteAuditiveADistanceOg());
@@ -378,7 +377,8 @@ public class DossierMedicaleUtil {
         examenAuditifRepo.save(examenAuditif);
 
         ExamenLocomoteur oldExamenLocomoteur = oldDossierMedicale.getExamenLocomoteur();
-        ExamenLocomoteur examenLocomoteur = dossierMedicale.getExamenLocomoteur();
+        ExamenLocomoteur examenLocomoteur =  new ExamenLocomoteur();
+        examenLocomoteur.setDossierMedicale(dossierMedicale);
         examenLocomoteur.setForceHanche(oldExamenLocomoteur.getForceHanche());
         examenLocomoteur.setForceCheville(oldExamenLocomoteur.getForceCheville());
         examenLocomoteur.setForceCoude(oldExamenLocomoteur.getForceCoude());
@@ -386,7 +386,6 @@ public class DossierMedicaleUtil {
         examenLocomoteur.setForceEpaule(oldExamenLocomoteur.getForceEpaule());
         examenLocomoteur.setForceGenoux(oldExamenLocomoteur.getForceGenoux());
         examenLocomoteur.setForceTendons(oldExamenLocomoteur.getForceTendons());
-        examenLocomoteur.setDossierMedicale(dossierMedicale);
         examenLocomoteurRepo.save(examenLocomoteur);
 
 
@@ -489,9 +488,6 @@ public class DossierMedicaleUtil {
         antecedentFamiliaux.setMaladiesMetaboliques(oldAntecedantFamilaux.getMaladiesMetaboliques());
         antecedentFamiliaux.setAutres(oldAntecedantFamilaux.getAutres());
         antecedentFamiliauxRepo.save(antecedentFamiliaux);
-
-
-
 
 
     }

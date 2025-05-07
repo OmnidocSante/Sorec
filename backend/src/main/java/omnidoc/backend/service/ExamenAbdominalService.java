@@ -23,6 +23,15 @@ public class ExamenAbdominalService {
 
     public ExamenAbdominal fetchExamenAbdominal(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenAbdominal(dossierMedicale);
+    }
+
+    public ExamenAbdominal fetchExamenAbdominalByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getExamenAbdominal(dossierMedicale);
+    }
+
+    private ExamenAbdominal getExamenAbdominal(DossierMedicale dossierMedicale) throws Exception {
         ExamenAbdominal examenAbdominal = dossierMedicale.getExamenAbdominal();
         examenAbdominal.setDossierMedicale(dossierMedicale);
         examenAbdominal.setOropharynx(decryptIfNotNull(examenAbdominal.getOropharynx()));

@@ -22,6 +22,16 @@ public class ElectrocardiogrammeReposService {
 
     public ElectrocardiogrammeRepos fetchElectrocardiogrammeRepos(int jockeyId) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        return getElectrocardiogrammeRepos(dossierMedicale);
+    }
+
+
+    public ElectrocardiogrammeRepos fetchElectrocardiogrammeReposByDossierId(int dossierId) throws Exception {
+        DossierMedicale dossierMedicale = dossierMedicaleRepo.findById(dossierId).orElseThrow(() -> new ApiException("not found"));
+        return getElectrocardiogrammeRepos(dossierMedicale);
+    }
+
+    private ElectrocardiogrammeRepos getElectrocardiogrammeRepos(DossierMedicale dossierMedicale) throws Exception {
         ElectrocardiogrammeRepos electrocardiogrammeRepos = dossierMedicale.getElectrocardiogrammeRepos();
         electrocardiogrammeRepos.setDossierMedicale(dossierMedicale);
         electrocardiogrammeRepos.setFrequenceCardiaque(decryptIfNotNull(electrocardiogrammeRepos.getFrequenceCardiaque()));

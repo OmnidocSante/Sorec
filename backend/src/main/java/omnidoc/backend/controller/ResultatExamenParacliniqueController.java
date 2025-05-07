@@ -19,6 +19,11 @@ public class ResultatExamenParacliniqueController {
         return ResponseEntity.ok(resultatExamenParacliniqueService.fetchResultatExamenParaclinique(jockeyId));
     }
 
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<ResultatExamenParaclinique> fetchResultatExamenParacliniqueByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(resultatExamenParacliniqueService.fetchResultatExamenParacliniqueByDossierId(dossierId));
+    }
+
     @PutMapping
     public ResponseEntity<Void> updateResultatExamenParaclinique(@PathVariable int jockeyId, @RequestBody ResultatExamenParaclinique resultatExamenParaclinique) throws Exception {
         resultatExamenParacliniqueService.updateExamenGenitoUrinaire(jockeyId, resultatExamenParaclinique);

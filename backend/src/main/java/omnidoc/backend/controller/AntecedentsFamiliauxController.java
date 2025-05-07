@@ -19,6 +19,10 @@ public class AntecedentsFamiliauxController {
     public ResponseEntity<AntecedentFamiliaux> fetchAntcedentFamiliaux(@PathVariable int jockeyId) throws Exception {
         return ResponseEntity.ok(antecedentFamiliauxService.fetchAntecedentFamiliaux(jockeyId));
     }
+    @GetMapping("/historique/{dossierId}")
+    public ResponseEntity<AntecedentFamiliaux> fetchAntcedentFamiliauxByDossierId(@PathVariable int dossierId) throws Exception {
+        return ResponseEntity.ok(antecedentFamiliauxService.fetchAntecedentFamiliauxByDossierId(dossierId));
+    }
 
     @PutMapping
     public ResponseEntity<Void> updateConclusion(@PathVariable int jockeyId, @RequestBody AntecedentFamiliaux antecedentFamiliaux) throws Exception {

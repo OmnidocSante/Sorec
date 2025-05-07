@@ -23,6 +23,12 @@ public class MedicationController {
         return medicationService.fetchMedicationByPatientId(jockeyId);
     }
 
+    @GetMapping("/historique/{dossierId}")
+    @PreAuthorize("hasAuthority('MEDECIN')")
+    public List<Medication> fetchMedicationByDossierId(@PathVariable int dossierId) throws Exception {
+        return medicationService.fetchMedicationByDossierId(dossierId);
+    }
+
 
     @PostMapping
     @PreAuthorize("hasAuthority('MEDECIN')")
@@ -32,7 +38,7 @@ public class MedicationController {
     }
 
     @DeleteMapping("/{medicamentId}")
-    public ResponseEntity<Void> deleteMedication(@PathVariable int medicamentId){
+    public ResponseEntity<Void> deleteMedication(@PathVariable int medicamentId) {
         medicationService.deleteMedication(medicamentId);
         return ResponseEntity.ok().build();
 
