@@ -21,8 +21,8 @@ export default function DoctorPanel() {
       case "dashboard":
         return <DashboardTab />;
 
-      case "data":
-        return <DataCorrectionTab />;
+      // case "data":
+      //   return <DataCorrectionTab />;
       case "appointments":
         return <AppointmentsTab />;
 
@@ -76,7 +76,7 @@ export default function DoctorPanel() {
           >
             Tableau de Bord
           </button>
-
+{/* 
           <button
             onClick={() => {
               setActiveTab("data");
@@ -89,7 +89,7 @@ export default function DoctorPanel() {
             }`}
           >
             Correction des Données
-          </button>
+          </button> */}
 
           <button
             onClick={() => {

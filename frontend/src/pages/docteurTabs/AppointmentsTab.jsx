@@ -111,6 +111,7 @@ export default function AppointmentsTab() {
 
   const handleStatusUpdate = async (appointmentId, newStatus) => {
     await instance.patch(`/api/rdvs/${appointmentId}`, { status: newStatus });
+    setOpenStates({})
     fetchAppointments();
     setIsDialogOpen(false);
   };

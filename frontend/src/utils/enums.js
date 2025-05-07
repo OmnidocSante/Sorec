@@ -60,3 +60,10 @@ export const VILLES = [
   { label: "Tiznit", value: "TIZNIT" },
   { label: "Zagora", value: "ZAGORA" },
 ];
+
+export const Status = [
+  { label: "APTE", value: "Apte" },
+  { label: "NON_APTE", value: "Non Apte" },
+  { label: "EN_ATTENTE_DE_REEVALUATION", value: "En Attente de Réévaluation" },
+  { label: "EXAMEN_ANNUEL_A_PREVOIR", value: "Examen Annuel à Prévoir" },
+];
