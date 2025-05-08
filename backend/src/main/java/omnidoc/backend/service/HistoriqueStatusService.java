@@ -42,7 +42,7 @@ public class HistoriqueStatusService {
     }
 
     public List<HistoriqueStatusRecord> getStatus(int jockeyId) {
-        List<HistoriqueStatus> historiqueStatuses = historiqueStatusRepo.findHistoriqueStatusesByJockey_Id(jockeyId);
+        List<HistoriqueStatus> historiqueStatuses = historiqueStatusRepo.findHistoriqueStatusesByJockey_User_Id(jockeyId);
         return historiqueStatuses.stream().map(historiqueStatus -> {
             try {
                 return new HistoriqueStatusRecord(historiqueStatus.getMedecin().getUser().getNom(), historiqueStatus.getMedecin().getUser().getPrénom(), historiqueStatus.getJockey().getUser().getNom(), historiqueStatus.getJockey().getUser().getPrénom(), historiqueStatus.getDate(), Util.decryptIfNotNull(historiqueStatus.getStatus()));

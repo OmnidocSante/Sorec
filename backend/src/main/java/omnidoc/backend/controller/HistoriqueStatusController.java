@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/jockeys/{jockeyId}/historique/status")
+@RequestMapping("/api/jockey/{jockeyId}/historique/status")
 public class HistoriqueStatusController {
     private final HistoriqueStatusService historiqueStatusService;
 

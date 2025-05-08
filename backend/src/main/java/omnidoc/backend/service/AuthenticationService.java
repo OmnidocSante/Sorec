@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AuthenticationService {
@@ -25,7 +26,8 @@ public class AuthenticationService {
     private UserRepo userRepo;
 
     public AuthenticationResponse login(User user) {
-        if (user.getPassword() == null || user.getPassword().isBlank()) {
+        User user1 = userRepo.findByEmail(user.getEmail()).orElseThrow(()->new ApiException("Email invalide."));
+        if (user1.getPassword() == null ) {
             throw new ApiException("Mot de passe non encore créé. Un email contenant un lien de création de mot de passe vous a été envoyé. Veuillez consulter votre boîte mail.");
         }
 

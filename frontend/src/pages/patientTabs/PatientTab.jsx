@@ -53,7 +53,7 @@ export default function PatientTab() {
   });
 
   const fetchData = async () => {
-    const response = await instance.get(`/api/jockeys/${id}`);
+    const response = await instance.get(`/api/jockey/${id}`);
     setJockey(response.data);
     setValue("plisDroit", response.data.plisDroit);
     setValue("plisGauche", response.data.plisGauche);
@@ -77,7 +77,7 @@ export default function PatientTab() {
   };
 
   const onSubmit = async (data) => {
-    await instance.patch(`/api/jockeys/${id}`, data);
+    await instance.patch(`/api/jockey/${id}`, data);
     setIsDialogOpen(false);
     fetchData();
   };
@@ -87,8 +87,8 @@ export default function PatientTab() {
   const toggleStatus = async () => {
     try {
       await Promise.all([
-        instance.patch(`/api/jockeys/${id}/status`, { status }),
-        instance.post(`/api/jockeys/${id}/historique`, { status }),
+        instance.patch(`/api/jockey/${id}/status`, { status }),
+        instance.post(`/api/jockey/${id}/historique/status`, { status }),
       ]);
 
       fetchData();

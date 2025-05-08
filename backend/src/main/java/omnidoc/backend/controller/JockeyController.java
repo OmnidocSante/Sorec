@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/jockeys")
+@RequestMapping("/api/jockey")
 public class JockeyController {
     @Autowired
     private JockeyService jockeyService;

@@ -26,7 +26,7 @@ export default function AntecedentPersonnel() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await instance.get(`/api/jockeys/${id}`);
+      const response = await instance.get(`/api/jockey/${id}`);
       setJockey(response.data);
     };
     fetchData();

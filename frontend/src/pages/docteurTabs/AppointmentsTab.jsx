@@ -551,7 +551,7 @@ export default function AppointmentsTab() {
               </div>
             </div>
           ) : (
-            <p className="text-bay-of-many-600">Aucun rendez-vous planifié</p>
+            <p className="text-bay-of-many-600">Aucun rendez-vous planifié aujourd'hui</p>
           )}
         </div>
       </div>

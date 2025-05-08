@@ -1,16 +1,8 @@
 import instance from "@/auth/AxiosInstance";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  AlertCircle,
-  ArrowLeft,
-  Ban,
-  Edit,
-  History,
-  HistoryIcon,
-  Save,
-} from "lucide-react";
+import { AnimatePresence,motion } from "framer-motion";
+import { ArrowLeft, Ban, Edit, History, HistoryIcon, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -55,7 +47,6 @@ export default function Conclusion() {
       paraclinique: null,
     },
   });
-  
 
   const fetchData = async (url) => {
     try {
@@ -90,8 +81,10 @@ export default function Conclusion() {
 
   const handleSave = async (data) => {
     try {
-      await instance.put(`/api/jockey/${id}/conclusion`, data);
-      fetchData(`/api/jockey/${id}/conclusion`);
+      await Promise.all([
+        await instance.put(`/api/jockey/${id}/conclusion`, data),
+        fetchData(`/api/jockey/${id}/conclusion`),
+      ]);
       setIsEditMode(false);
     } catch (err) {
       console.error("Error saving Conclusion:", err);
@@ -229,11 +222,9 @@ export default function Conclusion() {
                 className={`p-2 pl-4 ${
                   isHistory && "cursor-not-allowed"
                 } rounded-lg flex items-center gap-2 transition-all ${
-                  isEditMode
-                    ? " "
-                    : "hover:bg-blue-50 hover:-translate-y-0.5"
+                  isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
                 }`}
-                disabled={ isHistory}
+                disabled={isHistory}
               >
                 <Ban className="h-6 w-6 text-red-600" />
                 <span className="text-sm font-medium text-red-800">
@@ -247,9 +238,7 @@ export default function Conclusion() {
                 className={`p-2 pl-4 ${
                   isHistory && "cursor-not-allowed"
                 } rounded-lg flex items-center gap-2 transition-all ${
-                  isEditMode
-                    ? ""
-                    : "hover:bg-blue-50 hover:-translate-y-0.5"
+                  isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
                 }`}
                 disabled={isEditMode || isHistory}
               >
@@ -280,22 +269,24 @@ export default function Conclusion() {
           <div className="my-4 space-y-2">
             {historique.map((item) => (
               <div
-                key={item.id}
-                onClick={() => fetchItem(item.id)}
-                className="p-3 bg-gray-50 rounded-lg cursor-pointer"
-              >
-                <p className="text-sm font-medium">
-                  {new Date(item.date).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                    hour12: false,
-                  })}
-                </p>
-              </div>
+              key={item.id}
+              onClick={() => fetchItem(item.id)}
+              className="p-3 bg-gray-50 rounded-lg cursor-pointer"
+            >
+            <p className="text-sm font-medium">
+              <span className="mr-2">rdv date:</span>
+
+              {new Date(item.date).toLocaleString("en-US", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false,
+              })}
+            </p>
+            </div>
             ))}
           </div>
         )}

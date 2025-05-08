@@ -1,7 +1,7 @@
 import instance from "@/auth/AxiosInstance";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { ArrowLeft, Edit, Plus, Save, Trash } from "lucide-react";
+import { ArrowLeft, Ban, Edit, Plus, Save, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -61,7 +61,9 @@ export default function Medications() {
   const handleSave = async (formData) => {
     try {
       await Promise.all(
-        toDelete.map((medicationId) => instance.delete(`/api/jockey/${id}/medication/${medicationId}`))
+        toDelete.map((medicationId) =>
+          instance.delete(`/api/jockey/${id}/medication/${medicationId}`)
+        )
       );
 
       if (formData.medications.length > 0) {
@@ -126,19 +128,52 @@ export default function Medications() {
           Gestion des Médicaments
         </h1>
         <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setIsEditMode(true)}
-            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode
-                ? "bg-gray-200 cursor-not-allowed"
-                : "hover:bg-blue-50 hover:-translate-y-0.5"
-            }`}
-            disabled={isEditMode}
-          >
-            <Edit className="h-6 w-6 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Modifier</span>
-          </button>
+          {isEditMode ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setIsEditMode(false)}
+                className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all `}
+              >
+                <>
+                  <Ban className="h-6 w-6 text-red-600" />
+                  <span className="text-sm font-medium text-red-800">
+                    Annuler
+                  </span>
+                </>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setIsEditMode(true)}
+                className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "hover:bg-blue-50 hover:-translate-y-0.5"
+                }`}
+                disabled={isEditMode}
+              >
+                {existingMedications.length > 0 ? (
+                  <>
+                    <Edit className="h-6 w-6 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800">
+                      Modifier
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-6 w-6 text-green-600" />
+                    <span className="text-sm font-medium text-green-800">
+                      Ajouter
+                    </span>
+                  </>
+                )}
+              </button>
+            </>
+          )}
+
           <button
             type="submit"
             className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${

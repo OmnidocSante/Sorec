@@ -6,6 +6,7 @@ import omnidoc.backend.entity.antecent_personnel.Condition;
 import omnidoc.backend.entity.dossier.DossierMedicale;
 import omnidoc.backend.entity.dossier.Hygiene;
 import omnidoc.backend.entity.dossier.Medication;
+import omnidoc.backend.entity.enums.Status;
 import omnidoc.backend.entity.examens.*;
 import omnidoc.backend.entity.examens.electrocardiogrammes.ElectrocardiogrammeEffort;
 import omnidoc.backend.entity.examens.electrocardiogrammes.ElectrocardiogrammeRepos;
@@ -80,6 +81,7 @@ public class DossierMedicaleUtil {
     public void createDossier(User createdUser) throws Exception {
         Jockey jockey = new Jockey();
         jockey.setUser(createdUser);
+        jockey.setStatus(Status.NON_APTE);
         jockeyRepo.save(jockey);
 
         DossierMedicale dossierMedicale = new DossierMedicale();
@@ -394,6 +396,7 @@ public class DossierMedicaleUtil {
             newParametre.setExamenLocomoteur(examenLocomoteur);
             newParametre.setObservations(parametresExamenLocomoteur.getObservations());
             newParametre.setHasCondition(parametresExamenLocomoteur.getHasCondition());
+            newParametre.setParametre(parametresExamenLocomoteur.getParametre());
             return newParametre;
         }).toList();
         parametresExamenLocomoteurRepo.saveAll(parametresExamenLocomoteurs);

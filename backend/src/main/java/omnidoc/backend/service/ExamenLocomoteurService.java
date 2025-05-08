@@ -48,6 +48,7 @@ public class ExamenLocomoteurService {
         examenLocomoteur.setForceCoude(Util.decryptIfNotNull(examenLocomoteur.getForceCoude()));
         examenLocomoteur.setForceCheville(Util.decryptIfNotNull(examenLocomoteur.getForceCheville()));
         examenLocomoteur.setForceHanche(Util.decryptIfNotNull(examenLocomoteur.getForceHanche()));
+        System.out.println("testtttttttttttttttttt" + examenLocomoteur.getParametresExamenLocomoteurs().getFirst().getParametre().getNom());
 
         for (ParametresExamenLocomoteur parametresExamenLocomoteur : examenLocomoteur.getParametresExamenLocomoteurs()) {
             parametresExamenLocomoteur.setHasCondition(Util.decryptIfNotNull(parametresExamenLocomoteur.getHasCondition()));
@@ -57,8 +58,9 @@ public class ExamenLocomoteurService {
     }
 
 
-    public void updateExamenLocomoteur(int jockeyId,ExamenLocomoteur examenLocomoteur) throws Exception {
+    public void updateExamenLocomoteur(int jockeyId, ExamenLocomoteur examenLocomoteur) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
+        examenLocomoteur.setDossierMedicale(dossierMedicale);
         examenLocomoteur.setForceGenoux(Util.encryptIfNotNull(examenLocomoteur.getForceGenoux()));
         examenLocomoteur.setForceTendons(Util.encryptIfNotNull(examenLocomoteur.getForceTendons()));
         examenLocomoteur.setForceEpaule(Util.encryptIfNotNull(examenLocomoteur.getForceEpaule()));
@@ -66,21 +68,20 @@ public class ExamenLocomoteurService {
         examenLocomoteur.setForceCoude(Util.encryptIfNotNull(examenLocomoteur.getForceCoude()));
         examenLocomoteur.setForceCheville(Util.encryptIfNotNull(examenLocomoteur.getForceCheville()));
         examenLocomoteur.setForceHanche(Util.encryptIfNotNull(examenLocomoteur.getForceHanche()));
-        examenLocomoteur.setDossierMedicale(dossierMedicale);
 
         List<ParametresExamenLocomoteur> encryptedParams = examenLocomoteur.getParametresExamenLocomoteurs().stream().map(param -> {
             try {
                 param.setHasCondition(encryptIfNotNull(param.getHasCondition()));
                 param.setObservations(encryptIfNotNull(param.getObservations()));
-                param.setExamenLocomoteur(examenLocomoteur);
+                param.setExamenLocomoteur(dossierMedicale.getExamenLocomoteur());
                 return param;
             } catch (Exception e) {
                 throw new ApiException("Erreur de chiffrement d’un paramètre: " + e.getMessage());
             }
         }).toList();
+        System.out.println("test");
 
         parametresExamenLocomoteurRepo.saveAll(encryptedParams);
-        examenLocomoteur.setDossierMedicale(dossierMedicale);
         examenLocomoteurRepo.save(examenLocomoteur);
 
     }

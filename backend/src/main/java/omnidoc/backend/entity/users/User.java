@@ -73,7 +73,6 @@ public class User implements UserDetails {
     private String sorecId;
 
 
-    @JsonIgnore
     private String password;
 
     @NotNull(message = "Role is required")

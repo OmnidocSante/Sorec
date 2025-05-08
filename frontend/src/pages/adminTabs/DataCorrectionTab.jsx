@@ -1,3 +1,4 @@
+import instance from "@/auth/AxiosInstance";
 import {
   Select,
   SelectContent,
@@ -24,6 +25,7 @@ export default function DataCorrectionTab() {
   const {
     formState: { errors },
     setValue,
+    handleSubmit,
   } = useForm({
     resolver: zodResolver(jockeySchema),
     defaultValues: {
@@ -50,13 +52,34 @@ export default function DataCorrectionTab() {
       return matchesSearch && matchesCity;
     });
   }, [jockeys, jockeySearch, jockeyCityFilter]);
+
+  const [historique, setHistorique] = useState([]);
+
+  const onSubmit = async (data) => {
+    const response = await instance.get(
+      `/api/jockey/${data.jockeyId}/historique/status`
+    );
+    setHistorique(response.data);
+  };
+  const statusTranslations = {
+    EXAMEN_ANNUEL_A_PREVOIR: "Examen annuel à prévoir",
+    APTE: "Apte",
+    EN_ATTENTE_DE_REEVALUATION: "En attente de réévaluation",
+  };
+  const formatDate = (isoString) => {
+    const [date] = isoString.split("T");
+    return date.split("-").reverse().join("/");
+  };
   return (
     <div>
       <h1 className="text-2xl font-bold text-bay-of-many-900 mb-6">
-        Correction des Données
+        Historique de status
       </h1>
-      <div className="bg-white p-6  rounded-lg shadow">
-        <div className="my-8">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white p-6  rounded-lg shadow"
+      >
+        <div>
           <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
             Jockey
           </label>
@@ -128,18 +151,66 @@ export default function DataCorrectionTab() {
               {errors.jockeyId.message}
             </p>
           )}
+
+          <button
+            type="submit"
+            className="w-full mb-4 bg-bay-of-many-600 text-white py-2.5 px-4 rounded-md hover:bg-bay-of-many-700 transition-colors mt-2"
+          >
+            Sélectionner
+          </button>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold mb-3">
-            Historique des Modifications
-          </h2>
-          <div className="border rounded-lg p-4">
-            <p className="text-bay-of-many-700">
-              Sélectionnez un jockey pour voir son historique
-            </p>
-          </div>
+        {historique.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-bay-of-many-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
+                  Docteur
+                </th>
+
+                <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
+                  Jockey
+                </th>
+
+                <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
+                  Statut
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {historique.map((entry, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {entry.doctorLastName.trim()} {entry.doctorName}
+                  </td>
+
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {entry.jockeyLastName} {entry.jockeyName}
+                  </td>
+
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatDate(entry.date)}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                      {statusTranslations[entry.status]}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
+      ) : (
+        <p className="text-bay-of-many-700 ">
+          Sélectionnez un jockey pour voir son historique
+        </p>
+      )}
+      </form>
+
     </div>
   );
 }
