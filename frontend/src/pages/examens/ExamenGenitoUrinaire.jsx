@@ -1,29 +1,38 @@
 import instance from "@/auth/AxiosInstance";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { ArrowLeft, Edit, Save } from "lucide-react";
+import { ArrowLeft, Edit, Save, Ban, History } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
+import { AnimatePresence } from "framer-motion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+const examGU_Schema = z.object({
+  id: z.number(),
+  valeurGlucose: z.string().nullable().optional(),
+  observationGlucose: z.string().nullable().optional(),
+  valeurAlbumine: z.string().nullable().optional(),
+  observationAlbumine: z.string().nullable().optional(),
+  valeurSang: z.string().nullable().optional(),
+  observationSang: z.string().nullable().optional(),
+  valeurAutres: z.string().nullable().optional(),
+  observationAutres: z.string().nullable().optional(),
+});
 
 export default function ExamenGenitoUrinaire() {
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
+  const [hiddenFields, setHiddenFields] = useState(new Set());
 
-  const examenGU_Schema = z.object({
-    id: z.number(),
-    valeurGlucose: z.string().min(1, "Valeur Glucose est requise"),
-    observationGlucose: z.string().min(1, "Observation Glucose est requise"),
-    valeurAlbumine: z.string().min(1, "Valeur Albumine est requise"),
-    observationAlbumine: z.string().min(1, "Observation Albumine est requise"),
-    valeurSang: z.string().min(1, "Valeur Sang est requise"),
-    observationSang: z.string().min(1, "Observation Sang est requise"),
-    valeurAutres: z.string().min(1, "Valeur Autres est requise"),
-    observationAutres: z.string().min(1, "Observation Autres est requise"),
-  });
+  const [historique, setHistorique] = useState([]);
+  const [showHistorique, setShowHistorique] = useState(false);
+  const [isHistory, setIsHistory] = useState(false);
+
+  const HIDE_VALUE = "HIDDEN";
 
   const {
     register,
@@ -31,7 +40,7 @@ export default function ExamenGenitoUrinaire() {
     reset,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(examenGU_Schema),
+    resolver: zodResolver(examGU_Schema),
     defaultValues: {
       id: 0,
       valeurGlucose: "",
@@ -45,40 +54,86 @@ export default function ExamenGenitoUrinaire() {
     },
   });
 
-  const fetchData = async () => {
+  const fetchData = async (url) => {
+    setLoading(true);
     try {
-      const response = await instance.get(
-        `/api/jockey/${id}/examen-genito-urinaire`
-      );
-      reset({
-        id: response.data.id,
-        valeurGlucose: response.data.valeurGlucose ?? "",
-        observationGlucose: response.data.observationGlucose ?? "",
-        valeurAlbumine: response.data.valeurAlbumine ?? "",
-        observationAlbumine: response.data.observationAlbumine ?? "",
-        valeurSang: response.data.valeurSang ?? "",
-        observationSang: response.data.observationSang ?? "",
-        valeurAutres: response.data.valeurAutres ?? "",
-        observationAutres: response.data.observationAutres ?? "",
+      const response = await instance.get(url);
+      const data = response.data;
+      console.log(data);
+
+      const hidden = new Set();
+      const fieldsToCheck = [
+        'valeurGlucose', 'observationGlucose',
+        'valeurAlbumine', 'observationAlbumine',
+        'valeurSang', 'observationSang',
+        'valeurAutres', 'observationAutres'
+      ];
+
+      fieldsToCheck.forEach(key => {
+          if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
+              hidden.add(key);
+          }
       });
+      setHiddenFields(hidden);
+
+      const dataToReset = {
+        id: data.id,
+        valeurGlucose: data.valeurGlucose === HIDE_VALUE ? "" : (data.valeurGlucose ?? ""),
+        observationGlucose: data.observationGlucose === HIDE_VALUE ? "" : (data.observationGlucose ?? ""),
+        valeurAlbumine: data.valeurAlbumine === HIDE_VALUE ? "" : (data.valeurAlbumine ?? ""),
+        observationAlbumine: data.observationAlbumine === HIDE_VALUE ? "" : (data.observationAlbumine ?? ""),
+        valeurSang: data.valeurSang === HIDE_VALUE ? "" : (data.valeurSang ?? ""),
+        observationSang: data.observationSang === HIDE_VALUE ? "" : (data.observationSang ?? ""),
+        valeurAutres: data.valeurAutres === HIDE_VALUE ? "" : (data.valeurAutres ?? ""),
+        observationAutres: data.observationAutres === HIDE_VALUE ? "" : (data.observationAutres ?? ""),
+      };
+
+      reset(dataToReset);
+
     } catch (err) {
       console.error("Error fetching ExamenGenitoUrinaire:", err);
+        reset({
+          id: parseInt(id) || 0,
+          valeurGlucose: "", observationGlucose: "",
+          valeurAlbumine: "", observationAlbumine: "",
+          valeurSang: "", observationSang: "",
+          valeurAutres: "", observationAutres: "",
+        });
+       setHiddenFields(new Set([
+         'valeurGlucose', 'observationGlucose',
+         'valeurAlbumine', 'observationAlbumine',
+         'valeurSang', 'observationSang',
+         'valeurAutres', 'observationAutres'
+       ]));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(`/api/jockey/${id}/examen-genito-urinaire`);
   }, [id]);
 
   const handleSave = async (data) => {
+    console.log(data);
     try {
-      await instance.put(
-        `/api/jockey/${id}/examen-genito-urinaire`,
-        data
-      );
-      fetchData();
+      const payload = { id: data.id };
+      console.log(hiddenFields);
+
+      if (!hiddenFields.has('valeurGlucose')) payload.valeurGlucose = data.valeurGlucose === "" ? null : data.valeurGlucose;
+      if (!hiddenFields.has('observationGlucose')) payload.observationGlucose = data.observationGlucose === "" ? null : data.observationGlucose;
+      if (!hiddenFields.has('valeurAlbumine')) payload.valeurAlbumine = data.valeurAlbumine === "" ? null : data.valeurAlbumine;
+      if (!hiddenFields.has('observationAlbumine')) payload.observationAlbumine = data.observationAlbumine === "" ? null : data.observationAlbumine;
+      if (!hiddenFields.has('valeurSang')) payload.valeurSang = data.valeurSang === "" ? null : data.valeurSang;
+      if (!hiddenFields.has('observationSang')) payload.observationSang = data.observationSang === "" ? null : data.observationSang;
+      if (!hiddenFields.has('valeurAutres')) payload.valeurAutres = data.valeurAutres === "" ? null : data.valeurAutres;
+      if (!hiddenFields.has('observationAutres')) payload.observationAutres = data.observationAutres === "" ? null : data.observationAutres;
+
+      console.log(payload);
+
+      await instance.put(`/api/jockey/${id}/examen-genito-urinaire`, payload);
+
+      fetchData(`/api/jockey/${id}/examen-genito-urinaire`);
       setIsEditMode(false);
     } catch (err) {
       console.error("Error saving ExamenGenitoUrinaire:", err);
@@ -86,6 +141,33 @@ export default function ExamenGenitoUrinaire() {
   };
 
   const onSubmit = (data) => handleSave(data);
+
+  const handleHistoriqueClick = async () => {
+    if (isEditMode) return;
+    if (isHistory) {
+      fetchData(`/api/jockey/${id}/examen-genito-urinaire`);
+      setIsHistory(false);
+      setShowHistorique(false);
+    } else {
+      if (historique.length === 0) {
+        try {
+          const response = await instance.get(`/api/jockey/${id}/historique`);
+          setHistorique(response.data);
+        } catch(err) {
+           console.error("Error fetching history:", err);
+           setHistorique([]);
+        }
+      }
+      setShowHistorique(true);
+    }
+  };
+
+  const fetchItem = async (dossierid) => {
+    fetchData(`/api/jockey/${id}/examen-genito-urinaire/historique/${dossierid}`);
+    setIsHistory(true);
+    setIsEditMode(false);
+    setShowHistorique(false);
+  };
 
   if (loading) {
     return (
@@ -112,6 +194,20 @@ export default function ExamenGenitoUrinaire() {
     );
   }
 
+  const fieldConfigs = [
+    { key: "valeurGlucose", label: "Valeur Glucose" },
+    { key: "observationGlucose", label: "Observation Glucose" },
+    { key: "valeurAlbumine", label: "Valeur Albumine" },
+    { key: "observationAlbumine", label: "Observation Albumine" },
+    { key: "valeurSang", label: "Valeur Sang" },
+    { key: "observationSang", label: "Observation Sang" },
+    { key: "valeurAutres", label: "Valeur Autres" },
+    { key: "observationAutres", label: "Observation Autres" },
+  ].filter(({ key }) => !hiddenFields.has(key));
+
+  const hasVisibleData = fieldConfigs.length > 0;
+
+
   return (
     <motion.form
       onSubmit={handleSubmit(onSubmit)}
@@ -120,7 +216,40 @@ export default function ExamenGenitoUrinaire() {
       transition={{ duration: 0.3 }}
       className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
     >
-      {/* Header */}
+      <AnimatePresence>
+        {isHistory && (
+          <motion.div
+            className="w-full max-w-md fixed top-20 left-1/2 -translate-x-1/2 z-50"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            <Alert
+              variant="default"
+              className="bg-white/95 backdrop-blur-sm border border-blue-100 shadow-lg"
+            >
+              <History className="size-5 text-blue-600 shrink-0" />
+              <AlertTitle className="text-sm font-semibold text-blue-800 mb-1">
+                Historique Mode Active
+              </AlertTitle>
+              <AlertDescription className="text-sm text-blue-700 leading-snug">
+                <div>
+                  Consultation seule - Les modifications sont désactivées dans
+                  ce mode.{" "}
+                  <span
+                    onClick={handleHistoriqueClick}
+                    className="text-red-500 cursor-pointer hover:underline"
+                  >
+                    Restaurer
+                  </span>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex items-center justify-between mb-8">
         <button
           type="button"
@@ -129,69 +258,161 @@ export default function ExamenGenitoUrinaire() {
         >
           <ArrowLeft className="h-6 w-6 text-gray-700" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-800">Examen Genito-Urinaire</h1>
+        <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">
+          Examen Genito-Urinaire
+        </h1>
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => setIsEditMode(true)}
+            onClick={handleHistoriqueClick}
             className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode ? "bg-gray-200 cursor-not-allowed" : "hover:bg-blue-50 hover:-translate-y-0.5"
+              isEditMode || isHistory || !hasVisibleData
+                ? "bg-gray-200 cursor-not-allowed"
+                : "hover:bg-blue-50 hover:-translate-y-0.5"
             }`}
-            disabled={isEditMode}
+            disabled={isEditMode || isHistory || !hasVisibleData}
           >
-            <Edit className="h-6 w-6 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Modifier</span>
+            <History className="h-6 w-6 text-gray-600" />
+            <span className="text-sm font-medium text-gray-800">
+              {showHistorique ? "Cacher l'historique" : "Voir historique"}
+            </span>
           </button>
+
+          {isEditMode ? (
+            <button
+              type="button"
+              onClick={() => {
+                 fetchData(`/api/jockey/${id}/examen-genito-urinaire`);
+                 setIsEditMode(false);
+               }}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
+              }`}
+              disabled={isHistory || !hasVisibleData}
+            >
+              <Ban className="h-6 w-6 text-red-600" />
+              <span className="text-sm font-medium text-red-800">Annuler</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsEditMode(true)}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+              }`}
+              disabled={isEditMode || isHistory || !hasVisibleData}
+            >
+              <Edit className="h-6 w-6 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">
+                Modifier
+              </span>
+            </button>
+          )}
+
           <button
             type="submit"
             className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              !isEditMode ? "bg-gray-200 cursor-not-allowed" : "hover:bg-green-50 hover:-translate-y-0.5"
-            }`}
-            disabled={!isEditMode}
+              !isEditMode || isHistory || !hasVisibleData
+                ? "bg-gray-200 cursor-not-allowed"
+                : "hover:bg-green-50 hover:-translate-y-0.5"
+            } `}
+            disabled={!isEditMode || isHistory || !hasVisibleData}
           >
             <Save className="h-6 w-6 text-green-600" />
-            <span className="text-sm font-medium text-green-800">Enregistrer</span>
+            <span className="text-sm font-medium text-green-800">
+              Enregistrer
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Fields */}
-      <div className="space-y-6">
-        {[
-          { key: "valeurGlucose", label: "Valeur Glucose" },
-          { key: "observationGlucose", label: "Observation Glucose" },
-          { key: "valeurAlbumine", label: "Valeur Albumine" },
-          { key: "observationAlbumine", label: "Observation Albumine" },
-          { key: "valeurSang", label: "Valeur Sang" },
-          { key: "observationSang", label: "Observation Sang" },
-          { key: "valeurAutres", label: "Valeur Autres" },
-          { key: "observationAutres", label: "Observation Autres" },
-        ].map(({ key, label }) => (
-          <div
-            key={key}
-            className="bg-white  rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
+      {showHistorique && (
+        <motion.div
+           initial={{ opacity: 0, y: -20 }}
+           animate={{ opacity: 1, y: 0 }}
+           exit={{ opacity: 0, y: -20 }}
+           transition={{ duration: 0.3 }}
+           className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+        >
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Versions Historiques</h3>
+          {historique.length > 0 ? historique.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => fetchItem(item.id)}
+              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
+            >
+              <p className="text-sm font-medium text-gray-700">
+                <span className="mr-2 text-gray-500">Date du dossier:</span>
+                {new Date(item.date).toLocaleString("fr-FR", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: false,
+                })}
+              </p>
             </div>
-            <input
-              {...register(key)}
-              placeholder={label + "..."}
-              disabled={!isEditMode}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all resize-none ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors[key] && (
-              <p className="text-red-500 text-sm mt-2">{errors[key].message}</p>
-            )}
+          )) : (
+             <p className="text-gray-500 text-sm italic">Aucun historique disponible.</p>
+          )}
+        </motion.div>
+      )}
+
+      {hasVisibleData && (
+          <div className="space-y-6">
+             {fieldConfigs.map(({ key, label }) => (
+                 <motion.div
+                     key={key}
+                     initial={{ opacity: 0, y: 20 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{ opacity: 0, y: 20 }}
+                     transition={{ duration: 0.3 }}
+                     className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+                 >
+                     <div className="flex justify-between items-center mb-4">
+                         <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
+                     </div>
+                     <div>
+                         <input
+                             id={key}
+                             {...register(key)}
+                             placeholder={label + "..."}
+                             disabled={!isEditMode || isHistory}
+                             type="text"
+                             className={`w-full px-4 py-3 border ${
+                                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+                             } rounded-lg focus:outline-none focus:ring-2 ${
+                                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
+                             } transition-all ${
+                                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
+                             }`}
+                         />
+                         {errors[key] && errors[key].message && (
+                             <p className="text-red-500 text-sm mt-2">
+                                 {errors[key].message}
+                             </p>
+                         )}
+                     </div>
+                 </motion.div>
+             ))}
           </div>
-        ))}
-      </div>
+       )}
+
+       {!hasVisibleData && !loading && (
+           <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-gray-500 italic mt-8"
+           >
+             Aucune donnée d'examen génito-urinaire enregistrée ou visible pour ce dossier.
+           </motion.div>
+       )}
     </motion.form>
   );
 }

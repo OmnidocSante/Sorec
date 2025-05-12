@@ -3,8 +3,11 @@ package omnidoc.backend.controller;
 import omnidoc.backend.entity.antecedents_familiaux.AntecedentFamiliaux;
 import omnidoc.backend.service.AntecedentFamiliauxService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+
+@PreAuthorize("hasAuthority('MEDECIN')")
 @RestController
 @RequestMapping("/api/jockey/{jockeyId}/antecedent-familiaux")
 public class AntecedentsFamiliauxController {

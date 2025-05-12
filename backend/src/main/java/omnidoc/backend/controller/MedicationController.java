@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
+@PreAuthorize("hasAuthority('MEDECIN')")
 @RestController
 @RequestMapping("/api/jockey/{jockeyId}/medication")
 public class MedicationController {

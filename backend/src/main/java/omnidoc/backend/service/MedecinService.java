@@ -15,4 +15,6 @@ public class MedecinService {
     public List<UserRecord> getMedecins() {
         return userService.getUsers().stream().filter(userRecord -> userRecord.role() == Role.MEDECIN).toList();
     }
+
+
 }

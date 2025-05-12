@@ -1,25 +1,33 @@
 import instance from "@/auth/AxiosInstance";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { ArrowLeft, Edit, Save } from "lucide-react";
+import { ArrowLeft, Edit, Save, Ban, History } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
+import { AnimatePresence } from "framer-motion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+const examAbdominaleSchema = z.object({
+  id: z.number(),
+  oropharynx: z.string().nullable().optional(),
+  foie: z.string().nullable().optional(),
+  rate: z.string().nullable().optional(),
+  autres: z.string().nullable().optional(),
+});
 
 export default function ExamenAbdominal() {
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
+  const [hiddenFields, setHiddenFields] = useState(new Set());
+  const [historique, setHistorique] = useState([]);
+  const [showHistorique, setShowHistorique] = useState(false);
+  const [isHistory, setIsHistory] = useState(false);
 
-  const examAbdominaleSchema = z.object({
-    id: z.number(),
-    oropharynx: z.string().min(1, "Oropharynx est requis"),
-    foie: z.string().min(1, "Foie est requis"),
-    rate: z.string().min(1, "Rate est requise"),
-    autres: z.string().min(1, "Autres observations sont requises"),
-  });
+  const HIDE_VALUE = "HIDDEN";
 
   const {
     register,
@@ -37,33 +45,63 @@ export default function ExamenAbdominal() {
     },
   });
 
-  const fetchData = async () => {
+  const fetchData = async (url) => {
+    setLoading(true);
     try {
-      const response = await instance.get(
-        `/api/jockey/${id}/examen-abdominal`
-      );
-      reset({
-        id: response.data.id,
-        oropharynx: response.data.oropharynx ?? "",
-        foie: response.data.foie ?? "",
-        rate: response.data.rate ?? "",
-        autres: response.data.autres ?? "",
+      const response = await instance.get(url);
+      const data = response.data;
+      console.log(data);
+
+      const hidden = new Set();
+      const fieldsToCheck = ['oropharynx', 'foie', 'rate', 'autres'];
+
+      fieldsToCheck.forEach(key => {
+          if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
+              hidden.add(key);
+          }
       });
+      setHiddenFields(hidden);
+
+      const dataToReset = {
+        id: data.id,
+        oropharynx: data.oropharynx === HIDE_VALUE ? "" : (data.oropharynx ?? ""),
+        foie: data.foie === HIDE_VALUE ? "" : (data.foie ?? ""),
+        rate: data.rate === HIDE_VALUE ? "" : (data.rate ?? ""),
+        autres: data.autres === HIDE_VALUE ? "" : (data.autres ?? ""),
+      };
+
+      reset(dataToReset);
+
     } catch (err) {
       console.error("Error fetching ExamAbdominale:", err);
+       reset({
+         id: parseInt(id) || 0,
+         oropharynx: "", foie: "", rate: "", autres: "",
+       });
+       setHiddenFields(new Set(['oropharynx', 'foie', 'rate', 'autres']));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(`/api/jockey/${id}/examen-abdominal`);
   }, [id]);
 
   const handleSave = async (data) => {
+    console.log(data);
     try {
-      await instance.put(`/api/jockey/${id}/examen-abdominal`, data);
-      fetchData();
+      const payload = { id: data.id };
+      console.log(hiddenFields);
+
+      if (!hiddenFields.has('oropharynx')) payload.oropharynx = data.oropharynx === "" ? null : data.oropharynx;
+      if (!hiddenFields.has('foie')) payload.foie = data.foie === "" ? null : data.foie;
+      if (!hiddenFields.has('rate')) payload.rate = data.rate === "" ? null : data.rate;
+      if (!hiddenFields.has('autres')) payload.autres = data.autres === "" ? null : data.autres;
+      console.log(payload);
+
+      await instance.put(`/api/jockey/${id}/examen-abdominal`, payload);
+      fetchData(`/api/jockey/${id}/examen-abdominal`);
       setIsEditMode(false);
     } catch (err) {
       console.error("Error saving ExamAbdominale:", err);
@@ -71,6 +109,33 @@ export default function ExamenAbdominal() {
   };
 
   const onSubmit = (data) => handleSave(data);
+
+  const handleHistoriqueClick = async () => {
+    if (isEditMode) return;
+    if (isHistory) {
+      fetchData(`/api/jockey/${id}/examen-abdominal`);
+      setIsHistory(false);
+      setShowHistorique(false);
+    } else {
+      if (historique.length === 0) {
+        try {
+          const response = await instance.get(`/api/jockey/${id}/historique`);
+          setHistorique(response.data);
+        } catch(err) {
+           console.error("Error fetching history:", err);
+           setHistorique([]);
+        }
+      }
+      setShowHistorique(true);
+    }
+  };
+
+  const fetchItem = async (dossierid) => {
+    fetchData(`/api/jockey/${id}/examen-abdominal/historique/${dossierid}`);
+    setIsHistory(true);
+    setIsEditMode(false);
+    setShowHistorique(false);
+  };
 
   if (loading) {
     return (
@@ -97,6 +162,15 @@ export default function ExamenAbdominal() {
     );
   }
 
+  const fieldConfigs = [
+    { key: "oropharynx", label: "Oropharynx" },
+    { key: "foie", label: "Foie" },
+    { key: "rate", label: "Rate" },
+    { key: "autres", label: "Autres Observations" },
+  ].filter(({ key }) => !hiddenFields.has(key));
+
+  const hasVisibleData = fieldConfigs.length > 0;
+
   return (
     <motion.form
       onSubmit={handleSubmit(onSubmit)}
@@ -105,7 +179,40 @@ export default function ExamenAbdominal() {
       transition={{ duration: 0.3 }}
       className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
     >
-      {/* Header */}
+      <AnimatePresence>
+        {isHistory && (
+          <motion.div
+            className="w-full max-w-md fixed top-20 left-1/2 -translate-x-1/2 z-50"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            <Alert
+              variant="default"
+              className="bg-white/95 backdrop-blur-sm border border-blue-100 shadow-lg"
+            >
+              <History className="size-5 text-blue-600 shrink-0" />
+              <AlertTitle className="text-sm font-semibold text-blue-800 mb-1">
+                Historique Mode Active
+              </AlertTitle>
+              <AlertDescription className="text-sm text-blue-700 leading-snug">
+                <div>
+                  Consultation seule - Les modifications sont désactivées dans
+                  ce mode.{" "}
+                  <span
+                    onClick={handleHistoriqueClick}
+                    className="text-red-500 cursor-pointer hover:underline"
+                  >
+                    Restaurer
+                  </span>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex items-center justify-between mb-8">
         <button
           type="button"
@@ -114,29 +221,67 @@ export default function ExamenAbdominal() {
         >
           <ArrowLeft className="h-6 w-6 text-gray-700" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-800">Examen Abdominale</h1>
+        <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">Examen Abdominale</h1>
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => setIsEditMode(true)}
+            onClick={handleHistoriqueClick}
             className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode
+              isEditMode || isHistory || !hasVisibleData
                 ? "bg-gray-200 cursor-not-allowed"
                 : "hover:bg-blue-50 hover:-translate-y-0.5"
             }`}
-            disabled={isEditMode}
+            disabled={isEditMode || isHistory || !hasVisibleData}
           >
-            <Edit className="h-6 w-6 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Modifier</span>
+            <History className="h-6 w-6 text-gray-600" />
+            <span className="text-sm font-medium text-gray-800">
+              {showHistorique ? "Cacher l'historique" : "Voir historique"}
+            </span>
           </button>
+
+          {isEditMode ? (
+            <button
+              type="button"
+              onClick={() => {
+                 fetchData(`/api/jockey/${id}/examen-abdominal`);
+                 setIsEditMode(false);
+               }}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
+              }`}
+              disabled={isHistory || !hasVisibleData}
+            >
+              <Ban className="h-6 w-6 text-red-600" />
+              <span className="text-sm font-medium text-red-800">Annuler</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsEditMode(true)}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+              }`}
+              disabled={isEditMode || isHistory || !hasVisibleData}
+            >
+              <Edit className="h-6 w-6 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">
+                Modifier
+              </span>
+            </button>
+          )}
+
           <button
             type="submit"
             className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              !isEditMode
+              !isEditMode || isHistory || !hasVisibleData
                 ? "bg-gray-200 cursor-not-allowed"
                 : "hover:bg-green-50 hover:-translate-y-0.5"
-            }`}
-            disabled={!isEditMode}
+            } `}
+            disabled={!isEditMode || isHistory || !hasVisibleData}
           >
             <Save className="h-6 w-6 text-green-600" />
             <span className="text-sm font-medium text-green-800">
@@ -146,39 +291,89 @@ export default function ExamenAbdominal() {
         </div>
       </div>
 
-      {/* Fields */}
-      <div className="space-y-6">
-        {[
-          { key: "oropharynx", label: "Oropharynx" },
-          { key: "foie", label: "Foie" },
-          { key: "rate", label: "Rate" },
-          { key: "autres", label: "Autres Observations" },
-        ].map(({ key, label }) => (
-          <div
-            key={key}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
+      {showHistorique && (
+        <motion.div
+           initial={{ opacity: 0, y: -20 }}
+           animate={{ opacity: 1, y: 0 }}
+           exit={{ opacity: 0, y: -20 }}
+           transition={{ duration: 0.3 }}
+           className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+        >
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Versions Historiques</h3>
+          {historique.length > 0 ? historique.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => fetchItem(item.id)}
+              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
+            >
+              <p className="text-sm font-medium text-gray-700">
+                <span className="mr-2 text-gray-500">Date du dossier:</span>
+                {new Date(item.date).toLocaleString("fr-FR", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: false,
+                })}
+              </p>
             </div>
-            <input
-              {...register(key)}
-              placeholder={label + "..."}
-              disabled={!isEditMode}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all resize-none ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors[key] && (
-              <p className="text-red-500 text-sm mt-2">{errors[key].message}</p>
-            )}
+          )) : (
+             <p className="text-gray-500 text-sm italic">Aucun historique disponible.</p>
+          )}
+        </motion.div>
+      )}
+
+      {hasVisibleData && (
+          <div className="space-y-6">
+             {fieldConfigs.map(({ key, label }) => (
+                 <motion.div
+                     key={key}
+                     initial={{ opacity: 0, y: 20 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{ opacity: 0, y: 20 }}
+                     transition={{ duration: 0.3 }}
+                     className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+                 >
+                     <div className="flex justify-between items-center mb-4">
+                         <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
+                     </div>
+                     <div>
+                         <input
+                             id={key}
+                             {...register(key)}
+                             placeholder={label + "..."}
+                             disabled={!isEditMode || isHistory}
+                             type="text"
+                             className={`w-full px-4 py-3 border ${
+                                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+                             } rounded-lg focus:outline-none focus:ring-2 ${
+                                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
+                             } transition-all ${
+                                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
+                             }`}
+                         />
+                         {errors[key] && errors[key].message && (
+                             <p className="text-red-500 text-sm mt-2">
+                                 {errors[key].message}
+                             </p>
+                         )}
+                     </div>
+                 </motion.div>
+             ))}
           </div>
-        ))}
-      </div>
+       )}
+
+       {!hasVisibleData && !loading && (
+           <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-gray-500 italic mt-8"
+           >
+             Aucune donnée d'examen abdominal enregistré ou visible pour ce dossier.
+           </motion.div>
+       )}
     </motion.form>
   );
 }

@@ -5,6 +5,7 @@ import omnidoc.backend.entity.antecent_personnel.AntecedentPersonnel;
 import omnidoc.backend.entity.dossier.DossierMedicale;
 import omnidoc.backend.entity.enums.SystemeMedical;
 import omnidoc.backend.exceptions.ApiException;
+import omnidoc.backend.repository.AccessRepo;
 import omnidoc.backend.repository.AntecedentPersonnelRepo;
 import omnidoc.backend.repository.DossierMedicaleRepo;
 import omnidoc.backend.util.AESUtil;
@@ -23,6 +24,10 @@ public class AntecedantPersonnelService {
 
     @Autowired
     private DossierMedicaleRepo dossierMedicaleRepo;
+    @Autowired
+    private AccessRepo accessRepo;
+    @Autowired
+    private AccessService accessService;
 
 
     @Transactional
@@ -41,6 +46,7 @@ public class AntecedantPersonnelService {
     }
 
     public List<AntecedentPersonnelDTO> getAntecedentBysysteme(int jockeyId, SystemeMedical systemeMedical) throws Exception {
+        accessService.verifyAccess(jockeyId);
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow();
         return getAntecedentPersonnelDTOS(systemeMedical, dossierMedicale);
 

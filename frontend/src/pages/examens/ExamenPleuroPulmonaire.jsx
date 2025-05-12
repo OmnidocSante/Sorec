@@ -1,50 +1,31 @@
 import instance from "@/auth/AxiosInstance";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
-import { ArrowLeft, Edit, Save } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Ban, Edit, History, HistoryIcon, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
-import { AnimatePresence } from "framer-motion";
-import { Ban, HistoryIcon, History } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ExamenPleuroPulmonaire() {
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
-  const fetchData = async (url) => {
-    try {
-      const response = await instance.get(url);
-      reset({
-        id: response.data.id,
-        frequence_respiratoire: response.data.frequence_respiratoire || "",
-        inspection: response.data.inspection || "",
-        austucultation: response.data.austucultation || "",
-      });
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchData(`/api/jockey/${id}/examen-pleuro`);
-  }, [id]);
+  const [hiddenFields, setHiddenFields] = useState(new Set());
 
-  const onSubmit = (data) => {
-    console.log(data);
-    handleSave(data);
-    setIsEditMode(false);
-  };
+  const [historique, setHistorique] = useState([]);
+  const [showHistorique, setShowHistorique] = useState(false);
+  const [isHistory, setIsHistory] = useState(false);
+
+  const HIDE_VALUE = "HIDDEN";
 
   const examenPleuroPulmonaireSchema = z.object({
-    id: z.number().optional(),
-    frequence_respiratoire: z.string(),
-    inspection: z.string(),
-    austucultation: z.string(),
+    id: z.number(),
+    frequence_respiratoire: z.string().nullable().optional(),
+    inspection: z.string().nullable().optional(),
+    austucultation: z.string().nullable().optional(),
   });
 
   const {
@@ -62,37 +43,93 @@ export default function ExamenPleuroPulmonaire() {
     },
   });
 
-  const handleSave = async (data) => {
-    await Promise.all([
-      await instance.put(`/api/jockey/${id}/examen-pleuro`, data),
-      fetchData(`/api/jockey/${id}/examen-pleuro`),
-    ]);
-    setIsEditMode(false);
-  };
+  const fetchData = async (url) => {
+    setLoading(true);
+    try {
+      const response = await instance.get(url);
+      const data = response.data;
+      console.log(data);
 
-  const [historique, setHistorique] = useState([]);
-  const [showHistorique, setShowHistorique] = useState(false);
-  const handleHistoriqueClick = async () => {
-    if (isHistory) {
-      fetchData(`/api/jockey/${id}/examen-pleuro`);
-      setIsHistory(false);
-      setShowHistorique(!showHistorique);
-    } else {
-      if (historique.length === 0) {
-        const response = await instance.get(`/api/jockey/${id}/historique`);
+      const hidden = new Set();
+      const fieldsToCheck = ['frequence_respiratoire', 'inspection', 'austucultation'];
 
-        setHistorique(response.data);
-      }
-      setShowHistorique(!showHistorique);
+      fieldsToCheck.forEach(key => {
+          if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
+              hidden.add(key);
+          }
+      });
+      setHiddenFields(hidden);
+
+      const dataToReset = {
+          id: data.id,
+          frequence_respiratoire: data.frequence_respiratoire === HIDE_VALUE ? "" : (data.frequence_respiratoire ?? ""),
+          inspection: data.inspection === HIDE_VALUE ? "" : (data.inspection ?? ""),
+          austucultation: data.austucultation === HIDE_VALUE ? "" : (data.austucultation ?? ""),
+      };
+
+      reset(dataToReset);
+
+    } catch (error) {
+      console.error("Error fetching ExamenPleuroPulmonaire:", error);
+      setHiddenFields(new Set(['frequence_respiratoire', 'inspection', 'austucultation']));
+    } finally {
+      setLoading(false);
     }
   };
 
-  const [isHistory, setIsHistory] = useState(false);
+  useEffect(() => {
+    fetchData(`/api/jockey/${id}/examen-pleuro`);
+  }, [id]);
+
+  const handleSave = async (data) => {
+    console.log(data);
+
+    try {
+      const payload = { id: data.id };
+
+      if (!hiddenFields.has('frequence_respiratoire')) payload.frequence_respiratoire = data.frequence_respiratoire === "" ? null : data.frequence_respiratoire;
+      if (!hiddenFields.has('inspection')) payload.inspection = data.inspection === "" ? null : data.inspection;
+      if (!hiddenFields.has('austucultation')) payload.austucultation = data.austucultation === "" ? null : data.austucultation;
+
+      console.log(payload);
+
+      await instance.put(`/api/jockey/${id}/examen-pleuro`, payload);
+
+      fetchData(`/api/jockey/${id}/examen-pleuro`);
+      setIsEditMode(false);
+    } catch (err) {
+      console.error("Error saving ExamenPleuroPulmonaire:", err);
+    }
+  };
+
+  const onSubmit = (data) => handleSave(data);
+
+  const handleHistoriqueClick = async () => {
+    if (isEditMode) return;
+
+    if (isHistory) {
+      fetchData(`/api/jockey/${id}/examen-pleuro`);
+      setIsHistory(false);
+      setShowHistorique(false);
+    } else {
+      if (historique.length === 0) {
+        try {
+          const response = await instance.get(`/api/jockey/${id}/historique`);
+          setHistorique(response.data);
+        } catch(err) {
+           console.error("Error fetching history:", err);
+           setHistorique([]);
+        }
+      }
+      setShowHistorique(true);
+    }
+  };
 
   const fetchItem = async (dossierid) => {
     fetchData(`/api/jockey/${id}/examen-pleuro/historique/${dossierid}`);
     setIsHistory(true);
     setIsEditMode(false);
+    setShowHistorique(false);
   };
 
   if (loading) {
@@ -118,235 +155,219 @@ export default function ExamenPleuroPulmonaire() {
         </motion.div>
       </motion.div>
     );
-  } else {
-    return (
-      <motion.form
-        onSubmit={handleSubmit(onSubmit)}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
-      >
-        <AnimatePresence>
-          {isHistory && (
-            <motion.div
-              className="w-full max-w-md fixed top-20 left-1/2 -translate-x-1/2 z-50"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <Alert
-                variant="default"
-                className="bg-white/95 backdrop-blur-sm border border-blue-100 shadow-lg"
-              >
-                <HistoryIcon className="size-5 text-blue-600 shrink-0" />
-                <AlertTitle className="text-sm font-semibold text-blue-800 mb-1">
-                  Historique Mode Active
-                </AlertTitle>
-                <AlertDescription className="text-sm text-blue-700 leading-snug">
-                  <div>
-                    Consultation seule - Les modifications sont désactivées dans
-                    ce mode{"              "}
-                    <span
-                      onClick={handleHistoriqueClick}
-                      className="text-red-500 cursor-pointer "
-                    >
-                      restaurer
-                    </span>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            </motion.div>
-          )}
-        </AnimatePresence>
+  }
 
-        {/* Header Section */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+  const fieldConfigs = [
+    { key: "frequence_respiratoire", label: "Fréquence Respiratoire" },
+    { key: "inspection", label: "Inspection" },
+    { key: "austucultation", label: "Auscultation" },
+  ].filter(({ key }) => !hiddenFields.has(key));
+
+  const hasVisibleData = fieldConfigs.length > 0;
+
+  return (
+    <motion.form
+      onSubmit={handleSubmit(onSubmit)}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
+    >
+      <AnimatePresence>
+        {isHistory && (
+          <motion.div
+            className="w-full max-w-md fixed top-20 left-1/2 -translate-x-1/2 z-50"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <ArrowLeft className="h-6 w-6 text-gray-700" />
+            <Alert
+              variant="default"
+              className="bg-white/95 backdrop-blur-sm border border-blue-100 shadow-lg"
+            >
+              <HistoryIcon className="size-5 text-blue-600 shrink-0" />
+              <AlertTitle className="text-sm font-semibold text-blue-800 mb-1">
+                Historique Mode Active
+              </AlertTitle>
+              <AlertDescription className="text-sm text-blue-700 leading-snug">
+                <div>
+                  Consultation seule - Les modifications sont désactivées dans
+                  ce mode{" "}
+                  <span
+                    onClick={handleHistoriqueClick}
+                    className="text-red-500 cursor-pointer hover:underline"
+                  >
+                    restaurer
+                  </span>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex items-center justify-between mb-8">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <ArrowLeft className="h-6 w-6 text-gray-700" />
+        </button>
+        <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">
+          Examen Pleuro-pulmonaire
+        </h1>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={handleHistoriqueClick}
+            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+              isEditMode || isHistory || !hasVisibleData
+                ? "bg-gray-200 cursor-not-allowed"
+                : "hover:bg-blue-50 hover:-translate-y-0.5"
+            }`}
+            disabled={isEditMode || isHistory || !hasVisibleData}
+          >
+            <History className="h-6 w-6 text-gray-600" />
+            <span className="text-sm font-medium text-gray-800">
+              {showHistorique ? "Cacher l'historique" : "Voir historique"}
+            </span>
           </button>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Examen Pleuro-pulmonaire
-          </h1>
-          <div className="flex gap-3">
+
+          {isEditMode ? (
             <button
               type="button"
-              onClick={handleHistoriqueClick}
-              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "hover:bg-blue-50 hover:-translate-y-0.5"
+              onClick={() => {
+                fetchData(`/api/jockey/${id}/examen-pleuro`);
+                setIsEditMode(false);
+              }}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
-              disabled={isEditMode}
+              disabled={isHistory || !hasVisibleData}
             >
-              <History className="h-6 w-6 text-gray-600" />
-              <span className="text-sm font-medium text-gray-800">
-                {showHistorique ? "Cacher l'historique" : "Voir historique"}
-              </span>
+              <Ban className="h-6 w-6 text-red-600" />
+              <span className="text-sm font-medium text-red-800">Annuler</span>
             </button>
-
-            {isEditMode ? (
-              <button
-                type="button"
-                onClick={() => setIsEditMode(false)}
-                className={`p-2 pl-4 ${
-                  isHistory && "cursor-not-allowed"
-                } rounded-lg flex items-center gap-2 transition-all ${
-                  isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
-                }`}
-                disabled={isHistory}
-              >
-                <Ban className="h-6 w-6 text-red-600" />
-                <span className="text-sm font-medium text-red-800">
-                  Annuler
-                </span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsEditMode(true)}
-                className={`p-2 pl-4 ${
-                  isHistory && "cursor-not-allowed"
-                } rounded-lg flex items-center gap-2 transition-all ${
-                  isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
-                }`}
-                disabled={isEditMode || isHistory}
-              >
-                <Edit className="h-6 w-6 text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">
-                  Modifier
-                </span>
-              </button>
-            )}
-
+          ) : (
             <button
-              type="submit"
-              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-                !isEditMode && isHistory
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "hover:bg-green-50 hover:-translate-y-0.5"
-              } `}
-              disabled={!isEditMode || isHistory}
+              type="button"
+              onClick={() => setIsEditMode(true)}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+              }`}
+              disabled={isEditMode || isHistory || !hasVisibleData}
             >
-              <Save className="h-6 w-6 text-green-600" />
-              <span className="text-sm font-medium text-green-800">
-                Enregistrer
-              </span>
+              <Edit className="h-6 w-6 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">Modifier</span>
             </button>
-          </div>
+          )}
+
+          <button
+            type="submit"
+            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+              !isEditMode || isHistory || !hasVisibleData
+                ? "bg-gray-200 cursor-not-allowed"
+                : "hover:bg-green-50 hover:-translate-y-0.5"
+            } `}
+            disabled={!isEditMode || isHistory || !hasVisibleData}
+          >
+            <Save className="h-6 w-6 text-green-600" />
+            <span className="text-sm font-medium text-green-800">
+              Enregistrer
+            </span>
+          </button>
         </div>
-        {showHistorique && (
-          <div className="my-4 space-y-2">
-            {historique.map((item) => (
-              <div
+      </div>
+
+      {showHistorique && (
+        <motion.div
+           initial={{ opacity: 0, y: -20 }}
+           animate={{ opacity: 1, y: 0 }}
+           exit={{ opacity: 0, y: -20 }}
+           transition={{ duration: 0.3 }}
+           className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+        >
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Versions Historiques</h3>
+          {historique.length > 0 ? historique.map((item) => (
+            <div
               key={item.id}
               onClick={() => fetchItem(item.id)}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer"
+              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
             >
-            <p className="text-sm font-medium">
-              <span className="mr-2">rdv date:</span>
-
-              {new Date(item.date).toLocaleString("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false,
-              })}
-            </p>
-            </div>
-            ))}
-          </div>
-        )}
-
-        {/* Conditions Container */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                fréquence respiratoire
-              </h2>
-            </div>
-
-            <input
-              {...register("frequence_respiratoire")}
-              placeholder="Remarques..."
-              disabled={!isEditMode}
-              rows={3}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all resize-none ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors.frequence_respiratoire && (
-              <p className="text-red-500 text-sm mt-4 ml-2">
-                {errors.frequence_respiratoire.message}
+              <p className="text-sm font-medium text-gray-700">
+                <span className="mr-2 text-gray-500">Date du dossier:</span>
+                {new Date(item.date).toLocaleString("fr-FR", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: false,
+                })}
               </p>
-            )}
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Inspection
-              </h2>
             </div>
+          )) : (
+             <p className="text-gray-500 text-sm italic">Aucun historique disponible.</p>
+          )}
+        </motion.div>
+      )}
 
-            <input
-              {...register("inspection")}
-              placeholder="Remarques..."
-              disabled={!isEditMode}
-              rows={3}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all resize-none ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors.inspection && (
-              <p className="text-red-500 text-sm mt-4 ml-2">
-                {errors.inspection.message}
-              </p>
-            )}
+      {hasVisibleData && (
+          <div className="space-y-6">
+             {fieldConfigs.map(({ key, label }) => (
+                 <motion.div
+                     key={key}
+                     initial={{ opacity: 0, y: 20 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{ opacity: 0, y: 20 }}
+                     transition={{ duration: 0.3 }}
+                     className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+                 >
+                     <div className="flex justify-between items-center mb-4">
+                         <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
+                     </div>
+                     <div>
+                         <input
+                             id={key}
+                             {...register(key)}
+                             placeholder={label + "..."}
+                             disabled={!isEditMode || isHistory}
+                             type="text"
+                             className={`w-full px-4 py-3 border ${
+                                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+                             } rounded-lg focus:outline-none focus:ring-2 ${
+                                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
+                             } transition-all ${
+                                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
+                             }`}
+                         />
+                         {errors[key] && errors[key].message && (
+                             <p className="text-red-500 text-sm mt-2">
+                                 {errors[key].message}
+                             </p>
+                         )}
+                     </div>
+                 </motion.div>
+             ))}
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                austuculation
-              </h2>
-            </div>
+       )}
 
-            <input
-              {...register("austucultation")}
-              placeholder="Remarques..."
-              disabled={!isEditMode}
-              rows={3}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all resize-none ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors.austucultation && (
-              <p className="text-red-500 text-sm mt-4 ml-2">
-                {errors.austucultation.message}
-              </p>
-            )}
-          </div>
-        </div>
-      </motion.form>
-    );
-  }
+       {!hasVisibleData && !loading && (
+           <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-gray-500 italic mt-8"
+           >
+             Aucune donnée d'examen pleuro-pulmonaire enregistrée ou visible pour ce dossier.
+           </motion.div>
+       )}
+    </motion.form>
+  );
 }

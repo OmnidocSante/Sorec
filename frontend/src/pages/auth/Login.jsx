@@ -38,16 +38,22 @@ export default function Login() {
 
 
   const onSubmit = async (data) => {
+    console.log(data);
+    
     try {
       const response = await axios.post(
         "http://localhost:4000/api/auth/login",
         data
       );
+      console.log(response.data.token);
+      
       setToken(response.data.token);
       const payload = token.split(".")[1];
       const decoded = JSON.parse(atob(payload));
       navigateRole(decoded.role);
     } catch (error) {
+      console.log(error);
+      
       setAlertContent({
         title: "Erreur de connexion",
         description: error?.response?.data?.message || error.message,

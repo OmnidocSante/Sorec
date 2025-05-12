@@ -4,7 +4,9 @@ import omnidoc.backend.entity.examens.ExamenCardioVasculaire;
 import omnidoc.backend.service.ExamenCardioVasculaireService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+@PreAuthorize("hasAuthority('MEDECIN')")
 
 @RestController
 @RequestMapping("/api/jockey/{jockeyId}/examen-cardio")

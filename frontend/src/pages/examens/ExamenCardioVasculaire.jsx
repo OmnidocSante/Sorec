@@ -4,7 +4,6 @@ import { ArrowLeft, Edit, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
 import { AnimatePresence } from "framer-motion";
 import { Ban, HistoryIcon, History } from "lucide-react";
 
@@ -12,30 +11,46 @@ export default function ExamenCardio() {
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
+  const [hiddenFields, setHiddenFields] = useState(new Set());
+  const [conditions, setConditions] = useState(null);
+  const [historique, setHistorique] = useState([]);
+  const [showHistorique, setShowHistorique] = useState(false);
+  const [isHistory, setIsHistory] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const HIDE_VALUE = "HIDDEN";
 
   const fetchData = async (url) => {
-    const response = await instance.get(url);
-    console.log(response.data.parametresExamenCardioVasculaires);
+    setLoading(true);
+    try {
+      const response = await instance.get(url);
+      const data = response.data;
+      console.log(data);
 
-    setConditions(response.data);
+      setConditions(data);
+
+      const hidden = new Set();
+      Object.entries(data).forEach(([key, value]) => {
+        if (key !== "parametresExamenCardioVasculaires" && key !== "id" && value === HIDE_VALUE) {
+          hidden.add(key);
+        }
+      });
+      setHiddenFields(hidden);
+    } catch (err) {
+      console.error("Error fetching ExamenCardio:", err);
+      setConditions(null); // Set to null on error to show loading or error state
+      setHiddenFields(new Set());
+    } finally {
+      setLoading(false);
+    }
   };
+
   useEffect(() => {
     fetchData(`/api/jockey/${id}/examen-cardio`);
   }, [id]);
 
-  // const [conditions, setConditions] = useState([
-  //   {
-  //     id: 1,
-  //     name: "Maladie cardiaque",
-  //     toggle: null,
-  //     remarks: "",
-  //   },
-  // ]);
-
-  const [conditions, setConditions] = useState(null);
-  console.log(conditions);
-
   const handleToggle = (conditionId, value) => {
+    if (!isEditMode || isHistory || !conditions?.parametresExamenCardioVasculaires) return;
     setConditions((prev) => ({
       ...prev,
       parametresExamenCardioVasculaires:
@@ -45,10 +60,10 @@ export default function ExamenCardio() {
             : cond
         ),
     }));
-    console.log(conditions);
   };
 
   const handleRemarksChange = (conditionId, value) => {
+    if (!isEditMode || isHistory || !conditions?.parametresExamenCardioVasculaires) return;
     setConditions((prev) => ({
       ...prev,
       parametresExamenCardioVasculaires:
@@ -59,6 +74,10 @@ export default function ExamenCardio() {
   };
 
   const handleObject = (key, value) => {
+    if (!isEditMode || isHistory || !conditions) return;
+    if (key === "parametresExamenCardioVasculaires" || key === "id") return;
+    if (hiddenFields.has(key)) return;
+
     setConditions((prev) => ({
       ...prev,
       [key]: key.includes("Observation") ? value : parseInt(value) || 0,
@@ -66,40 +85,55 @@ export default function ExamenCardio() {
   };
 
   const handleSave = async () => {
-    await Promise.all([
-      await instance.put(`/api/jockey/${id}/examen-cardio`, conditions),
-      fetchData(`/api/jockey/${id}/examen-cardio`),
-    ]);
+    if (!isEditMode || isHistory || !conditions) return;
 
-    setIsEditMode(false);
-  };
+    try {
+      const payload = {
+        ...conditions,
+        parametresExamenCardioVasculaires: conditions.parametresExamenCardioVasculaires
+      };
 
-  const [historique, setHistorique] = useState([]);
-  const [showHistorique, setShowHistorique] = useState(false);
-  const handleHistoriqueClick = async () => {
-    if (isHistory) {
+      hiddenFields.forEach(field => {
+        delete payload[field];
+      });
+
+      await instance.put(`/api/jockey/${id}/examen-cardio`, payload);
       fetchData(`/api/jockey/${id}/examen-cardio`);
-      setIsHistory(false);
-      setShowHistorique(!showHistorique);
-    } else {
-      if (historique.length === 0) {
-        const response = await instance.get(`/api/jockey/${id}/historique`);
-
-        setHistorique(response.data);
-      }
-      setShowHistorique(!showHistorique);
+      setIsEditMode(false);
+    } catch (err) {
+      console.error("Error saving ExamenCardio:", err);
     }
   };
 
-  const [isHistory, setIsHistory] = useState(false);
+  const handleHistoriqueClick = async () => {
+    if (isEditMode) return;
+
+    if (isHistory) {
+      fetchData(`/api/jockey/${id}/examen-cardio`);
+      setIsHistory(false);
+      setShowHistorique(false);
+    } else {
+      if (historique.length === 0) {
+        try {
+          const response = await instance.get(`/api/jockey/${id}/historique`);
+          setHistorique(response.data);
+        } catch(err) {
+           console.error("Error fetching history:", err);
+           setHistorique([]);
+        }
+      }
+      setShowHistorique(true);
+    }
+  };
 
   const fetchItem = async (dossierid) => {
     fetchData(`/api/jockey/${id}/examen-cardio/historique/${dossierid}`);
     setIsHistory(true);
     setIsEditMode(false);
+    setShowHistorique(false);
   };
 
-  if (!conditions) {
+  if (loading) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -122,138 +156,169 @@ export default function ExamenCardio() {
         </motion.div>
       </motion.div>
     );
-  } else {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
-      >
-        <AnimatePresence>
-          {isHistory && (
-            <motion.div
-              className="w-full max-w-md fixed top-20 left-1/2 -translate-x-1/2 z-50"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <Alert
-                variant="default"
-                className="bg-white/95 backdrop-blur-sm border border-blue-100 shadow-lg"
-              >
-                <HistoryIcon className="size-5 text-blue-600 shrink-0" />
-                <AlertTitle className="text-sm font-semibold text-blue-800 mb-1">
-                  Historique Mode Active
-                </AlertTitle>
-                <AlertDescription className="text-sm text-blue-700 leading-snug">
-                  <div>
-                    Consultation seule - Les modifications sont désactivées dans
-                    ce mode{"              "}
-                    <span
-                      onClick={handleHistoriqueClick}
-                      className="text-red-500 cursor-pointer "
-                    >
-                      restaurer
-                    </span>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            </motion.div>
-          )}
-        </AnimatePresence>
+  } else if (!conditions) {
+       return (
+            <div className="min-h-screen flex items-center justify-center bg-bay-of-many-50 p-6">
+                 <Alert variant="destructive" className="max-w-sm">
+                    <Ban className="size-5" />
+                    <AlertTitle>Erreur de chargement</AlertTitle>
+                    <AlertDescription>
+                        Impossible de charger les données de l'examen cardiovasculaire.
+                    </AlertDescription>
+                 </Alert>
+            </div>
+       );
+  }
 
-        {/* Header Section */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+  const visibleConditionsArray = conditions.parametresExamenCardioVasculaires || [];
+  const visibleTopLevelFields = Object.entries(conditions)
+      .filter(([key]) =>
+           key !== "parametresExamenCardioVasculaires" &&
+           key !== "id" &&
+           !hiddenFields.has(key)
+      );
+
+  const hasVisibleData = visibleConditionsArray.length > 0 || visibleTopLevelFields.length > 0;
+
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
+    >
+      <AnimatePresence>
+        {isHistory && (
+          <motion.div
+            className="w-full max-w-md fixed top-20 left-1/2 -translate-x-1/2 z-50"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <ArrowLeft className="h-6 w-6 text-gray-700" />
+            <Alert
+              variant="default"
+              className="bg-white/95 backdrop-blur-sm border border-blue-100 shadow-lg"
+            >
+              <HistoryIcon className="size-5 text-blue-600 shrink-0" />
+              <AlertTitle className="text-sm font-semibold text-blue-800 mb-1">
+                Historique Mode Active
+              </AlertTitle>
+              <AlertDescription className="text-sm text-blue-700 leading-snug">
+                <div>
+                  Consultation seule - Les modifications sont désactivées dans
+                  ce mode{" "}
+                  <span
+                    onClick={handleHistoriqueClick}
+                    className="text-red-500 cursor-pointer hover:underline"
+                  >
+                    {" "}restaurer
+                  </span>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex items-center justify-between mb-8">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <ArrowLeft className="h-6 w-6 text-gray-700" />
+        </button>
+        <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">
+          Examen CardioVasculaire
+        </h1>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={handleHistoriqueClick}
+            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+              isEditMode || isHistory || !hasVisibleData
+                ? "bg-gray-200 cursor-not-allowed"
+                : "hover:bg-blue-50 hover:-translate-y-0.5"
+            }`}
+            disabled={isEditMode || isHistory || !hasVisibleData}
+          >
+            <History className="h-6 w-6 text-gray-600" />
+            <span className="text-sm font-medium text-gray-800">
+              {showHistorique ? "Cacher l'historique" : "Voir historique"}
+            </span>
           </button>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Examen CardioVasculaire
-          </h1>
-          <div className="flex gap-3">
+
+          {isEditMode ? (
             <button
               type="button"
-              onClick={handleHistoriqueClick}
-              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "hover:bg-blue-50 hover:-translate-y-0.5"
+              onClick={() => {
+                fetchData(`/api/jockey/${id}/examen-cardio`);
+                setIsEditMode(false);
+              }}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
-              disabled={isEditMode}
+              disabled={isHistory || !hasVisibleData}
             >
-              <History className="h-6 w-6 text-gray-600" />
-              <span className="text-sm font-medium text-gray-800">
-                {showHistorique ? "Cacher l'historique" : "Voir historique"}
-              </span>
+              <Ban className="h-6 w-6 text-red-600" />
+              <span className="text-sm font-medium text-red-800">Annuler</span>
             </button>
-
-            {isEditMode ? (
-              <button
-                type="button"
-                onClick={() => setIsEditMode(false)}
-                className={`p-2 pl-4 ${
-                  isHistory && "cursor-not-allowed"
-                } rounded-lg flex items-center gap-2 transition-all ${
-                  isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
-                }`}
-                disabled={isHistory}
-              >
-                <Ban className="h-6 w-6 text-red-600" />
-                <span className="text-sm font-medium text-red-800">
-                  Annuler
-                </span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsEditMode(true)}
-                className={`p-2 pl-4 ${
-                  isHistory && "cursor-not-allowed"
-                } rounded-lg flex items-center gap-2 transition-all ${
-                  isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
-                }`}
-                disabled={isEditMode || isHistory}
-              >
-                <Edit className="h-6 w-6 text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">
-                  Modifier
-                </span>
-              </button>
-            )}
-
+          ) : (
             <button
-              onClick={handleSave}
-              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-                !isEditMode && isHistory
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "hover:bg-green-50 hover:-translate-y-0.5"
-              } `}
-              disabled={!isEditMode || isHistory}
+              type="button"
+              onClick={() => setIsEditMode(true)}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+              }`}
+              disabled={isEditMode || isHistory || !hasVisibleData}
             >
-              <Save className="h-6 w-6 text-green-600" />
-              <span className="text-sm font-medium text-green-800">
-                Enregistrer
-              </span>
+              <Edit className="h-6 w-6 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">Modifier</span>
             </button>
-          </div>
-        </div>
-        {showHistorique && (
-          <div className="my-4 space-y-2">
-            {historique.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => fetchItem(item.id)}
-                className="p-3 bg-gray-50 rounded-lg cursor-pointer"
-              >
-              <p className="text-sm font-medium">
-                <span className="mr-2">rdv date:</span>
+          )}
 
-                {new Date(item.date).toLocaleString("en-US", {
+          <button
+            type="button"
+            onClick={handleSave}
+            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+              !isEditMode || isHistory || !hasVisibleData
+                ? "bg-gray-200 cursor-not-allowed"
+                : "hover:bg-green-50 hover:-translate-y-0.5"
+            } `}
+            disabled={!isEditMode || isHistory || !hasVisibleData}
+          >
+            <Save className="h-6 w-6 text-green-600" />
+            <span className="text-sm font-medium text-green-800">
+              Enregistrer
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {showHistorique && (
+        <motion.div
+           initial={{ opacity: 0, y: -20 }}
+           animate={{ opacity: 1, y: 0 }}
+           exit={{ opacity: 0, y: -20 }}
+           transition={{ duration: 0.3 }}
+           className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+        >
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Versions Historiques</h3>
+          {historique.length > 0 ? historique.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => fetchItem(item.id)}
+              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
+            >
+              <p className="text-sm font-medium text-gray-700">
+                <span className="mr-2 text-gray-500">Date du dossier:</span>
+                {new Date(item.date).toLocaleString("fr-FR", {
                   year: "numeric",
                   month: "2-digit",
                   day: "2-digit",
@@ -263,138 +328,140 @@ export default function ExamenCardio() {
                   hour12: false,
                 })}
               </p>
-              </div>
-            ))}
-          </div>
+            </div>
+          )) : (
+             <p className="text-gray-500 text-sm italic">Aucun historique disponible.</p>
+          )}
+        </motion.div>
+      )}
+
+      <div className="space-y-6">
+        {visibleConditionsArray.length > 0 && (
+           <div className="space-y-6 mb-6">
+              {visibleConditionsArray.map((condition) => (
+                  <motion.div
+                     key={condition.id}
+                     initial={{ opacity: 0, y: 20 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{ opacity: 0, y: 20 }}
+                     transition={{ duration: 0.3 }}
+                    className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+                  >
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-lg font-semibold text-gray-800">
+                        {condition.parametresCardioVasculaire?.nom
+                          ?.toLowerCase()
+                          .split("_")
+                          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(" ") || "Condition Inconnue"}
+                      </h2>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          disabled={!isEditMode || isHistory}
+                          onClick={() => handleToggle(condition.id, true)}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                            condition.hasCondition === "true"
+                              ? "bg-green-500 text-white shadow-inner"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          Oui
+                        </button>
+                        <button
+                           type="button"
+                           disabled={!isEditMode || isHistory}
+                          onClick={() => handleToggle(condition.id, false)}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                            condition.hasCondition === "false"
+                              ? "bg-red-500 text-white shadow-inner"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          Non
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                         <label htmlFor={`condition-${condition.id}-observations`} className="block text-sm font-medium text-gray-700 mb-1">Observations</label>
+                         <input
+                             id={`condition-${condition.id}-observations`}
+                             value={condition.observations || ""}
+                             onChange={(e) => handleRemarksChange(condition.id, e.target.value)}
+                             placeholder="Remarques..."
+                             disabled={!isEditMode || isHistory}
+                             className={`w-full px-4 py-3 border ${
+                                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+                             } rounded-lg focus:outline-none focus:ring-2 ${
+                                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
+                             } transition-all ${
+                                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
+                             }`}
+                         />
+                     </div>
+                  </motion.div>
+              ))}
+            </div>
         )}
 
-        {/* Conditions Container */}
-        <div className="space-y-6">
-          {conditions.parametresExamenCardioVasculaires.map((condition) => (
-            <div
-              key={condition.id}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-            >
-              {/* Condition Header */}
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {condition.parametresCardioVasculaire.nom
-                    .toLowerCase()
-                    .split("_")
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(" ")}
-                </h2>
+        {visibleTopLevelFields.length > 0 && (
+             <div className="space-y-6">
+                {visibleTopLevelFields.map(([key, value]) => {
+                     const label = key
+                                 .replace(/([A-Z])/g, " $1")
+                                 .trim()
+                                 .split(" ")
+                                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                 .join(" ");
 
-                {/* Toggle Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    disabled={!isEditMode}
-                    onClick={() => handleToggle(condition.id, true)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      condition.hasCondition === "true"
-                        ? "bg-green-500 text-white shadow-inner"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    } ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    Oui
-                  </button>
-                  <button
-                    disabled={!isEditMode}
-                    onClick={() => handleToggle(condition.id, false)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      condition.hasCondition === "false"
-                        ? "bg-red-500 text-white shadow-inner"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    } ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    Non
-                  </button>
-                </div>
-              </div>
+                     return (
+                        <motion.div
+                            key={key}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            transition={{ duration: 0.3 }}
+                            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-lg font-semibold text-gray-800">
+                                   {label}
+                                </h2>
+                            </div>
+                            <div>
 
-              {/* Remarks Input */}
-              <input
-                value={condition.observations}
-                onChange={(e) =>
-                  handleRemarksChange(condition.id, e.target.value)
-                }
-                placeholder="Remarques..."
-                disabled={!isEditMode}
-                rows={3}
-                className={`w-full px-4 py-3 border ${
-                  isEditMode ? "border-blue-200" : "border-gray-200"
-                } rounded-lg focus:outline-none focus:ring-2 ${
-                  isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-                } transition-all resize-none ${
-                  !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-                }`}
-              />
+                                 <input
+                                     id={`top-level-${key}`}
+                                     value={value || ""}
+                                     onChange={(e) => handleObject(key, e.target.value)}
+                                     placeholder={label + "..."}
+                                     disabled={!isEditMode || isHistory}
+                                     type={key.includes("valeur") ? "number" : "text"}
+                                     className={`w-full px-4 py-3 border ${
+                                         isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+                                     } rounded-lg focus:outline-none focus:ring-2 ${
+                                         isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
+                                     } transition-all ${
+                                         (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
+                                     }`}
+                                 />
+                            </div>
+                        </motion.div>
+                     );
+                })}
             </div>
-          ))}
-          {Object.entries(conditions)
-            .filter(
-              ([key]) =>
-                key !== "parametresExamenCardioVasculaires" && key !== "id"
-            )
-            .map(([key, value]) => (
-              <div
-                key={key}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-              >
-                {/* Condition Header */}
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    {key
-                      .replace(/([A-Z])/g, " $1")
-                      .trim()
-                      .split(" ")
-                      .map(
-                        (word) =>
-                          word.charAt(0).toUpperCase() +
-                          word.slice(1).toLowerCase()
-                      )
-                      .join(" ")}
-                  </h2>
-                </div>
+        )}
+      </div>
 
-                {/* Remarks Input */}
-                {key.includes("Observation") && (
-                  <input
-                    value={value}
-                    onChange={(e) => handleObject(key, e.target.value)}
-                    placeholder="Remarques..."
-                    disabled={!isEditMode}
-                    rows={3}
-                    className={`w-full px-4 py-3 border ${
-                      isEditMode ? "border-blue-200" : "border-gray-200"
-                    } rounded-lg focus:outline-none focus:ring-2 ${
-                      isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-                    } transition-all resize-none ${
-                      !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-                    }`}
-                  />
-                )}
-                {!key.includes("Observation") && (
-                  <input
-                    value={value}
-                    onChange={(e) => handleObject(key, e.target.value)}
-                    placeholder="0"
-                    disabled={!isEditMode}
-                    type="number"
-                    rows={3}
-                    className={`w-full px-4 py-3 border ${
-                      isEditMode ? "border-blue-200" : "border-gray-200"
-                    } rounded-lg focus:outline-none focus:ring-2 ${
-                      isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-                    } transition-all resize-none ${
-                      !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-        </div>
-      </motion.div>
-    );
-  }
+      {!hasVisibleData && !loading && (
+        <motion.div
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           className="text-center text-gray-500 italic mt-8"
+        >
+          Aucune donnée d'examen cardiovasculaire enregistrée ou visible pour ce dossier.
+        </motion.div>
+      )}
+    </motion.div>
+  );
 }

@@ -1,6 +1,12 @@
 package omnidoc.backend.util;
 
+import omnidoc.backend.repository.AccessRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
 public class Util {
+
     public static String parseBooleanString(Boolean bool) throws Exception {
         int value = bool ? 1 : 0;
         return AESUtil.encrypt(String.valueOf(value));
@@ -25,5 +31,8 @@ public class Util {
             return null;
         }
     }
+
+
+
 
 }

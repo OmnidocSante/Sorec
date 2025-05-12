@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 import static omnidoc.backend.util.Util.decryptIfNotNull;
 import static omnidoc.backend.util.Util.encryptIfNotNull;
@@ -25,9 +26,16 @@ public class ExamenCardioVasculaireService {
 
     @Autowired
     private parametresExamenCardioVasculaireRepo parametresExamenCardioVasculaireRepo;
+    @Autowired
+    private FieldVisibilityService fieldVisibilityService;
+    @Autowired
+    private AccessService accessService;
 
 
     public ExamenCardioVasculaire getExamenByPatientId(int jockeyId) throws Exception {
+        accessService
+                .verifyAccess(jockeyId);
+
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("Dossier médical non trouvé"));
 
         return getExamenCardioVasculaire(dossierMedicale);
@@ -43,15 +51,52 @@ public class ExamenCardioVasculaireService {
         ExamenCardioVasculaire examenCardioVasculaire = dossierMedicale.getExamenCardioVasculaire();
         examenCardioVasculaire.setDossierMedicale(dossierMedicale);
 
-        examenCardioVasculaire.setAusculationDebout(decryptIfNotNull(examenCardioVasculaire.getAusculationDebout()));
-        examenCardioVasculaire.setAusculationObservation(decryptIfNotNull(examenCardioVasculaire.getAusculationObservation()));
-        examenCardioVasculaire.setAusculationCouche(decryptIfNotNull(examenCardioVasculaire.getAusculationCouche()));
-        examenCardioVasculaire.setTensionCouche(decryptIfNotNull(examenCardioVasculaire.getTensionCouche()));
-        examenCardioVasculaire.setTensionDebout(decryptIfNotNull(examenCardioVasculaire.getTensionDebout()));
-        examenCardioVasculaire.setTensionObservation(decryptIfNotNull(examenCardioVasculaire.getTensionObservation()));
-        examenCardioVasculaire.setFrequenceCouche(decryptIfNotNull(examenCardioVasculaire.getFrequenceCouche()));
-        examenCardioVasculaire.setFrequenceDebout(decryptIfNotNull(examenCardioVasculaire.getFrequenceDebout()));
-        examenCardioVasculaire.setFrequenceObservation(decryptIfNotNull(examenCardioVasculaire.getFrequenceObservation()));
+        Set<String> hiddenFields = fieldVisibilityService.getHiddenFields("examen_cardio_vasculaire");
+
+        if (!hiddenFields.contains("ausculation_debout"))
+            examenCardioVasculaire.setAusculationDebout(decryptIfNotNull(examenCardioVasculaire.getAusculationDebout()));
+        else
+            examenCardioVasculaire.setAusculationDebout("HIDDEN");
+
+        if (!hiddenFields.contains("ausculation_observation"))
+            examenCardioVasculaire.setAusculationObservation(decryptIfNotNull(examenCardioVasculaire.getAusculationObservation()));
+        else
+            examenCardioVasculaire.setAusculationObservation("HIDDEN");
+
+        if (!hiddenFields.contains("ausculation_couche"))
+            examenCardioVasculaire.setAusculationCouche(decryptIfNotNull(examenCardioVasculaire.getAusculationCouche()));
+        else
+            examenCardioVasculaire.setAusculationCouche("HIDDEN");
+
+        if (!hiddenFields.contains("tension_couche"))
+            examenCardioVasculaire.setTensionCouche(decryptIfNotNull(examenCardioVasculaire.getTensionCouche()));
+        else
+            examenCardioVasculaire.setTensionCouche("HIDDEN");
+
+        if (!hiddenFields.contains("tension_debout"))
+            examenCardioVasculaire.setTensionDebout(decryptIfNotNull(examenCardioVasculaire.getTensionDebout()));
+        else
+            examenCardioVasculaire.setTensionDebout("HIDDEN");
+
+        if (!hiddenFields.contains("tension_observation"))
+            examenCardioVasculaire.setTensionObservation(decryptIfNotNull(examenCardioVasculaire.getTensionObservation()));
+        else
+            examenCardioVasculaire.setTensionObservation("HIDDEN");
+
+        if (!hiddenFields.contains("frequence_couche"))
+            examenCardioVasculaire.setFrequenceCouche(decryptIfNotNull(examenCardioVasculaire.getFrequenceCouche()));
+        else
+            examenCardioVasculaire.setFrequenceCouche("HIDDEN");
+
+        if (!hiddenFields.contains("frequence_debout"))
+            examenCardioVasculaire.setFrequenceDebout(decryptIfNotNull(examenCardioVasculaire.getFrequenceDebout()));
+        else
+            examenCardioVasculaire.setFrequenceDebout("HIDDEN");
+
+        if (!hiddenFields.contains("frequence_observation"))
+            examenCardioVasculaire.setFrequenceObservation(decryptIfNotNull(examenCardioVasculaire.getFrequenceObservation()));
+        else
+            examenCardioVasculaire.setFrequenceObservation("HIDDEN");
 
         List<ParametresExamenCardioVasculaire> decryptedParametres = examenCardioVasculaire.getParametresExamenCardioVasculaires().stream().map(param -> {
             try {

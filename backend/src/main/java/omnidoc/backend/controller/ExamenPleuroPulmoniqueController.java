@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+
+@PreAuthorize("hasAuthority('MEDECIN')")
+
 @RestController
 @RequestMapping("/api/jockey/{jockeyId}/examen-pleuro")
 public class ExamenPleuroPulmoniqueController {
@@ -15,19 +18,16 @@ public class ExamenPleuroPulmoniqueController {
         this.examenPleuroPulmonaireService = examenPleuroPulmonaireService;
     }
 
-    @PreAuthorize("hasAnyAuthority('MEDECIN')")
     @GetMapping
     public ResponseEntity<ExamenPleuroPulmonaire> fetchExamenPleuro(@PathVariable int jockeyId) throws Exception {
         return ResponseEntity.ok(examenPleuroPulmonaireService.fetchExamenPleuroPulmonique(jockeyId));
     }
 
-    @PreAuthorize("hasAnyAuthority('MEDECIN')")
     @GetMapping("/historique/{dossierId}")
     public ResponseEntity<ExamenPleuroPulmonaire> fetchExamenPleuroByDossierId(@PathVariable int dossierId) throws Exception {
         return ResponseEntity.ok(examenPleuroPulmonaireService.fetchExamenPleuroPulmoniqueByDossier(dossierId));
     }
 
-    @PreAuthorize("hasAnyAuthority('MEDECIN')")
     @PutMapping
     public ResponseEntity<Void> updateExamenPleuro(@PathVariable int jockeyId, @RequestBody ExamenPleuroPulmonaire examenPleuroPulmonaire) throws Exception {
         examenPleuroPulmonaireService.updateExamenPleuroPulmonique(jockeyId, examenPleuroPulmonaire);

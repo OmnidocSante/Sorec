@@ -3,6 +3,7 @@ package omnidoc.backend.service;
 import jakarta.validation.Valid;
 import omnidoc.backend.entity.enums.StatusRDV;
 import omnidoc.backend.entity.rdv.Rdv;
+import omnidoc.backend.entity.users.Access;
 import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.Medecin;
 import omnidoc.backend.exceptions.ApiException;
@@ -32,6 +33,8 @@ public class RdvService {
 
     @Autowired
     private DossierMedicaleUtil dossierMedicaleUtil;
+    @Autowired
+    private AccessRepo accessRepo;
 
 
     public void createRdv(@Valid RdvRequest rdvRequest) {
@@ -42,6 +45,13 @@ public class RdvService {
 
         try {
             dossierMedicaleUtil.copyDossier(jockey);
+            boolean hasAccess = accessRepo.existsByMedecinAndJockey(medecin, jockey);
+            if (!hasAccess) {
+                Access access = new Access();
+                access.setMedecin(medecin);
+                access.setJockey(jockey);
+                accessRepo.save(access);
+            }
             Rdv rdv = new Rdv();
             rdv.setDate(rdvRequest.getDate());
             rdv.setJockey(jockey);
@@ -79,6 +89,13 @@ public class RdvService {
 
         try {
             dossierMedicaleUtil.copyDossier(jockey);
+            boolean hasAccess = accessRepo.existsByMedecinAndJockey(medecin, jockey);
+            if (!hasAccess) {
+                Access access = new Access();
+                access.setMedecin(medecin);
+                access.setJockey(jockey);
+                accessRepo.save(access);
+            }
             Rdv rdv = new Rdv();
             rdv.setDate(rdvRequest.getDate());
             rdv.setJockey(jockey);

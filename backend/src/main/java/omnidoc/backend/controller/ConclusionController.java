@@ -3,7 +3,12 @@ package omnidoc.backend.controller;
 import omnidoc.backend.entity.resultat.Conclusion;
 import omnidoc.backend.service.ConclusionService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+
+
+@PreAuthorize("hasAuthority('MEDECIN')")
 
 @RestController
 @RequestMapping("/api/jockey/{jockeyId}/conclusion")

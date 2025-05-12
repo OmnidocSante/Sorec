@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "medecins")
 @Getter
@@ -21,6 +23,10 @@ public class Medecin {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    @OneToMany(mappedBy = "medecin", cascade = CascadeType.ALL)
+    private List<Access> accessList;
+
 
     public Medecin(User user) {
         this.user = user;

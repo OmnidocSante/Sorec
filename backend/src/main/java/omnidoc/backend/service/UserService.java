@@ -77,6 +77,7 @@ public class UserService {
         emailService.sendEmail(user.getEmail(), subject, body);
 
         if (user.getRole() == Role.JOCKEY) {
+            System.out.println("testHere");
             dossierMedicaleUtil.createDossier(createdUser);
         } else if (user.getRole() == Role.MEDECIN) {
             medecinRepo.save(new Medecin(createdUser));

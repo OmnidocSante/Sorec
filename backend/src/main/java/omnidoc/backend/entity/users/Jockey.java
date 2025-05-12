@@ -10,6 +10,7 @@ import lombok.Setter;
 import omnidoc.backend.entity.enums.Status;
 
 import java.sql.Blob;
+import java.util.List;
 
 @Entity
 @Table(name = "jockeys")
@@ -41,6 +42,10 @@ public class Jockey {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String plisGauche;
+
+    @OneToMany(mappedBy = "jockey", cascade = CascadeType.ALL)
+    private List<Access> accessList;
+
 
 
     @Lob

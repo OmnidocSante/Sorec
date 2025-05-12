@@ -7,9 +7,9 @@ import DataCorrectionTab from "../adminTabs/DataCorrectionTab";
 import AppointmentsTab from "../adminTabs/AppointmentsTab";
 import UserCreationTab from "../adminTabs/UserCreationTab";
 import PatientTab from "../patientTabs/PatientTab";
+import MedicalRecordTab from "../adminTabs/MedicalRecordTab";
 
 export default function AdminPanel({ tab }) {
-  
   const [activeTab, setActiveTab] = useState("dashboard");
   if (tab && tab !== "dashboard") {
     setActiveTab(tab);
@@ -34,6 +34,8 @@ export default function AdminPanel({ tab }) {
         return <UserCreationTab />;
       case "appointments":
         return <AppointmentsTab />;
+      case "hide":
+        return <MedicalRecordTab />;
 
       default:
         return <DashboardTab />;
@@ -107,8 +109,9 @@ export default function AdminPanel({ tab }) {
                 : "hover:bg-bay-of-many-800"
             }`}
           >
-            Correction des Données
+            Historique des jockeys
           </button>
+
           <button
             onClick={() => {
               setActiveTab("create-user");
@@ -127,13 +130,26 @@ export default function AdminPanel({ tab }) {
               setActiveTab("appointments");
               setIsMobileMenuOpen(false);
             }}
-            className={`w-full cursor-pointer transition-all duration-500 text-left p-3 rounded-lg mb-8 ${
+            className={`w-full cursor-pointer transition-all duration-500 text-left p-3 rounded-lg ${
               activeTab === "appointments"
                 ? "bg-bay-of-many-700"
                 : "hover:bg-bay-of-many-800"
             }`}
           >
             Rendez-vous
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab("hide");
+              setIsMobileMenuOpen(false);
+            }}
+            className={`w-full cursor-pointer transition-all duration-500 text-left p-3 rounded-lg  ${
+              activeTab === "hide"
+                ? "bg-bay-of-many-700"
+                : "hover:bg-bay-of-many-800"
+            }`}
+          >
+            Gestion de dossier m{"é"}dicale
           </button>
 
           <button

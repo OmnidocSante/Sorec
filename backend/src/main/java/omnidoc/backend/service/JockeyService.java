@@ -24,6 +24,8 @@ public class JockeyService {
     private UserService userService;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private AccessService accessService;
 
     public List<UserRecord> getJockeys() {
         List<UserRecord> userRecords = userService.getUsers();
@@ -31,6 +33,9 @@ public class JockeyService {
     }
 
     public JockeyRecord getJockey(int jockeyId) throws Exception {
+        accessService
+                .verifyAccess(jockeyId);
+
         Jockey jockey = jockeyRepo.findById(jockeyId).orElseThrow(() -> new ApiException("Not found"));
         User user = jockey.getUser();
 

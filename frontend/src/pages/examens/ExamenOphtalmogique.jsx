@@ -1,59 +1,32 @@
 import instance from "@/auth/AxiosInstance";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
-import { ArrowLeft, Edit, Save } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Edit, Save, Ban, HistoryIcon, History } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
-export default function ExamenOphtalmogique() {
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+export default function ExamenOphtalmologique() {
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
-  const fetchData = async () => {
-    try {
-      const response = await instance.get(
-        `/api/jockey/${id}/examen-ophtalmogique`
-      );
-      reset({
-        id: response.data.id,
-        paupieresEtCorneesNormale:
-          response.data.paupieresEtCorneesNormale || "",
-        odCorrige: response.data.odCorrige || "",
-        odNonCorrige: response.data.odNonCorrige || "",
-        ogCorrige: response.data.ogCorrige || "",
-        ogNonCorrige: response.data.ogNonCorrige || "",
-      });
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchData();
-  }, [id]);
+  const [hiddenFields, setHiddenFields] = useState(new Set());
+  const [historique, setHistorique] = useState([]);
+  const [showHistorique, setShowHistorique] = useState(false);
+  const [isHistory, setIsHistory] = useState(false);
 
-  const onSubmit = (data) => {
-    console.log(errors);
+  const HIDE_VALUE = "HIDDEN";
 
-    console.log(data);
-    handleSave(data);
-    setIsEditMode(false);
-  };
-
-  const handleToggle = (field, value) => {
-    setValue(field, value); // React Hook Form function to update form field
-  };
-
-  const examenPleuroPulmonaireSchema = z.object({
-    id: z.number().optional(),
-    odCorrige: z.string(),
-    odNonCorrige: z.string(),
-    ogCorrige: z.string(),
-    ogNonCorrige: z.string(),
-    paupieresEtCorneesNormale: z.string(),
+  const examenOphtalmologiqueSchema = z.object({
+    id: z.number(),
+    odCorrige: z.string().nullable().optional(),
+    odNonCorrige: z.string().nullable().optional(),
+    ogCorrige: z.string().nullable().optional(),
+    ogNonCorrige: z.string().nullable().optional(),
+    paupieresEtCorneesNormale: z.enum(["true", "false"]).nullable().optional(),
   });
 
   const {
@@ -64,22 +37,121 @@ export default function ExamenOphtalmogique() {
     watch,
     reset,
   } = useForm({
-    resolver: zodResolver(examenPleuroPulmonaireSchema),
+    resolver: zodResolver(examenOphtalmologiqueSchema),
     defaultValues: {
+      id: 0,
       odCorrige: "",
       odNonCorrige: "",
       ogCorrige: "",
       ogNonCorrige: "",
-      paupieresEtCorneesNormale: "",
+      paupieresEtCorneesNormale: null,
     },
   });
-  console.log(errors);
+
+  const fetchData = async (url) => {
+    setLoading(true);
+    try {
+      const response = await instance.get(url);
+      console.log(response.data);
+      
+      const data = response.data;
+      console.log(data);
+
+      const hidden = new Set();
+      const fieldsToCheck = [
+        'paupieresEtCorneesNormale',
+        'odCorrige', 'odNonCorrige',
+        'ogCorrige', 'ogNonCorrige'
+      ];
+
+      fieldsToCheck.forEach(key => {
+          if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
+              hidden.add(key);
+          }
+      });
+      setHiddenFields(hidden);
+
+      const dataToReset = {
+        id: data.id,
+        paupieresEtCorneesNormale: data.paupieresEtCorneesNormale === HIDE_VALUE ? null : (data.paupieresEtCorneesNormale ?? null),
+        odCorrige: data.odCorrige === HIDE_VALUE ? "" : (data.odCorrige ?? ""),
+        odNonCorrige: data.odNonCorrige === HIDE_VALUE ? "" : (data.odNonCorrige ?? ""),
+        ogCorrige: data.ogCorrige === HIDE_VALUE ? "" : (data.ogCorrige ?? ""),
+        ogNonCorrige: data.ogNonCorrige === HIDE_VALUE ? "" : (data.ogNonCorrige ?? ""),
+      };
+
+      reset(dataToReset);
+
+    } catch (error) {
+      console.error("Error fetching ExamenOphtalmologique:", error);
+       setHiddenFields(new Set([
+        'paupieresEtCorneesNormale', 'odCorrige', 'odNonCorrige',
+        'ogCorrige', 'ogNonCorrige'
+       ]));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData(`/api/jockey/${id}/examen-ophtalmogique`);
+  }, [id]);
 
   const handleSave = async (data) => {
-    await instance.put(`/api/jockey/${id}/examen-ophtalmogique`, data);
-    fetchData();
-    setIsEditMode(false);
+    console.log(data);
+    try {
+      const payload = { id: data.id };
 
+
+      if (!hiddenFields.has('paupieresEtCorneesNormale')) payload.paupieresEtCorneesNormale = data.paupieresEtCorneesNormale;
+      if (!hiddenFields.has('odCorrige')) payload.odCorrige = data.odCorrige === "" ? null : data.odCorrige;
+      if (!hiddenFields.has('odNonCorrige')) payload.odNonCorrige = data.odNonCorrige === "" ? null : data.odNonCorrige;
+      if (!hiddenFields.has('ogCorrige')) payload.ogCorrige = data.ogCorrige === "" ? null : data.ogCorrige;
+      if (!hiddenFields.has('ogNonCorrige')) payload.ogNonCorrige = data.ogNonCorrige === "" ? null : data.ogNonCorrige;
+
+      console.log(payload);
+
+      await instance.put(`/api/jockey/${id}/examen-ophtalmologique`, payload);
+
+      fetchData(`/api/jockey/${id}/examen-ophtalmologique`);
+      setIsEditMode(false);
+    } catch (err) {
+      console.error("Error saving ExamenOphtalmologique:", err);
+    }
+  };
+
+  const onSubmit = (data) => handleSave(data);
+
+  const handleToggle = (fieldName, value) => {
+    if (!isEditMode || isHistory) return;
+    setValue(fieldName, value, { shouldValidate: true });
+  };
+
+  const handleHistoriqueClick = async () => {
+    if (isEditMode) return;
+    if (isHistory) {
+      fetchData(`/api/jockey/${id}/examen-ophtalmologique`);
+      setIsHistory(false);
+      setShowHistorique(false);
+    } else {
+      if (historique.length === 0) {
+        try {
+          const response = await instance.get(`/api/jockey/${id}/historique`);
+          setHistorique(response.data);
+        } catch(err) {
+           console.error("Error fetching history:", err);
+           setHistorique([]);
+        }
+      }
+      setShowHistorique(true);
+    }
+  };
+
+  const fetchItem = async (dossierid) => {
+    fetchData(`/api/jockey/${id}/examen-ophtalmologique/historique/${dossierid}`);
+    setIsHistory(true);
+    setIsEditMode(false);
+    setShowHistorique(false);
   };
 
   if (loading) {
@@ -105,209 +177,362 @@ export default function ExamenOphtalmogique() {
         </motion.div>
       </motion.div>
     );
-  } else {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
-      >
-        {/* Header Section */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+  }
+
+  const allFieldKeys = [
+    'paupieresEtCorneesNormale',
+    'odCorrige', 'odNonCorrige',
+    'ogCorrige', 'ogNonCorrige'
+  ];
+
+  const allFieldsAreHidden = allFieldKeys.every(key => hiddenFields.has(key));
+  const hasVisibleData = !allFieldsAreHidden;
+
+  return (
+    <motion.form
+      onSubmit={handleSubmit(onSubmit)}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
+    >
+      <AnimatePresence>
+        {isHistory && (
+          <motion.div
+            className="w-full max-w-md fixed top-20 left-1/2 -translate-x-1/2 z-50"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <ArrowLeft className="h-6 w-6 text-gray-700" />
+            <Alert
+              variant="default"
+              className="bg-white/95 backdrop-blur-sm border border-blue-100 shadow-lg"
+            >
+              <HistoryIcon className="size-5 text-blue-600 shrink-0" />
+              <AlertTitle className="text-sm font-semibold text-blue-800 mb-1">
+                Historique Mode Active
+              </AlertTitle>
+              <AlertDescription className="text-sm text-blue-700 leading-snug">
+                <div>
+                  Consultation seule - Les modifications sont désactivées dans
+                  ce mode{" "}
+                  <span
+                    onClick={handleHistoriqueClick}
+                    className="text-red-500 cursor-pointer hover:underline"
+                  >
+                    restaurer
+                  </span>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="flex items-center justify-between mb-8">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <ArrowLeft className="h-6 w-6 text-gray-700" />
+        </button>
+        <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">
+          Examen Ophtalmologique
+        </h1>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={handleHistoriqueClick}
+            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+              isEditMode || isHistory || !hasVisibleData
+                ? "bg-gray-200 cursor-not-allowed"
+                : "hover:bg-blue-50 hover:-translate-y-0.5"
+            }`}
+             disabled={isEditMode || isHistory || !hasVisibleData}
+          >
+            <History className="h-6 w-6 text-gray-600" />
+            <span className="text-sm font-medium text-gray-800">
+              {showHistorique ? "Cacher l'historique" : "Voir historique"}
+            </span>
           </button>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Examen CardioVasculaire
-          </h1>
-          <div className="flex gap-3">
+          {isEditMode ? (
             <button
-              onClick={() => setIsEditMode(true)}
-              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "hover:bg-blue-50 hover:-translate-y-0.5"
+              type="button"
+              onClick={() => {
+                 fetchData(`/api/jockey/${id}/examen-ophtalmologique`);
+                 setIsEditMode(false);
+               }}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
-              disabled={isEditMode}
+              disabled={isHistory || !hasVisibleData}
+            >
+              <Ban className="h-6 w-6 text-red-600" />
+              <span className="text-sm font-medium text-red-800">Annuler</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsEditMode(true)}
+              className={`p-2 pl-4 ${
+                isHistory && "cursor-not-allowed"
+              } rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+              }`}
+              disabled={isEditMode || isHistory || !hasVisibleData}
             >
               <Edit className="h-6 w-6 text-blue-600" />
               <span className="text-sm font-medium text-blue-800">
                 Modifier
               </span>
             </button>
-
-            <button
-              onClick={handleSubmit(onSubmit)}
-              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-                !isEditMode
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "hover:bg-green-50 hover:-translate-y-0.5"
-              }`}
-              disabled={!isEditMode}
+          )}
+          <button
+            type="submit"
+            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+              !isEditMode || isHistory || !hasVisibleData
+                ? "bg-gray-200 cursor-not-allowed"
+                : "hover:bg-green-50 hover:-translate-y-0.5"
+            } `}
+             disabled={!isEditMode || isHistory || !hasVisibleData}
+          >
+            <Save className="h-6 w-6 text-green-600" />
+            <span className="text-sm font-medium text-green-800">
+              Enregistrer
+            </span>
+          </button>
+        </div>
+      </div>
+      {showHistorique && (
+        <motion.div
+           initial={{ opacity: 0, y: -20 }}
+           animate={{ opacity: 1, y: 0 }}
+           exit={{ opacity: 0, y: -20 }}
+           transition={{ duration: 0.3 }}
+           className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+        >
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Versions Historiques</h3>
+          {historique.length > 0 ? historique.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => fetchItem(item.id)}
+              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
             >
-              <Save className="h-6 w-6 text-green-600" />
-              <span className="text-sm font-medium text-green-800">
-                Enregistrer
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Conditions Container */}
-        {/* Conditions Container */}
-        <div className="space-y-6">
-          {/* Paupières et cornées normales - boolean-like string field */}
-          {/* Paupières et cornées normales - boolean-like string field */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Paupières et cornées normales
-              </h2>
-            </div>
-            <div className="flex gap-2">
-              <button
-                disabled={!isEditMode}
-                onClick={() =>
-                  handleToggle("paupieresEtCorneesNormale", "true")
-                }
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  watch("paupieresEtCorneesNormale") === "true"
-                    ? "bg-green-500 text-white shadow-inner"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                } ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                Oui
-              </button>
-              <button
-                disabled={!isEditMode}
-                onClick={() =>
-                  handleToggle("paupieresEtCorneesNormale", "false")
-                }
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  watch("paupieresEtCorneesNormale") === "false"
-                    ? "bg-red-500 text-white shadow-inner"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                } ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                Non
-              </button>
-            </div>
-            {errors.paupieresEtCorneesNormale && (
-              <p className="text-red-500 text-sm mt-2">
-                {errors.paupieresEtCorneesNormale.message}
+              <p className="text-sm font-medium text-gray-700">
+                <span className="mr-2 text-gray-500">Date du dossier:</span>
+                {new Date(item.date).toLocaleString("fr-FR", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: false,
+                })}
               </p>
-            )}
-          </div>
-
-          {/* OD corrigé */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                OD Corrigé
-              </h2>
             </div>
-            <input
-              {...register("odCorrige")}
-              placeholder="Ex: 10/10"
-              disabled={!isEditMode}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors.odCorrige && (
-              <p className="text-red-500 text-sm mt-2">
-                {errors.odCorrige.message}
-              </p>
-            )}
-          </div>
-
-          {/* OD non corrigé */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                OD Non Corrigé
-              </h2>
-            </div>
-            <input
-              {...register("odNonCorrige")}
-              placeholder="Ex: 8/10"
-              disabled={!isEditMode}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors.odNonCorrige && (
-              <p className="text-red-500 text-sm mt-2">
-                {errors.odNonCorrige.message}
-              </p>
-            )}
-          </div>
-
-          {/* OG corrigé */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                OG Corrigé
-              </h2>
-            </div>
-            <input
-              {...register("ogCorrige")}
-              placeholder="Ex: 10/10"
-              disabled={!isEditMode}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors.ogCorrige && (
-              <p className="text-red-500 text-sm mt-2">
-                {errors.ogCorrige.message}
-              </p>
-            )}
-          </div>
-
-          {/* OG non corrigé */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                OG Non Corrigé
-              </h2>
-            </div>
-            <input
-              {...register("ogNonCorrige")}
-              placeholder="Ex: 7/10"
-              disabled={!isEditMode}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors.ogNonCorrige && (
-              <p className="text-red-500 text-sm mt-2">
-                {errors.ogNonCorrige.message}
-              </p>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
+          )) : (
+             <p className="text-gray-500 text-sm italic">Aucun historique disponible.</p>
+          )}
+        </motion.div>
+      )}
+      <div className="space-y-6">
+        {!hiddenFields.has('paupieresEtCorneesNormale') && (
+           <motion.div
+              key="paupieresEtCorneesNormale"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+           >
+             <div className="flex justify-between items-center mb-4">
+               <h2 className="text-lg font-semibold text-gray-800">
+                 Paupières et cornées normales
+               </h2>
+             </div>
+             <div className="flex gap-2">
+               <button
+                 type="button"
+                 disabled={!isEditMode || isHistory}
+                 onClick={() => handleToggle("paupieresEtCorneesNormale", "true")}
+                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                   watch("paupieresEtCorneesNormale") === "true"
+                     ? "bg-green-500 text-white shadow-inner"
+                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                 } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
+               >
+                 Oui
+               </button>
+               <button
+                 type="button"
+                 disabled={!isEditMode || isHistory}
+                 onClick={() => handleToggle("paupieresEtCorneesNormale", "false")}
+                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                   watch("paupieresEtCorneesNormale") === "false"
+                     ? "bg-red-500 text-white shadow-inner"
+                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                 } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
+               >
+                 Non
+               </button>
+             </div>
+             {errors.paupieresEtCorneesNormale && errors.paupieresEtCorneesNormale.message && (
+               <p className="text-red-500 text-sm mt-2">
+                 {errors.paupieresEtCorneesNormale.message}
+               </p>
+             )}
+           </motion.div>
+         )}
+         {!hiddenFields.has('odCorrige') && (
+           <motion.div
+             key="odCorrige"
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             exit={{ opacity: 0, y: 20 }}
+             transition={{ duration: 0.3 }}
+             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+           >
+             <div className="flex justify-between items-center mb-4">
+               <h2 className="text-lg font-semibold text-gray-800">
+                 OD Corrigé
+               </h2>
+             </div>
+             <input
+               {...register("odCorrige")}
+               placeholder="Ex: 10/10"
+               disabled={!isEditMode || isHistory}
+               type="text"
+               className={`w-full px-4 py-3 border ${
+                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+               } rounded-lg focus:outline-none focus:ring-2 ${
+                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
+               } transition-all ${
+                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
+               }`}
+             />
+             {errors.odCorrige && errors.odCorrige.message && (
+               <p className="text-red-500 text-sm mt-2">
+                 {errors.odCorrige.message}
+               </p>
+             )}
+           </motion.div>
+         )}
+          {!hiddenFields.has('odNonCorrige') && (
+           <motion.div
+             key="odNonCorrige"
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             exit={{ opacity: 0, y: 20 }}
+             transition={{ duration: 0.3 }}
+             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+           >
+             <div className="flex justify-between items-center mb-4">
+               <h2 className="text-lg font-semibold text-gray-800">
+                 OD Non Corrigé
+               </h2>
+             </div>
+             <input
+               {...register("odNonCorrige")}
+               placeholder="Ex: 8/10"
+               disabled={!isEditMode || isHistory}
+               type="text"
+               className={`w-full px-4 py-3 border ${
+                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+               } rounded-lg focus:outline-none focus:ring-2 ${
+                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
+               } transition-all ${
+                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
+               }`}
+             />
+             {errors.odNonCorrige && errors.odNonCorrige.message && (
+               <p className="text-red-500 text-sm mt-2">
+                 {errors.odNonCorrige.message}
+               </p>
+             )}
+           </motion.div>
+         )}
+         {!hiddenFields.has('ogCorrige') && (
+           <motion.div
+             key="ogCorrige"
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             exit={{ opacity: 0, y: 20 }}
+             transition={{ duration: 0.3 }}
+             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+           >
+             <div className="flex justify-between items-center mb-4">
+               <h2 className="text-lg font-semibold text-gray-800">
+                 OG Corrigé
+               </h2>
+             </div>
+             <input
+               {...register("ogCorrige")}
+               placeholder="Ex: 10/10"
+               disabled={!isEditMode || isHistory}
+               type="text"
+               className={`w-full px-4 py-3 border ${
+                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+               } rounded-lg focus:outline-none focus:ring-2 ${
+                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
+               } transition-all ${
+                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
+               }`}
+             />
+             {errors.ogCorrige && errors.ogCorrige.message && (
+               <p className="text-red-500 text-sm mt-2">
+                 {errors.ogCorrige.message}
+               </p>
+             )}
+           </motion.div>
+         )}
+         {!hiddenFields.has('ogNonCorrige') && (
+           <motion.div
+             key="ogNonCorrige"
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             exit={{ opacity: 0, y: 20 }}
+             transition={{ duration: 0.3 }}
+             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+           >
+             <div className="flex justify-between items-center mb-4">
+               <h2 className="text-lg font-semibold text-gray-800">
+                 OG Non Corrigé
+               </h2>
+             </div>
+             <input
+               {...register("ogNonCorrige")}
+               placeholder="Ex: 7/10"
+               disabled={!isEditMode || isHistory}
+               type="text"
+               className={`w-full px-4 py-3 border ${
+                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+               } rounded-lg focus:outline-none focus:ring-2 ${
+                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
+               } transition-all ${
+                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
+               }`}
+             />
+             {errors.ogNonCorrige && errors.ogNonCorrige.message && (
+               <p className="text-red-500 text-sm mt-2">
+                 {errors.ogNonCorrige.message}
+               </p>
+             )}
+           </motion.div>
+         )}
+      </div>
+       {allFieldsAreHidden && !loading && (
+         <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center text-gray-500 italic mt-8"
+         >
+           Aucune donnée d'examen ophtalmologique enregistrée ou visible pour ce dossier.
+         </motion.div>
+       )}
+    </motion.form>
+  );
 }

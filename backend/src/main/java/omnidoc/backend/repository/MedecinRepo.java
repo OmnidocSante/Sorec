@@ -3,6 +3,7 @@ package omnidoc.backend.repository;
 
 
 import omnidoc.backend.entity.users.Medecin;
+import omnidoc.backend.entity.users.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,4 +19,5 @@ public interface MedecinRepo extends JpaRepository<Medecin, Integer> {
     Optional<Medecin> findByUser_Email(String userEmail);
 
 
+    String user(User user);
 }

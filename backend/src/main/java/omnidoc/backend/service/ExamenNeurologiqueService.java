@@ -7,6 +7,8 @@ import omnidoc.backend.repository.DossierMedicaleRepo;
 import omnidoc.backend.repository.ExamenNeurologiqueRepo;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 import static omnidoc.backend.util.Util.decryptIfNotNull;
 import static omnidoc.backend.util.Util.encryptIfNotNull;
 
@@ -15,13 +17,19 @@ public class ExamenNeurologiqueService {
 
     private final DossierMedicaleRepo dossierMedicaleRepo;
     private final ExamenNeurologiqueRepo examenNeurologiqueRepo;
+    private final FieldVisibilityService fieldVisibilityService;
+    private final AccessService accessService;
 
-    public ExamenNeurologiqueService(DossierMedicaleRepo dossierMedicaleRepo, ExamenNeurologiqueRepo examenNeurologiqueRepo) {
+    public ExamenNeurologiqueService(DossierMedicaleRepo dossierMedicaleRepo, ExamenNeurologiqueRepo examenNeurologiqueRepo, FieldVisibilityService fieldVisibilityService, AccessService accessService) {
         this.dossierMedicaleRepo = dossierMedicaleRepo;
         this.examenNeurologiqueRepo = examenNeurologiqueRepo;
+        this.fieldVisibilityService = fieldVisibilityService;
+        this.accessService = accessService;
     }
 
     public ExamenNeurologique fetchExamenPleuroPulmonique(int jockeyId) throws Exception {
+        accessService.verifyAccess(jockeyId);
+
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));
         return getExamenNeurologique(dossierMedicale);
     }
@@ -33,17 +41,53 @@ public class ExamenNeurologiqueService {
     private ExamenNeurologique getExamenNeurologique(DossierMedicale dossierMedicale) throws Exception {
         ExamenNeurologique examenNeurologique = dossierMedicale.getExamenNeurologique();
         examenNeurologique.setDossierMedicale(dossierMedicale);
-        examenNeurologique.setReflexePupillaire(decryptIfNotNull(examenNeurologique.getReflexePupillaire()));
-        examenNeurologique.setReflexesOstéoTendineux(decryptIfNotNull(examenNeurologique.getReflexesOstéoTendineux()));
-        examenNeurologique.setCoordination(decryptIfNotNull(examenNeurologique.getCoordination()));
-        examenNeurologique.setEquilibre(decryptIfNotNull(examenNeurologique.getEquilibre()));
-        examenNeurologique.setSensibilite(decryptIfNotNull(examenNeurologique.getSensibilite()));
-        examenNeurologique.setMotricite(decryptIfNotNull(examenNeurologique.getMotricite()));
-        examenNeurologique.setTonicite(decryptIfNotNull(examenNeurologique.getTonicite()));
-        examenNeurologique.setAutres(decryptIfNotNull(examenNeurologique.getAutres()));
+
+        Set<String> hiddenFields = fieldVisibilityService.getHiddenFields("examen_neurologique");
+
+        if (!hiddenFields.contains("reflexe_pupillaire"))
+            examenNeurologique.setReflexePupillaire(decryptIfNotNull(examenNeurologique.getReflexePupillaire()));
+        else
+            examenNeurologique.setReflexePupillaire("HIDDEN");
+
+        if (!hiddenFields.contains("reflexes_ostéo_tendineux"))
+            examenNeurologique.setReflexesOstéoTendineux(decryptIfNotNull(examenNeurologique.getReflexesOstéoTendineux()));
+        else
+            examenNeurologique.setReflexesOstéoTendineux("HIDDEN");
+
+        if (!hiddenFields.contains("coordination"))
+            examenNeurologique.setCoordination(decryptIfNotNull(examenNeurologique.getCoordination()));
+        else
+            examenNeurologique.setCoordination("HIDDEN");
+
+        if (!hiddenFields.contains("equilibre"))
+            examenNeurologique.setEquilibre(decryptIfNotNull(examenNeurologique.getEquilibre()));
+        else
+            examenNeurologique.setEquilibre("HIDDEN");
+
+        if (!hiddenFields.contains("sensibilite"))
+            examenNeurologique.setSensibilite(decryptIfNotNull(examenNeurologique.getSensibilite()));
+        else
+            examenNeurologique.setSensibilite("HIDDEN");
+
+        if (!hiddenFields.contains("motricite"))
+            examenNeurologique.setMotricite(decryptIfNotNull(examenNeurologique.getMotricite()));
+        else
+            examenNeurologique.setMotricite("HIDDEN");
+
+        if (!hiddenFields.contains("tonicite"))
+            examenNeurologique.setTonicite(decryptIfNotNull(examenNeurologique.getTonicite()));
+        else
+            examenNeurologique.setTonicite("HIDDEN");
+
+        if (!hiddenFields.contains("autres"))
+            examenNeurologique.setAutres(decryptIfNotNull(examenNeurologique.getAutres()));
+        else
+            examenNeurologique.setAutres("HIDDEN");
 
         return examenNeurologique;
     }
+
+
 
     public void updateExamenNeurologique(int jockeyId, ExamenNeurologique examenNeurologique) throws Exception {
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("not found"));

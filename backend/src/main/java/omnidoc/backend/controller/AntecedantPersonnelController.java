@@ -6,10 +6,12 @@ import omnidoc.backend.entity.enums.SystemeMedical;
 import omnidoc.backend.service.AntecedantPersonnelService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@PreAuthorize("hasAuthority('MEDECIN')")
 @RestController
 @RequestMapping("/api/jockey/{jockeyId}/antecedent-personnel")
 
@@ -38,6 +40,7 @@ public class AntecedantPersonnelController {
     public ResponseEntity<List<AntecedentPersonnelDTO>> getAppareilRespiratoire(@PathVariable int jockeyId) throws Exception {
         return ResponseEntity.ok(antecedantPersonnelService.getAntecedentBysysteme(jockeyId, SystemeMedical.APPAREIL_RESPIRATOIRE));
     }
+
 
     @GetMapping("/systeme-nerveux")
     public ResponseEntity<List<AntecedentPersonnelDTO>> getSystemeNerveux(@PathVariable int jockeyId) throws Exception {

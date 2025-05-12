@@ -4,7 +4,12 @@ package omnidoc.backend.controller;
 import omnidoc.backend.entity.examens.electrocardiogrammes.ElectrocardiogrammeEffort;
 import omnidoc.backend.service.ElectrocardiogrammeEffortService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+
+
+@PreAuthorize("hasAuthority('MEDECIN')")
 
 @RestController
 @RequestMapping("/api/jockey/{jockeyId}/electrocardiogramme-effort")

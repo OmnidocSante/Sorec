@@ -13,14 +13,20 @@ export default function AntecedentFamiliaux() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
+  // State to track hidden fields based on backend value being "HIDDEN"
+  const [hiddenFields, setHiddenFields] = useState(new Set());
 
+  // Define the specific value that triggers hiding
+  const HIDE_VALUE = "HIDDEN";
+
+  // Zod schema remains the same, allowing null/optional strings
   const antecedentSchema = z.object({
     id: z.number(),
-    medicaux: z.string(),
-    asthme: z.string(),
-    mortSubite: z.string(),
-    maladiesMetaboliques: z.string(),
-    autres: z.string(),
+    medicaux: z.string().nullable().optional(),
+    asthme: z.string().nullable().optional(),
+    mortSubite: z.string().nullable().optional(),
+    maladiesMetaboliques: z.string().nullable().optional(),
+    autres: z.string().nullable().optional(),
   });
 
   const {
@@ -28,11 +34,12 @@ export default function AntecedentFamiliaux() {
     handleSubmit,
     reset,
     formState: { errors },
+    // getValues // No longer strictly needed for this pattern logic
   } = useForm({
     resolver: zodResolver(antecedentSchema),
     defaultValues: {
       id: 0,
-      medicaux: "",
+      medicaux: "", // Default to empty string or null
       asthme: "",
       mortSubite: "",
       maladiesMetaboliques: "",
@@ -41,20 +48,61 @@ export default function AntecedentFamiliaux() {
   });
 
   const fetchData = async (url) => {
+    setLoading(true); // Set loading to true before fetch
     try {
       const response = await instance.get(url);
-      reset({
-        id: response.data.id,
-        medicaux: response.data.medicaux ?? "",
-        asthme: response.data.asthme ?? "",
-        mortSubite: response.data.mortSubite ?? "",
-        maladiesMetaboliques: response.data.maladiesMetaboliques ?? "",
-        autres: response.data.autres ?? "",
+      
+      const data = response.data;
+      console.log("Fetched data:", data); // Log fetched data
+
+      // Determine hidden fields based on backend value being "HIDDEN"
+      const hidden = new Set();
+      const fieldsToCheck = [
+        "medicaux",
+        "asthme",
+        "mortSubite",
+        "maladiesMetaboliques",
+        "autres",
+      ];
+
+      fieldsToCheck.forEach((key) => {
+        // Check if the key exists in the response data and its value is "HIDDEN"
+        if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
+          hidden.add(key);
+        }
       });
+      setHiddenFields(hidden);
+
+      // Prepare data for reset.
+      // If a field's value was "HIDDEN", reset it to "" or null for the form state.
+      // Otherwise, use the fetched value (which could be null or a string).
+      const dataToReset = {
+        id: data.id,
+        medicaux: data.medicaux === HIDE_VALUE ? "" : data.medicaux ?? "",
+        asthme: data.asthme === HIDE_VALUE ? "" : data.asthme ?? "",
+        mortSubite: data.mortSubite === HIDE_VALUE ? "" : data.mortSubite ?? "",
+        maladiesMetaboliques:
+          data.maladiesMetaboliques === HIDE_VALUE
+            ? ""
+            : data.maladiesMetaboliques ?? "",
+        autres: data.autres === HIDE_VALUE ? "" : data.autres ?? "",
+      };
+
+      reset(dataToReset);
     } catch (err) {
       console.error("Error fetching AntecedentFamiliaux:", err);
+      // On error, reset to default empty state and clear hidden fields
+      reset({
+        id: parseInt(id) || 0, // Attempt to use id from params if fetch failed completely
+        medicaux: "",
+        asthme: "",
+        mortSubite: "",
+        maladiesMetaboliques: "",
+        autres: "",
+      });
+      setHiddenFields(new Set()); // Clear hidden state on fetch error
     } finally {
-      setLoading(false);
+      setLoading(false); // Set loading to false after fetch attempt
     }
   };
 
@@ -63,69 +111,101 @@ export default function AntecedentFamiliaux() {
   }, [id]);
 
   const handleSave = async (data) => {
+    console.log("Form data before processing:", data); // Log form data
+
     try {
-      await Promise.all([
-        await instance.put(`/api/jockey/${id}/antecedent-familiaux`, data),
-        fetchData(`/api/jockey/${id}/antecedent-familiaux`),
-      ]);
+      // Create payload with only non-hidden fields.
+      // The form data for hidden fields will be "" due to reset,
+      // but they are excluded from the payload here.
+      const payload = { id: data.id };
+      // Include field only if it was NOT hidden (i.e., not "HIDDEN" from backend)
+      // Convert empty strings in non-hidden fields to null if the backend expects null for empty.
+      if (!hiddenFields.has("medicaux"))
+        payload.medicaux = data.medicaux === "" ? null : data.medicaux;
+      if (!hiddenFields.has("asthme"))
+        payload.asthme = data.asthme === "" ? null : data.asthme;
+      if (!hiddenFields.has("mortSubite"))
+        payload.mortSubite = data.mortSubite === "" ? null : data.mortSubite;
+      if (!hiddenFields.has("maladiesMetaboliques"))
+        payload.maladiesMetaboliques =
+          data.maladiesMetaboliques === "" ? null : data.maladiesMetaboliques;
+      if (!hiddenFields.has("autres"))
+        payload.autres = data.autres === "" ? null : data.autres;
+
+      console.log("Saving payload:", payload); // Log payload being sent
+
+      await instance.put(`/api/jockey/${id}/antecedent-familiaux`, payload);
+
+      // Refetch data to get the latest state from the backend, including potential "HIDDEN" values
+      fetchData(`/api/jockey/${id}/antecedent-familiaux`);
       setIsEditMode(false);
     } catch (err) {
       console.error("Error saving AntecedentFamiliaux:", err);
+      // Potentially show a user-facing error message here
     }
   };
 
+  // Use handleSubmit provided by react-hook-form
   const onSubmit = (data) => handleSave(data);
 
   const [historique, setHistorique] = useState([]);
   const [showHistorique, setShowHistorique] = useState(false);
+  // isHistory state remains for historical view logic
+  const [isHistory, setIsHistory] = useState(false);
+
   const handleHistoriqueClick = async () => {
+    // Disable if in edit mode
+    if (isEditMode) return;
+
     if (isHistory) {
+      // If currently viewing history, restore main view
       fetchData(`/api/jockey/${id}/antecedent-familiaux`);
       setIsHistory(false);
-      setShowHistorique(!showHistorique);
+      setShowHistorique(false); // Hide historique list when restoring
     } else {
+      // If not viewing history, fetch and show history
       if (historique.length === 0) {
-        const response = await instance.get(`/api/jockey/${id}/historique`);
-
-        setHistorique(response.data);
+        try {
+          // Assuming this endpoint fetches general history items applicable to this section
+          const response = await instance.get(`/api/jockey/${id}/historique`);
+          setHistorique(response.data);
+        } catch (err) {
+          console.error("Error fetching history:", err);
+          setHistorique([]); // Clear history or set to empty on error
+        }
       }
-      setShowHistorique(!showHistorique);
+      setShowHistorique(true); // Show historique list
     }
   };
 
-  const [isHistory, setIsHistory] = useState(false);
-
   const fetchItem = async (dossierid) => {
+    // Fetch specific history item and treat it as historical view
     fetchData(`/api/jockey/${id}/antecedent-familiaux/historique/${dossierid}`);
     setIsHistory(true);
-    setIsEditMode(false);
+    setIsEditMode(false); // History view is read-only
+    setShowHistorique(false); // Hide the history list itself when viewing an item
   };
-  console.log();
 
-  if (loading) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen flex items-center justify-center bg-bay-of-many-50"
-      >
-        <motion.div
-          className="flex flex-col items-center space-y-4 p-6 bg-white border border-bay-of-many-200 rounded-xl shadow-md"
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-        >
-          <motion.div
-            className="w-12 h-12 border-4 border-bay-of-many-400 border-t-transparent rounded-full animate-spin"
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-          />
-          <p className="text-bay-of-many-700 font-medium text-sm tracking-wide">
-            Chargement des informations
-          </p>
-        </motion.div>
-      </motion.div>
-    );
-  }
+  // Define field configurations
+  const allFieldConfigs = [
+    { key: "medicaux", label: "Médicaux" }, // Assuming textarea is appropriate
+    { key: "asthme", label: "Asthme" },
+    { key: "mortSubite", label: "Mort Subite" },
+    {
+      key: "maladiesMetaboliques",
+      label: "Maladies Métaboliques",
+      type: "textarea",
+    },
+    { key: "autres", label: "Autres Observations", type: "textarea" },
+  ];
+
+  // Filter out hidden fields for rendering
+  const visibleFieldConfigs = allFieldConfigs.filter(
+    ({ key }) => !hiddenFields.has(key)
+  );
+
+  // Determine if there is any visible data
+  const hasVisibleData = visibleFieldConfigs.length > 0;
 
   return (
     <motion.form
@@ -157,10 +237,11 @@ export default function AntecedentFamiliaux() {
                   Consultation seule - Les modifications sont désactivées dans
                   ce mode
                   <span
-                    onClick={handleHistoriqueClick}
-                    className="text-red-500 cursor-pointer "
+                    onClick={handleHistoriqueClick} // Click to restore original view
+                    className="text-red-500 cursor-pointer hover:underline"
                   >
-                    {"  "}restaurer
+                    {" "}
+                    restaurer
                   </span>
                 </div>
               </AlertDescription>
@@ -178,19 +259,20 @@ export default function AntecedentFamiliaux() {
         >
           <ArrowLeft className="h-6 w-6 text-gray-700" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">
           Antécédents Familiaux
         </h1>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={handleHistoriqueClick}
+            // Disable history button if in edit mode, already in history mode, or no visible data to view history for
             className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode
+              isEditMode || isHistory || !hasVisibleData
                 ? "bg-gray-200 cursor-not-allowed"
                 : "hover:bg-blue-50 hover:-translate-y-0.5"
             }`}
-            disabled={isEditMode}
+            disabled={isEditMode || isHistory || !hasVisibleData} // Disabled when editing, viewing history, or no visible data
           >
             <History className="h-6 w-6 text-gray-600" />
             <span className="text-sm font-medium text-gray-800">
@@ -201,18 +283,23 @@ export default function AntecedentFamiliaux() {
           {isEditMode ? (
             <button
               type="button"
-              onClick={() => setIsEditMode(false)}
+              onClick={() => {
+                // When cancelling, reset form to initial fetched data
+                fetchData(`/api/jockey/${id}/antecedent-familiaux`);
+                setIsEditMode(false);
+              }}
               className={`p-2 pl-4 ${
                 isHistory && "cursor-not-allowed"
               } rounded-lg flex items-center gap-2 transition-all ${
                 isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
-              disabled={isHistory}
+              disabled={isHistory || !hasVisibleData} // Cannot cancel edit mode if in history view or no visible data
             >
               <Ban className="h-6 w-6 text-red-600" />
               <span className="text-sm font-medium text-red-800">Annuler</span>
             </button>
           ) : (
+            // Disable "Modifier" if there is no visible data
             <button
               type="button"
               onClick={() => setIsEditMode(true)}
@@ -221,7 +308,7 @@ export default function AntecedentFamiliaux() {
               } rounded-lg flex items-center gap-2 transition-all ${
                 isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
-              disabled={isEditMode || isHistory}
+              disabled={isEditMode || isHistory || !hasVisibleData} // Cannot enter edit mode if already editing, viewing history, or no visible data
             >
               <Edit className="h-6 w-6 text-blue-600" />
               <span className="text-sm font-medium text-blue-800">
@@ -233,11 +320,11 @@ export default function AntecedentFamiliaux() {
           <button
             type="submit"
             className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              !isEditMode && isHistory
+              !isEditMode || isHistory || !hasVisibleData // Disable if not in edit mode, in history, OR if no visible data to save
                 ? "bg-gray-200 cursor-not-allowed"
                 : "hover:bg-green-50 hover:-translate-y-0.5"
             } `}
-            disabled={!isEditMode || isHistory}
+            disabled={!isEditMode || isHistory || !hasVisibleData} // Disabled unless in edit mode and not history, and there's visible data
           >
             <Save className="h-6 w-6 text-green-600" />
             <span className="text-sm font-medium text-green-800">
@@ -246,66 +333,115 @@ export default function AntecedentFamiliaux() {
           </button>
         </div>
       </div>
-      {showHistorique && (
-        <div className="my-4 space-y-2">
-          {historique.map((item) => (
-              <div
-              key={item.id}
-              onClick={() => fetchItem(item.id)}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer"
-            >
-            <p className="text-sm font-medium">
-              <span className="mr-2">rdv date:</span>
 
-              {new Date(item.date).toLocaleString("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false,
-              })}
+      {/* Historique List */}
+      {showHistorique && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+        >
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+            Versions Historiques
+          </h3>
+          {historique.length > 0 ? (
+            historique.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => fetchItem(item.id)}
+                className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
+              >
+                <p className="text-sm font-medium text-gray-700">
+                  <span className="mr-2 text-gray-500">Date du dossier:</span>
+                  {new Date(item.date).toLocaleString("fr-FR", {
+                    // Changed to fr-FR for locale consistency
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                  })}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm italic">
+              Aucun historique disponible.
             </p>
-            </div>
-          ))}
+          )}
+        </motion.div>
+      )}
+
+      {/* Fields - Filtered */}
+      {/* Only render this section if there are visible fields */}
+      {hasVisibleData && ( // Use hasVisibleData to conditionally render the container div
+        <div className="space-y-6">
+          {visibleFieldConfigs.map(
+            (
+              { key, label } // This map now uses the filtered list
+            ) => (
+              <motion.div // Added motion for potential future animations on appearance/disappearance
+                key={key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {label}
+                  </h2>
+                </div>
+                {/* Render input or textarea based on inferred type */}
+                <input
+                  {...register(key)}
+                  placeholder={label + "..."}
+                  disabled={!isEditMode || isHistory} // Disable if not in edit mode or if in history
+                  type="text" // Assuming text input for simplicity
+                  className={`w-full px-4 py-3 border ${
+                    isEditMode && !isHistory
+                      ? "border-blue-200"
+                      : "border-gray-200" // Change border color based on edit mode
+                  } rounded-lg focus:outline-none focus:ring-2 ${
+                    isEditMode && !isHistory
+                      ? "focus:ring-blue-300"
+                      : "focus:ring-gray-300" // Change ring color
+                  } transition-all ${
+                    // Removed resize-y as it's input, not textarea
+                    !isEditMode || isHistory
+                      ? "bg-gray-50 cursor-not-allowed"
+                      : "" // Grey out and disable cursor when not editable
+                  }`}
+                />
+
+                {/* Errors for top-level fields */}
+                {errors[key] && errors[key].message && (
+                  <p className="text-red-500 text-sm mt-2">
+                    {errors[key].message}
+                  </p>
+                )}
+              </motion.div>
+            )
+          )}
         </div>
       )}
 
-      {/* Fields */}
-      <div className="space-y-6">
-        {[
-          { key: "medicaux", label: "Médicaux" },
-          { key: "asthme", label: "Asthme" },
-          { key: "mortSubite", label: "Mort Subite" },
-          { key: "maladiesMetaboliques", label: "Maladies Métaboliques" },
-          { key: "autres", label: "Autres Observations" },
-        ].map(({ key, label }) => (
-          <div
-            key={key}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
-            </div>
-            <input
-              {...register(key)}
-              placeholder={label + "..."}
-              disabled={!isEditMode}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all resize-none ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors[key] && (
-              <p className="text-red-500 text-sm mt-2">{errors[key].message}</p>
-            )}
-          </div>
-        ))}
-      </div>
+      {/* Message if all fields are hidden */}
+      {/* Show this message only if not loading and there is no visible data */}
+      {!hasVisibleData && !loading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-gray-500 italic mt-8"
+        >
+          Aucun antécédent familial enregistré ou visible pour ce dossier.
+        </motion.div>
+      )}
     </motion.form>
   );
 }

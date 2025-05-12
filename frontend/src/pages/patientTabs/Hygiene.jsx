@@ -1,31 +1,36 @@
 import instance from "@/auth/AxiosInstance";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
-import { ArrowLeft, Edit, Save } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Edit, Save, Ban, HistoryIcon, History } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
-import { AnimatePresence } from "framer-motion";
-import { Ban, HistoryIcon, History } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+const hygieneSchema = z.object({
+  id: z.number(),
+  habitudesAlimentaire: z.string().nullable().optional(),
+  tabac: z.string().nullable().optional(),
+  alcool: z.string().nullable().optional(),
+  hydratation: z.string().nullable().optional(),
+  sommeil: z.string().nullable().optional(),
+  autres: z.string().nullable().optional(),
+  allergiesAlimentaire: z.string().nullable().optional(),
+});
 
 export default function Hygiene() {
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
+  const [hiddenFields, setHiddenFields] = useState(new Set());
 
-  const hygieneSchema = z.object({
-    id: z.number(),
-    habitudesAlimentaire: z.string(),
-    tabac: z.string(),
-    alcool: z.string(),
-    hydratation: z.string(),
-    sommeil: z.string(),
-    autres: z.string(),
-    allergiesAlimentaire: z.string(),
-  });
+  const [historique, setHistorique] = useState([]);
+  const [showHistorique, setShowHistorique] = useState(false);
+  const [isHistory, setIsHistory] = useState(false);
+
+  const HIDE_VALUE = "HIDDEN";
 
   const {
     register,
@@ -47,20 +52,49 @@ export default function Hygiene() {
   });
 
   const fetchData = async (url) => {
+    setLoading(true);
     try {
       const response = await instance.get(url);
-      reset({
-        id: response.data.id,
-        habitudesAlimentaire: response.data.habitudesAlimentaire ?? "",
-        tabac: response.data.tabac ?? "",
-        alcool: response.data.alcool ?? "",
-        hydratation: response.data.hydratation ?? "",
-        sommeil: response.data.sommeil ?? "",
-        autres: response.data.autres ?? "",
-        allergiesAlimentaire: response.data.allergiesAlimentaire ?? "",
+      const data = response.data;
+      console.log(data);
+
+      const hidden = new Set();
+      const fieldsToCheck = [
+        "habitudesAlimentaire", "tabac", "alcool", "hydratation",
+        "sommeil", "autres", "allergiesAlimentaire",
+      ];
+
+      fieldsToCheck.forEach(key => {
+          if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
+              hidden.add(key);
+          }
       });
+      setHiddenFields(hidden);
+
+      const dataToReset = {
+          id: data.id,
+          habitudesAlimentaire: data.habitudesAlimentaire === HIDE_VALUE ? "" : (data.habitudesAlimentaire ?? ""),
+          tabac: data.tabac === HIDE_VALUE ? "" : (data.tabac ?? ""),
+          alcool: data.alcool === HIDE_VALUE ? "" : (data.alcool ?? ""),
+          hydratation: data.hydratation === HIDE_VALUE ? "" : (data.hydratation ?? ""),
+          sommeil: data.sommeil === HIDE_VALUE ? "" : (data.sommeil ?? ""),
+          autres: data.autres === HIDE_VALUE ? "" : (data.autres ?? ""),
+          allergiesAlimentaire: data.allergiesAlimentaire === HIDE_VALUE ? "" : (data.allergiesAlimentaire ?? ""),
+      };
+
+      reset(dataToReset);
+
     } catch (err) {
       console.error("Error fetching Hygiene:", err);
+        reset({
+          id: parseInt(id) || 0,
+          habitudesAlimentaire: "", tabac: "", alcool: "", hydratation: "",
+          sommeil: "", autres: "", allergiesAlimentaire: "",
+        });
+       setHiddenFields(new Set([
+         "habitudesAlimentaire", "tabac", "alcool", "hydratation",
+         "sommeil", "autres", "allergiesAlimentaire",
+       ]));
     } finally {
       setLoading(false);
     }
@@ -71,12 +105,23 @@ export default function Hygiene() {
   }, [id]);
 
   const handleSave = async (data) => {
+    console.log(data);
     try {
-      await Promise.all([
-        await instance.put(`/api/jockey/${id}/hygiene`, data),
-        fetchData(`/api/jockey/${id}/hygiene`),
-      ]);
+      const payload = { id: data.id };
+      console.log(hiddenFields);
 
+      if (!hiddenFields.has("habitudesAlimentaire")) payload.habitudesAlimentaire = data.habitudesAlimentaire === "" ? null : data.habitudesAlimentaire;
+      if (!hiddenFields.has("tabac")) payload.tabac = data.tabac === "" ? null : data.tabac;
+      if (!hiddenFields.has("alcool")) payload.alcool = data.alcool === "" ? null : data.alcool;
+      if (!hiddenFields.has("hydratation")) payload.hydratation = data.hydratation === "" ? null : data.hydratation;
+      if (!hiddenFields.has("sommeil")) payload.sommeil = data.sommeil === "" ? null : data.sommeil;
+      if (!hiddenFields.has("autres")) payload.autres = data.autres === "" ? null : data.autres;
+      if (!hiddenFields.has("allergiesAlimentaire")) payload.allergiesAlimentaire = data.allergiesAlimentaire === "" ? null : data.allergiesAlimentaire;
+
+      console.log(payload);
+
+      await instance.put(`/api/jockey/${id}/hygiene`, payload);
+      fetchData(`/api/jockey/${id}/hygiene`);
       setIsEditMode(false);
     } catch (err) {
       console.error("Error saving Hygiene:", err);
@@ -85,29 +130,31 @@ export default function Hygiene() {
 
   const onSubmit = (data) => handleSave(data);
 
-  const [historique, setHistorique] = useState([]);
-  const [showHistorique, setShowHistorique] = useState(false);
   const handleHistoriqueClick = async () => {
+    if (isEditMode) return;
     if (isHistory) {
       fetchData(`/api/jockey/${id}/hygiene`);
       setIsHistory(false);
-      setShowHistorique(!showHistorique);
+      setShowHistorique(false);
     } else {
       if (historique.length === 0) {
-        const response = await instance.get(`/api/jockey/${id}/historique`);
-
-        setHistorique(response.data);
+        try {
+          const response = await instance.get(`/api/jockey/${id}/historique`);
+          setHistorique(response.data);
+        } catch (err) {
+          console.error("Error fetching history:", err);
+          setHistorique([]);
+        }
       }
-      setShowHistorique(!showHistorique);
+      setShowHistorique(true);
     }
   };
-
-  const [isHistory, setIsHistory] = useState(false);
 
   const fetchItem = async (dossierid) => {
     fetchData(`/api/jockey/${id}/hygiene/historique/${dossierid}`);
     setIsHistory(true);
     setIsEditMode(false);
+    setShowHistorique(false);
   };
 
   if (loading) {
@@ -134,6 +181,18 @@ export default function Hygiene() {
       </motion.div>
     );
   }
+
+  const fieldConfigs = [
+    { key: "habitudesAlimentaire", label: "Habitudes Alimentaires" },
+    { key: "tabac", label: "Tabac"},
+    { key: "alcool", label: "Alcool"},
+    { key: "hydratation", label: "Hydratation" },
+    { key: "sommeil", label: "Sommeil" },
+    { key: "autres", label: "Autres Observations" },
+    { key: "allergiesAlimentaire", label: "Allergies Alimentaires" },
+  ].filter(({ key }) => !hiddenFields.has(key));
+
+  const hasVisibleData = fieldConfigs.length > 0;
 
   return (
     <motion.form
@@ -163,10 +222,10 @@ export default function Hygiene() {
               <AlertDescription className="text-sm text-blue-700 leading-snug">
                 <div>
                   Consultation seule - Les modifications sont désactivées dans
-                  ce mode{"              "}
+                  ce mode{" "}
                   <span
                     onClick={handleHistoriqueClick}
-                    className="text-red-500 cursor-pointer "
+                    className="text-red-500 cursor-pointer hover:underline"
                   >
                     restaurer
                   </span>
@@ -177,7 +236,6 @@ export default function Hygiene() {
         )}
       </AnimatePresence>
 
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <button
           type="button"
@@ -186,17 +244,19 @@ export default function Hygiene() {
         >
           <ArrowLeft className="h-6 w-6 text-gray-700" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-800">Hygiene</h1>
+        <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">
+          Hygiène
+        </h1>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={handleHistoriqueClick}
             className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode
+              isEditMode || isHistory || !hasVisibleData
                 ? "bg-gray-200 cursor-not-allowed"
                 : "hover:bg-blue-50 hover:-translate-y-0.5"
             }`}
-            disabled={isEditMode}
+            disabled={isEditMode || isHistory || !hasVisibleData}
           >
             <History className="h-6 w-6 text-gray-600" />
             <span className="text-sm font-medium text-gray-800">
@@ -207,13 +267,16 @@ export default function Hygiene() {
           {isEditMode ? (
             <button
               type="button"
-              onClick={() => setIsEditMode(false)}
+              onClick={() => {
+                 fetchData(`/api/jockey/${id}/hygiene`);
+                 setIsEditMode(false);
+               }}
               className={`p-2 pl-4 ${
                 isHistory && "cursor-not-allowed"
               } rounded-lg flex items-center gap-2 transition-all ${
                 isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
-              disabled={isHistory}
+              disabled={isHistory || !hasVisibleData}
             >
               <Ban className="h-6 w-6 text-red-600" />
               <span className="text-sm font-medium text-red-800">Annuler</span>
@@ -227,7 +290,7 @@ export default function Hygiene() {
               } rounded-lg flex items-center gap-2 transition-all ${
                 isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
-              disabled={isEditMode || isHistory}
+              disabled={isEditMode || isHistory || !hasVisibleData}
             >
               <Edit className="h-6 w-6 text-blue-600" />
               <span className="text-sm font-medium text-blue-800">
@@ -239,11 +302,11 @@ export default function Hygiene() {
           <button
             type="submit"
             className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              !isEditMode && isHistory
+              !isEditMode || isHistory || !hasVisibleData
                 ? "bg-gray-200 cursor-not-allowed"
                 : "hover:bg-green-50 hover:-translate-y-0.5"
             } `}
-            disabled={!isEditMode || isHistory}
+            disabled={!isEditMode || isHistory || !hasVisibleData}
           >
             <Save className="h-6 w-6 text-green-600" />
             <span className="text-sm font-medium text-green-800">
@@ -252,66 +315,104 @@ export default function Hygiene() {
           </button>
         </div>
       </div>
+
       {showHistorique && (
-        <div className="my-4 space-y-2">
-          {historique.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => fetchItem(item.id)}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer"
-            >
-              <p className="text-sm font-medium">
-                {new Date(item.date).toLocaleString("en-US", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                  hour12: false,
-                })}
-              </p>
-            </div>
-          ))}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+        >
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+            Versions Historiques
+          </h3>
+          {historique.length > 0 ? (
+            historique.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => fetchItem(item.id)}
+                className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
+              >
+                <p className="text-sm font-medium text-gray-700">
+                  <span className="mr-2 text-gray-500">Date du dossier:</span>
+                  {new Date(item.date).toLocaleString("fr-FR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                  })}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm italic">
+              Aucun historique disponible.
+            </p>
+          )}
+        </motion.div>
+      )}
+
+      {hasVisibleData && (
+        <div className="space-y-6">
+          {fieldConfigs.map(
+            (
+              { key, label }
+            ) => (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
+                </div>
+
+                <input
+                  {...register(key)}
+                  placeholder={label + "..."}
+                  disabled={!isEditMode || isHistory}
+                  className={`w-full px-4 py-3 border ${
+                    isEditMode && !isHistory
+                      ? "border-blue-200"
+                      : "border-gray-200"
+                  } rounded-lg focus:outline-none focus:ring-2 ${
+                    isEditMode && !isHistory
+                      ? "focus:ring-blue-300"
+                      : "focus:ring-gray-300"
+                  } transition-all ${
+                    !isEditMode || isHistory
+                      ? "bg-gray-50 cursor-not-allowed"
+                      : ""
+                  }`}
+                />
+
+                {errors[key] && errors[key].message && (
+                  <p className="text-red-500 text-sm mt-2">
+                    {errors[key].message}
+                  </p>
+                )}
+              </motion.div>
+            )
+          )}
         </div>
       )}
 
-      {/* Fields */}
-      <div className="space-y-6">
-        {[
-          { key: "habitudesAlimentaire", label: "Habitudes Alimentaires" },
-          { key: "tabac", label: "Tabac" },
-          { key: "alcool", label: "Alcool" },
-          { key: "hydratation", label: "Hydratation" },
-          { key: "sommeil", label: "Sommeil" },
-          { key: "autres", label: "Autres Observations" },
-          { key: "allergiesAlimentaire", label: "Allergies Alimentaires" },
-        ].map(({ key, label }) => (
-          <div
-            key={key}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
-            </div>
-            <input
-              {...register(key)}
-              placeholder={label + "..."}
-              disabled={!isEditMode}
-              className={`w-full px-4 py-3 border ${
-                isEditMode ? "border-blue-200" : "border-gray-200"
-              } rounded-lg focus:outline-none focus:ring-2 ${
-                isEditMode ? "focus:ring-blue-300" : "focus:ring-gray-300"
-              } transition-all resize-none ${
-                !isEditMode ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors[key] && (
-              <p className="text-red-500 text-sm mt-2">{errors[key].message}</p>
-            )}
-          </div>
-        ))}
-      </div>
+      {!hasVisibleData && !loading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-gray-500 italic mt-8"
+        >
+          Aucune donnée d'hygiène enregistrée ou visible pour ce dossier.
+        </motion.div>
+      )}
     </motion.form>
   );
 }

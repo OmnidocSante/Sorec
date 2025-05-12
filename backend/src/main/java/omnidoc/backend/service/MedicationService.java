@@ -24,8 +24,12 @@ public class MedicationService {
     private MedicationRepo medicationRepo;
     @Autowired
     private DossierMedicaleRepo dossierMedicaleRepo;
+    @Autowired
+    private AccessService accessService;
 
     public List<Medication> fetchMedicationByPatientId(int jockeyId) throws Exception {
+        accessService.verifyAccess(jockeyId);
+
 
         DossierMedicale dossierMedicale = dossierMedicaleRepo.getDossierMedicaleByJockey_IdAndIsCurrentTrue(jockeyId).orElseThrow(() -> new ApiException("Dossier médical non trouvé"));
 
