@@ -450,10 +450,6 @@ export default function ExamenLocomoteur() {
             {visibleNestedItems.map((field, idx) => (
               <motion.div
                 key={field.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
               >
                 <div className="flex justify-between items-center mb-4">
@@ -551,10 +547,7 @@ export default function ExamenLocomoteur() {
             {visibleTopLevelFields.map(({ key, label }) => (
               <motion.div
                 key={key}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
+
                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
               >
                 <div className="flex justify-between items-center mb-4">

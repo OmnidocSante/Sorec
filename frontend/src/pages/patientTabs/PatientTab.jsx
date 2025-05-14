@@ -11,7 +11,7 @@ import {
 import { Status } from "@/utils/enums";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard,
   User,
@@ -53,11 +53,15 @@ export default function PatientTab() {
   });
 
   const fetchData = async () => {
-    const response = await instance.get(`/api/jockey/${id}`);
-    setJockey(response.data);
-    setValue("plisDroit", response.data.plisDroit);
-    setValue("plisGauche", response.data.plisGauche);
-    setValue("matieresGrasses", response.data.matieresGrasses);
+    try {
+      const response = await instance.get(`/api/jockey/${id}`);
+      setJockey(response.data);
+      setValue("plisDroit", response.data.plisDroit);
+      setValue("plisGauche", response.data.plisGauche);
+      setValue("matieresGrasses", response.data.matieresGrasses);
+    } catch (error) {
+      navigate("/unauthorized");
+    }
   };
 
   useEffect(() => {
@@ -335,118 +339,119 @@ export default function PatientTab() {
           </motion.div>
         </div>
 
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          transition={{ staggerChildren: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
+        <AnimatePresence>
           <motion.div
-            variants={cardVariants}
-            whileHover={{ y: -5 }}
-            onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel`)
-            }
-            className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm border border-blue-200 cursor-pointer transition-all hover:shadow-md"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            <div className="flex justify-between items-start mb-4">
-              <HeartPulse className="w-8 h-8 text-blue-600" />
-              <ChevronRight className="w-5 h-5 text-blue-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-blue-800 mb-1">
-              Antecedent personnel
-            </h3>
-            <p className="text-sm text-blue-600">
-              Antecedent personnel du jockey
-            </p>
-          </motion.div>
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ y: -5 }}
+              onClick={() =>
+                navigate(`/medecin/jockey/${id}/antecedent_personel`)
+              }
+              className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm border border-blue-200 cursor-pointer transition-all hover:shadow-md"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <HeartPulse className="w-8 h-8 text-blue-600" />
+                <ChevronRight className="w-5 h-5 text-blue-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-blue-800 mb-1">
+                Antecedent personnel
+              </h3>
+              <p className="text-sm text-blue-600">
+                Antecedent personnel du jockey
+              </p>
+            </motion.div>
 
-          <motion.div
-            variants={cardVariants}
-            whileHover={{ y: -5 }}
-            onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_familiaux`)
-            }
-            className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 cursor-pointer transition-all hover:shadow-md"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <ClipboardList className="w-8 h-8 text-purple-600" />
-              <ChevronRight className="w-5 h-5 text-purple-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-purple-800 mb-1">
-              Antecedant familaux
-            </h3>
-            <p className="text-sm text-purple-600">
-              Historique familial médical
-            </p>
-          </motion.div>
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ y: -5 }}
+              onClick={() =>
+                navigate(`/medecin/jockey/${id}/antecedent_familiaux`)
+              }
+              className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 cursor-pointer transition-all hover:shadow-md"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <ClipboardList className="w-8 h-8 text-purple-600" />
+                <ChevronRight className="w-5 h-5 text-purple-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-purple-800 mb-1">
+                Antecedant familaux
+              </h3>
+              <p className="text-sm text-purple-600">
+                Historique familial médical
+              </p>
+            </motion.div>
 
-          <motion.div
-            variants={cardVariants}
-            whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/examens`)}
-            className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 cursor-pointer transition-all hover:shadow-md"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <Stethoscope className="w-8 h-8 text-green-600" />
-              <ChevronRight className="w-5 h-5 text-green-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-green-800 mb-1">
-              Examens
-            </h3>
-            <p className="text-sm text-green-600">Résultats des examens</p>
-          </motion.div>
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ y: -5 }}
+              onClick={() => navigate(`/medecin/jockey/${id}/examens`)}
+              className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 cursor-pointer transition-all hover:shadow-md"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <Stethoscope className="w-8 h-8 text-green-600" />
+                <ChevronRight className="w-5 h-5 text-green-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-green-800 mb-1">
+                Examens
+              </h3>
+              <p className="text-sm text-green-600">Résultats des examens</p>
+            </motion.div>
 
-          <motion.div
-            variants={cardVariants}
-            whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/medications`)}
-            className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl shadow-sm border border-amber-200 cursor-pointer transition-all hover:shadow-md"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <Pill className="w-8 h-8 text-amber-600" />
-              <ChevronRight className="w-5 h-5 text-amber-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-amber-800 mb-1">
-              Médication
-            </h3>
-            <p className="text-sm text-amber-600">Traitements en cours</p>
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ y: -5 }}
+              onClick={() => navigate(`/medecin/jockey/${id}/medications`)}
+              className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl shadow-sm border border-amber-200 cursor-pointer transition-all hover:shadow-md"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <Pill className="w-8 h-8 text-amber-600" />
+                <ChevronRight className="w-5 h-5 text-amber-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-amber-800 mb-1">
+                Médication
+              </h3>
+              <p className="text-sm text-amber-600">Traitements en cours</p>
+            </motion.div>
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ y: -5 }}
+              onClick={() => navigate(`/medecin/jockey/${id}/hygiene`)}
+              className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 cursor-pointer transition-all hover:shadow-md"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <Brush className="w-8 h-8 text-green-600" />
+                <ChevronRight className="w-5 h-5 text-green-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-green-800 mb-1">
+                Hygiène
+              </h3>
+              <p className="text-sm text-green-600">
+                Médication et soins d'hygiène
+              </p>
+            </motion.div>
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ y: -5 }}
+              onClick={() => navigate(`/medecin/jockey/${id}/conclusion`)}
+              className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl shadow-sm border border-indigo-200 cursor-pointer transition-all hover:shadow-md"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <FileText className="w-8 h-8 text-indigo-600" />
+                <ChevronRight className="w-5 h-5 text-indigo-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-indigo-800 mb-1">
+                Conclusion
+              </h3>
+              <p className="text-sm text-indigo-600">
+                Déterminer si le Jockey est apte ou non apte
+              </p>
+            </motion.div>
           </motion.div>
-          <motion.div
-            variants={cardVariants}
-            whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/hygiene`)}
-            className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 cursor-pointer transition-all hover:shadow-md"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <Brush className="w-8 h-8 text-green-600" />
-              <ChevronRight className="w-5 h-5 text-green-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-green-800 mb-1">
-              Hygiène
-            </h3>
-            <p className="text-sm text-green-600">
-              Médication et soins d'hygiène
-            </p>
-          </motion.div>
-          <motion.div
-            variants={cardVariants}
-            whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/conclusion`)}
-            className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl shadow-sm border border-indigo-200 cursor-pointer transition-all hover:shadow-md"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <FileText className="w-8 h-8 text-indigo-600" />
-              <ChevronRight className="w-5 h-5 text-indigo-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-indigo-800 mb-1">
-              Conclusion
-            </h3>
-            <p className="text-sm text-indigo-600">
-              Déterminer si le Jockey est apte ou non apte
-            </p>
-          </motion.div>
-        </motion.div>
+        </AnimatePresence>
       </motion.div>
     );
   }

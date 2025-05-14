@@ -12,8 +12,16 @@ export default function Autres() {
   const navigate = useNavigate();
   const { id } = useParams();
   const fetchData = async (url) => {
-    const response = await instance.get(url);
-    setConditions(response.data);
+    try {
+      const response = await instance.get(url);
+      setConditions(response.data);
+      
+    } catch (error) {
+      navigate("/unauthorized")
+
+      
+    }
+   
   };
   useEffect(() => {
     fetchData(`/api/jockey/${id}/antecedent-personnel/autres`);

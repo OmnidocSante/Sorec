@@ -90,6 +90,8 @@ export default function Conclusion() {
       reset(dataToReset);
 
     } catch (err) {
+      navigate("/unauthorized")
+
       console.error("Error fetching Conclusion:", err);
        reset({
          id: parseInt(id) || 0,

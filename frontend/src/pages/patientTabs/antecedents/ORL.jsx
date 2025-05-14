@@ -7,16 +7,17 @@ import { AnimatePresence } from "framer-motion";
 import { Ban, HistoryIcon, History } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-
 export default function ORL() {
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const fetchData = async (url) => {
-    const response = await instance.get(
-      url
-    );
-    setConditions(response.data);
+    try {
+      const response = await instance.get(url);
+      setConditions(response.data);
+    } catch (error) {
+      navigate("/unauthorized");
+    }
   };
   useEffect(() => {
     fetchData(`/api/jockey/${id}/antecedent-personnel/orl`);
@@ -43,12 +44,10 @@ export default function ORL() {
   const handleSave = async () => {
     await Promise.all([
       await instance.put(`/api/jockey/${id}/antecedent-personnel`, conditions),
-      fetchData(`/api/jockey/${id}/antecedent-personnel/orl`)
-
-    ])
+      fetchData(`/api/jockey/${id}/antecedent-personnel/orl`),
+    ]);
 
     setIsEditMode(false);
-
   };
 
   const [historique, setHistorique] = useState([]);
@@ -71,11 +70,12 @@ export default function ORL() {
   const [isHistory, setIsHistory] = useState(false);
 
   const fetchItem = async (dossierid) => {
-    fetchData(`/api/jockey/${id}/antecedent-personnel/orl/historique/${dossierid}`);
+    fetchData(
+      `/api/jockey/${id}/antecedent-personnel/orl/historique/${dossierid}`
+    );
     setIsHistory(true);
     setIsEditMode(false);
   };
-
 
   if (!conditions) {
     return (
@@ -108,40 +108,40 @@ export default function ORL() {
         transition={{ duration: 0.3 }}
         className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50"
       >
-              <AnimatePresence>
-        {isHistory && (
-          <motion.div
-            className="w-full max-w-md fixed top-20 left-1/2 -translate-x-1/2 z-50"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <Alert
-              variant="default"
-              className="bg-white/95 backdrop-blur-sm border border-blue-100 shadow-lg"
+        <AnimatePresence>
+          {isHistory && (
+            <motion.div
+              className="w-full max-w-md fixed top-20 left-1/2 -translate-x-1/2 z-50"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <HistoryIcon className="size-5 text-blue-600 shrink-0" />
-              <AlertTitle className="text-sm font-semibold text-blue-800 mb-1">
-                Historique Mode Active
-              </AlertTitle>
-              <AlertDescription className="text-sm text-blue-700 leading-snug">
-                <div>
-                  Consultation seule - Les modifications sont désactivées dans
-                  ce mode{"              "}
-                  <span
-                    onClick={handleHistoriqueClick}
-                    className="text-red-500 cursor-pointer "
-                  >
-                    restaurer
-                  </span>
-                </div>
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
+              <Alert
+                variant="default"
+                className="bg-white/95 backdrop-blur-sm border border-blue-100 shadow-lg"
+              >
+                <HistoryIcon className="size-5 text-blue-600 shrink-0" />
+                <AlertTitle className="text-sm font-semibold text-blue-800 mb-1">
+                  Historique Mode Active
+                </AlertTitle>
+                <AlertDescription className="text-sm text-blue-700 leading-snug">
+                  <div>
+                    Consultation seule - Les modifications sont désactivées dans
+                    ce mode{"              "}
+                    <span
+                      onClick={handleHistoriqueClick}
+                      className="text-red-500 cursor-pointer "
+                    >
+                      restaurer
+                    </span>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Header Section */}
         <div className="flex items-center justify-between mb-8">
           <button
@@ -152,93 +152,97 @@ export default function ORL() {
           </button>
           <h1 className="text-2xl font-bold text-gray-800">ORL</h1>
           <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={handleHistoriqueClick}
-          className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-            isEditMode
-              ? "bg-gray-200 cursor-not-allowed"
-              : "hover:bg-blue-50 hover:-translate-y-0.5"
-          }`}
-          disabled={isEditMode}
-        >
-          <History className="h-6 w-6 text-gray-600" />
-          <span className="text-sm font-medium text-gray-800">
-            {showHistorique ? "Cacher l'historique" : "Voir historique"}
-          </span>
-        </button>
+            <button
+              type="button"
+              onClick={handleHistoriqueClick}
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-blue-50 hover:-translate-y-0.5"
+              }`}
+              disabled={isEditMode}
+            >
+              <History className="h-6 w-6 text-gray-600" />
+              <span className="text-sm font-medium text-gray-800">
+                {showHistorique ? "Cacher l'historique" : "Voir historique"}
+              </span>
+            </button>
 
-        {isEditMode ? (
-          <button
-            type="button"
-            onClick={() => setIsEditMode(false)}
-            className={`p-2 pl-4 ${
-              isHistory && "cursor-not-allowed"
-            } rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
-            }`}
-            disabled={isHistory}
-          >
-            <Ban className="h-6 w-6 text-red-600" />
-            <span className="text-sm font-medium text-red-800">Annuler</span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setIsEditMode(true)}
-            className={`p-2 pl-4 ${
-              isHistory && "cursor-not-allowed"
-            } rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
-            }`}
-            disabled={isEditMode || isHistory}
-          >
-            <Edit className="h-6 w-6 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Modifier</span>
-          </button>
-        )}
+            {isEditMode ? (
+              <button
+                type="button"
+                onClick={() => setIsEditMode(false)}
+                className={`p-2 pl-4 ${
+                  isHistory && "cursor-not-allowed"
+                } rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
+                }`}
+                disabled={isHistory}
+              >
+                <Ban className="h-6 w-6 text-red-600" />
+                <span className="text-sm font-medium text-red-800">
+                  Annuler
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsEditMode(true)}
+                className={`p-2 pl-4 ${
+                  isHistory && "cursor-not-allowed"
+                } rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+                }`}
+                disabled={isEditMode || isHistory}
+              >
+                <Edit className="h-6 w-6 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">
+                  Modifier
+                </span>
+              </button>
+            )}
 
-        <button
-         onClick={handleSave}
-          className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-            !isEditMode && isHistory
-              ? "bg-gray-200 cursor-not-allowed"
-              : "hover:bg-green-50 hover:-translate-y-0.5"
-          } `}
-          disabled={!isEditMode || isHistory}
-        >
-          <Save className="h-6 w-6 text-green-600" />
-          <span className="text-sm font-medium text-green-800">
-            Enregistrer
-          </span>
-        </button>
-      </div>
+            <button
+              onClick={handleSave}
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                !isEditMode && isHistory
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-green-50 hover:-translate-y-0.5"
+              } `}
+              disabled={!isEditMode || isHistory}
+            >
+              <Save className="h-6 w-6 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Enregistrer
+              </span>
+            </button>
+          </div>
         </div>
         {showHistorique && (
-        <div className="my-4 space-y-2">
-          {historique.map((item) => (
+          <div className="my-4 space-y-2">
+            {historique.map((item) => (
               <div
-              key={item.id}
-              onClick={() => fetchItem(item.id)}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer"
-            >
-            <p className="text-sm font-medium">
-              <span className="mr-2">rdv date:</span>
+                key={item.id}
+                onClick={() => fetchItem(item.id)}
+                className="p-3 bg-gray-50 rounded-lg cursor-pointer"
+              >
+                <p className="text-sm font-medium">
+                  <span className="mr-2">rdv date:</span>
 
-              {new Date(item.date).toLocaleString("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false,
-              })}
-            </p>
-            </div>
-          ))}
-        </div>
-      )}
+                  {new Date(item.date).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                  })}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Conditions Container */}
         <div className="space-y-6">

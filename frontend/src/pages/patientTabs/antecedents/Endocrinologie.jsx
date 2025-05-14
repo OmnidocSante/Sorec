@@ -12,8 +12,12 @@ export default function Endocrinologie() {
   const navigate = useNavigate();
   const { id } = useParams();
   const fetchData = async (url) => {
-    const response = await instance.get(url);
-    setConditions(response.data);
+    try {
+      const response = await instance.get(url);
+      setConditions(response.data);
+    } catch (error) {
+      navigate("/unauthorized");
+    }
   };
   useEffect(() => {
     fetchData(`/api/jockey/${id}/antecedent-personnel/endocrinologie`);
@@ -66,7 +70,9 @@ export default function Endocrinologie() {
   const [isHistory, setIsHistory] = useState(false);
 
   const fetchItem = async (dossierid) => {
-    fetchData(`/api/jockey/${id}/antecedent-personnel/endocrinologie/historique/${dossierid}`);
+    fetchData(
+      `/api/jockey/${id}/antecedent-personnel/endocrinologie/historique/${dossierid}`
+    );
     setIsHistory(true);
     setIsEditMode(false);
   };
@@ -216,24 +222,24 @@ export default function Endocrinologie() {
           <div className="my-4 space-y-2">
             {historique.map((item) => (
               <div
-              key={item.id}
-              onClick={() => fetchItem(item.id)}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer"
-            >
-            <p className="text-sm font-medium">
-              <span className="mr-2">rdv date:</span>
+                key={item.id}
+                onClick={() => fetchItem(item.id)}
+                className="p-3 bg-gray-50 rounded-lg cursor-pointer"
+              >
+                <p className="text-sm font-medium">
+                  <span className="mr-2">rdv date:</span>
 
-              {new Date(item.date).toLocaleString("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false,
-              })}
-            </p>
-            </div>
+                  {new Date(item.date).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                  })}
+                </p>
+              </div>
             ))}
           </div>
         )}

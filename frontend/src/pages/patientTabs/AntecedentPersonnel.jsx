@@ -26,8 +26,12 @@ export default function AntecedentPersonnel() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await instance.get(`/api/jockey/${id}`);
-      setJockey(response.data);
+      try {
+        const response = await instance.get(`/api/jockey/${id}`);
+        setJockey(response.data);
+      } catch (error) {
+        navigate("/unauthorized");
+      }
     };
     fetchData();
   }, [id]);
@@ -99,18 +103,16 @@ export default function AntecedentPersonnel() {
             </div>
           </motion.div>
           <div className="align-middle justify-self-center">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 p-2 px-4 bg-gray-50 rounded-xl shadow-sm border border-bay-of-many-200 text-bay-of-many-600 hover:text-bay-of-many-800 transition-colors h-fit"
-          >
-            <LayoutDashboard className="w-5 h-5" />
-            <span>Retour au tableau de bord</span>
-          </motion.button>
-
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 p-2 px-4 bg-gray-50 rounded-xl shadow-sm border border-bay-of-many-200 text-bay-of-many-600 hover:text-bay-of-many-800 transition-colors h-fit"
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              <span>Retour au tableau de bord</span>
+            </motion.button>
           </div>
-
         </div>
 
         <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -119,7 +121,9 @@ export default function AntecedentPersonnel() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel/appareil-cardiovasculaire`)
+              navigate(
+                `/medecin/jockey/${id}/antecedent_personel/appareil-cardiovasculaire`
+              )
             }
             className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl shadow-sm border border-red-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -140,7 +144,9 @@ export default function AntecedentPersonnel() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel/appareil-respiratoire`)
+              navigate(
+                `/medecin/jockey/${id}/antecedent_personel/appareil-respiratoire`
+              )
             }
             className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm border border-blue-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -161,7 +167,9 @@ export default function AntecedentPersonnel() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel/systeme-nerveux`)
+              navigate(
+                `/medecin/jockey/${id}/antecedent_personel/systeme-nerveux`
+              )
             }
             className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -181,7 +189,9 @@ export default function AntecedentPersonnel() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/antecedent_personel/orl`)}
+            onClick={() =>
+              navigate(`/medecin/jockey/${id}/antecedent_personel/orl`)
+            }
             className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 cursor-pointer transition-all hover:shadow-md"
           >
             <div className="flex justify-between items-start mb-4">
@@ -220,7 +230,9 @@ export default function AntecedentPersonnel() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel/traumatologie`)
+              navigate(
+                `/medecin/jockey/${id}/antecedent_personel/traumatologie`
+              )
             }
             className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl shadow-sm border border-orange-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -241,7 +253,9 @@ export default function AntecedentPersonnel() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel/appareil-digestif`)
+              navigate(
+                `/medecin/jockey/${id}/antecedent_personel/appareil-digestif`
+              )
             }
             className="bg-gradient-to-br from-pink-50 to-pink-100 p-6 rounded-xl shadow-sm border border-pink-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -260,7 +274,9 @@ export default function AntecedentPersonnel() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel/endocrinologie`)
+              navigate(
+                `/medecin/jockey/${id}/antecedent_personel/endocrinologie`
+              )
             }
             className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl shadow-sm border border-indigo-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -280,7 +296,9 @@ export default function AntecedentPersonnel() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/antecedent_personel/autres`)}
+            onClick={() =>
+              navigate(`/medecin/jockey/${id}/antecedent_personel/autres`)
+            }
             className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl shadow-sm border border-gray-200 cursor-pointer transition-all hover:shadow-md"
           >
             <div className="flex justify-between items-start mb-4">

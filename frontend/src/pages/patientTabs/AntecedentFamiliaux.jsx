@@ -51,7 +51,7 @@ export default function AntecedentFamiliaux() {
     setLoading(true); // Set loading to true before fetch
     try {
       const response = await instance.get(url);
-      
+
       const data = response.data;
       console.log("Fetched data:", data); // Log fetched data
 
@@ -90,6 +90,8 @@ export default function AntecedentFamiliaux() {
 
       reset(dataToReset);
     } catch (err) {
+      navigate("/unauthorized");
+
       console.error("Error fetching AntecedentFamiliaux:", err);
       // On error, reset to default empty state and clear hidden fields
       reset({
@@ -206,6 +208,7 @@ export default function AntecedentFamiliaux() {
 
   // Determine if there is any visible data
   const hasVisibleData = visibleFieldConfigs.length > 0;
+
 
   return (
     <motion.form
@@ -334,7 +337,6 @@ export default function AntecedentFamiliaux() {
         </div>
       </div>
 
-      {/* Historique List */}
       {showHistorique && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -376,20 +378,15 @@ export default function AntecedentFamiliaux() {
         </motion.div>
       )}
 
-      {/* Fields - Filtered */}
-      {/* Only render this section if there are visible fields */}
-      {hasVisibleData && ( // Use hasVisibleData to conditionally render the container div
+
+      {hasVisibleData && ( 
         <div className="space-y-6">
           {visibleFieldConfigs.map(
             (
-              { key, label } // This map now uses the filtered list
+              { key, label } 
             ) => (
-              <motion.div // Added motion for potential future animations on appearance/disappearance
+              <motion.div 
                 key={key}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
               >
                 <div className="flex justify-between items-center mb-4">
@@ -397,25 +394,23 @@ export default function AntecedentFamiliaux() {
                     {label}
                   </h2>
                 </div>
-                {/* Render input or textarea based on inferred type */}
                 <input
                   {...register(key)}
                   placeholder={label + "..."}
-                  disabled={!isEditMode || isHistory} // Disable if not in edit mode or if in history
-                  type="text" // Assuming text input for simplicity
+                  disabled={!isEditMode || isHistory} 
+                  type="text"
                   className={`w-full px-4 py-3 border ${
                     isEditMode && !isHistory
                       ? "border-blue-200"
-                      : "border-gray-200" // Change border color based on edit mode
+                      : "border-gray-200"
                   } rounded-lg focus:outline-none focus:ring-2 ${
                     isEditMode && !isHistory
                       ? "focus:ring-blue-300"
-                      : "focus:ring-gray-300" // Change ring color
+                      : "focus:ring-gray-300" 
                   } transition-all ${
-                    // Removed resize-y as it's input, not textarea
                     !isEditMode || isHistory
                       ? "bg-gray-50 cursor-not-allowed"
-                      : "" // Grey out and disable cursor when not editable
+                      : "" 
                   }`}
                 />
 
@@ -431,8 +426,6 @@ export default function AntecedentFamiliaux() {
         </div>
       )}
 
-      {/* Message if all fields are hidden */}
-      {/* Show this message only if not loading and there is no visible data */}
       {!hasVisibleData && !loading && (
         <motion.div
           initial={{ opacity: 0 }}

@@ -53,41 +53,52 @@ export default function ExamenOphtalmologique() {
     try {
       const response = await instance.get(url);
       console.log(response.data);
-      
+
       const data = response.data;
       console.log(data);
 
       const hidden = new Set();
       const fieldsToCheck = [
-        'paupieresEtCorneesNormale',
-        'odCorrige', 'odNonCorrige',
-        'ogCorrige', 'ogNonCorrige'
+        "paupieresEtCorneesNormale",
+        "odCorrige",
+        "odNonCorrige",
+        "ogCorrige",
+        "ogNonCorrige",
       ];
 
-      fieldsToCheck.forEach(key => {
-          if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
-              hidden.add(key);
-          }
+      fieldsToCheck.forEach((key) => {
+        if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
+          hidden.add(key);
+        }
       });
       setHiddenFields(hidden);
 
       const dataToReset = {
         id: data.id,
-        paupieresEtCorneesNormale: data.paupieresEtCorneesNormale === HIDE_VALUE ? null : (data.paupieresEtCorneesNormale ?? null),
-        odCorrige: data.odCorrige === HIDE_VALUE ? "" : (data.odCorrige ?? ""),
-        odNonCorrige: data.odNonCorrige === HIDE_VALUE ? "" : (data.odNonCorrige ?? ""),
-        ogCorrige: data.ogCorrige === HIDE_VALUE ? "" : (data.ogCorrige ?? ""),
-        ogNonCorrige: data.ogNonCorrige === HIDE_VALUE ? "" : (data.ogNonCorrige ?? ""),
+        paupieresEtCorneesNormale:
+          data.paupieresEtCorneesNormale === HIDE_VALUE
+            ? null
+            : data.paupieresEtCorneesNormale ?? null,
+        odCorrige: data.odCorrige === HIDE_VALUE ? "" : data.odCorrige ?? "",
+        odNonCorrige:
+          data.odNonCorrige === HIDE_VALUE ? "" : data.odNonCorrige ?? "",
+        ogCorrige: data.ogCorrige === HIDE_VALUE ? "" : data.ogCorrige ?? "",
+        ogNonCorrige:
+          data.ogNonCorrige === HIDE_VALUE ? "" : data.ogNonCorrige ?? "",
       };
 
       reset(dataToReset);
-
     } catch (error) {
       console.error("Error fetching ExamenOphtalmologique:", error);
-       setHiddenFields(new Set([
-        'paupieresEtCorneesNormale', 'odCorrige', 'odNonCorrige',
-        'ogCorrige', 'ogNonCorrige'
-       ]));
+      setHiddenFields(
+        new Set([
+          "paupieresEtCorneesNormale",
+          "odCorrige",
+          "odNonCorrige",
+          "ogCorrige",
+          "ogNonCorrige",
+        ])
+      );
     } finally {
       setLoading(false);
     }
@@ -102,12 +113,18 @@ export default function ExamenOphtalmologique() {
     try {
       const payload = { id: data.id };
 
-
-      if (!hiddenFields.has('paupieresEtCorneesNormale')) payload.paupieresEtCorneesNormale = data.paupieresEtCorneesNormale;
-      if (!hiddenFields.has('odCorrige')) payload.odCorrige = data.odCorrige === "" ? null : data.odCorrige;
-      if (!hiddenFields.has('odNonCorrige')) payload.odNonCorrige = data.odNonCorrige === "" ? null : data.odNonCorrige;
-      if (!hiddenFields.has('ogCorrige')) payload.ogCorrige = data.ogCorrige === "" ? null : data.ogCorrige;
-      if (!hiddenFields.has('ogNonCorrige')) payload.ogNonCorrige = data.ogNonCorrige === "" ? null : data.ogNonCorrige;
+      if (!hiddenFields.has("paupieresEtCorneesNormale"))
+        payload.paupieresEtCorneesNormale = data.paupieresEtCorneesNormale;
+      if (!hiddenFields.has("odCorrige"))
+        payload.odCorrige = data.odCorrige === "" ? null : data.odCorrige;
+      if (!hiddenFields.has("odNonCorrige"))
+        payload.odNonCorrige =
+          data.odNonCorrige === "" ? null : data.odNonCorrige;
+      if (!hiddenFields.has("ogCorrige"))
+        payload.ogCorrige = data.ogCorrige === "" ? null : data.ogCorrige;
+      if (!hiddenFields.has("ogNonCorrige"))
+        payload.ogNonCorrige =
+          data.ogNonCorrige === "" ? null : data.ogNonCorrige;
 
       console.log(payload);
 
@@ -138,9 +155,9 @@ export default function ExamenOphtalmologique() {
         try {
           const response = await instance.get(`/api/jockey/${id}/historique`);
           setHistorique(response.data);
-        } catch(err) {
-           console.error("Error fetching history:", err);
-           setHistorique([]);
+        } catch (err) {
+          console.error("Error fetching history:", err);
+          setHistorique([]);
         }
       }
       setShowHistorique(true);
@@ -148,7 +165,9 @@ export default function ExamenOphtalmologique() {
   };
 
   const fetchItem = async (dossierid) => {
-    fetchData(`/api/jockey/${id}/examen-ophtalmologique/historique/${dossierid}`);
+    fetchData(
+      `/api/jockey/${id}/examen-ophtalmologique/historique/${dossierid}`
+    );
     setIsHistory(true);
     setIsEditMode(false);
     setShowHistorique(false);
@@ -180,12 +199,14 @@ export default function ExamenOphtalmologique() {
   }
 
   const allFieldKeys = [
-    'paupieresEtCorneesNormale',
-    'odCorrige', 'odNonCorrige',
-    'ogCorrige', 'ogNonCorrige'
+    "paupieresEtCorneesNormale",
+    "odCorrige",
+    "odNonCorrige",
+    "ogCorrige",
+    "ogNonCorrige",
   ];
 
-  const allFieldsAreHidden = allFieldKeys.every(key => hiddenFields.has(key));
+  const allFieldsAreHidden = allFieldKeys.every((key) => hiddenFields.has(key));
   const hasVisibleData = !allFieldsAreHidden;
 
   return (
@@ -249,7 +270,7 @@ export default function ExamenOphtalmologique() {
                 ? "bg-gray-200 cursor-not-allowed"
                 : "hover:bg-blue-50 hover:-translate-y-0.5"
             }`}
-             disabled={isEditMode || isHistory || !hasVisibleData}
+            disabled={isEditMode || isHistory || !hasVisibleData}
           >
             <History className="h-6 w-6 text-gray-600" />
             <span className="text-sm font-medium text-gray-800">
@@ -260,9 +281,9 @@ export default function ExamenOphtalmologique() {
             <button
               type="button"
               onClick={() => {
-                 fetchData(`/api/jockey/${id}/examen-ophtalmologique`);
-                 setIsEditMode(false);
-               }}
+                fetchData(`/api/jockey/${id}/examen-ophtalmologique`);
+                setIsEditMode(false);
+              }}
               className={`p-2 pl-4 ${
                 isHistory && "cursor-not-allowed"
               } rounded-lg flex items-center gap-2 transition-all ${
@@ -297,7 +318,7 @@ export default function ExamenOphtalmologique() {
                 ? "bg-gray-200 cursor-not-allowed"
                 : "hover:bg-green-50 hover:-translate-y-0.5"
             } `}
-             disabled={!isEditMode || isHistory || !hasVisibleData}
+            disabled={!isEditMode || isHistory || !hasVisibleData}
           >
             <Save className="h-6 w-6 text-green-600" />
             <span className="text-sm font-medium text-green-800">
@@ -308,231 +329,243 @@ export default function ExamenOphtalmologique() {
       </div>
       {showHistorique && (
         <motion.div
-           initial={{ opacity: 0, y: -20 }}
-           animate={{ opacity: 1, y: 0 }}
-           exit={{ opacity: 0, y: -20 }}
-           transition={{ duration: 0.3 }}
-           className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
         >
-          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Versions Historiques</h3>
-          {historique.length > 0 ? historique.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => fetchItem(item.id)}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
-            >
-              <p className="text-sm font-medium text-gray-700">
-                <span className="mr-2 text-gray-500">Date du dossier:</span>
-                {new Date(item.date).toLocaleString("fr-FR", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                  hour12: false,
-                })}
-              </p>
-            </div>
-          )) : (
-             <p className="text-gray-500 text-sm italic">Aucun historique disponible.</p>
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+            Versions Historiques
+          </h3>
+          {historique.length > 0 ? (
+            historique.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => fetchItem(item.id)}
+                className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
+              >
+                <p className="text-sm font-medium text-gray-700">
+                  <span className="mr-2 text-gray-500">Date du dossier:</span>
+                  {new Date(item.date).toLocaleString("fr-FR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                  })}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm italic">
+              Aucun historique disponible.
+            </p>
           )}
         </motion.div>
       )}
       <div className="space-y-6">
-        {!hiddenFields.has('paupieresEtCorneesNormale') && (
-           <motion.div
-              key="paupieresEtCorneesNormale"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-           >
-             <div className="flex justify-between items-center mb-4">
-               <h2 className="text-lg font-semibold text-gray-800">
-                 Paupières et cornées normales
-               </h2>
-             </div>
-             <div className="flex gap-2">
-               <button
-                 type="button"
-                 disabled={!isEditMode || isHistory}
-                 onClick={() => handleToggle("paupieresEtCorneesNormale", "true")}
-                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                   watch("paupieresEtCorneesNormale") === "true"
-                     ? "bg-green-500 text-white shadow-inner"
-                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                 } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
-               >
-                 Oui
-               </button>
-               <button
-                 type="button"
-                 disabled={!isEditMode || isHistory}
-                 onClick={() => handleToggle("paupieresEtCorneesNormale", "false")}
-                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                   watch("paupieresEtCorneesNormale") === "false"
-                     ? "bg-red-500 text-white shadow-inner"
-                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                 } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
-               >
-                 Non
-               </button>
-             </div>
-             {errors.paupieresEtCorneesNormale && errors.paupieresEtCorneesNormale.message && (
-               <p className="text-red-500 text-sm mt-2">
-                 {errors.paupieresEtCorneesNormale.message}
-               </p>
-             )}
-           </motion.div>
-         )}
-         {!hiddenFields.has('odCorrige') && (
-           <motion.div
-             key="odCorrige"
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             exit={{ opacity: 0, y: 20 }}
-             transition={{ duration: 0.3 }}
-             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-           >
-             <div className="flex justify-between items-center mb-4">
-               <h2 className="text-lg font-semibold text-gray-800">
-                 OD Corrigé
-               </h2>
-             </div>
-             <input
-               {...register("odCorrige")}
-               placeholder="Ex: 10/10"
-               disabled={!isEditMode || isHistory}
-               type="text"
-               className={`w-full px-4 py-3 border ${
-                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
-               } rounded-lg focus:outline-none focus:ring-2 ${
-                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
-               } transition-all ${
-                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
-               }`}
-             />
-             {errors.odCorrige && errors.odCorrige.message && (
-               <p className="text-red-500 text-sm mt-2">
-                 {errors.odCorrige.message}
-               </p>
-             )}
-           </motion.div>
-         )}
-          {!hiddenFields.has('odNonCorrige') && (
-           <motion.div
-             key="odNonCorrige"
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             exit={{ opacity: 0, y: 20 }}
-             transition={{ duration: 0.3 }}
-             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-           >
-             <div className="flex justify-between items-center mb-4">
-               <h2 className="text-lg font-semibold text-gray-800">
-                 OD Non Corrigé
-               </h2>
-             </div>
-             <input
-               {...register("odNonCorrige")}
-               placeholder="Ex: 8/10"
-               disabled={!isEditMode || isHistory}
-               type="text"
-               className={`w-full px-4 py-3 border ${
-                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
-               } rounded-lg focus:outline-none focus:ring-2 ${
-                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
-               } transition-all ${
-                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
-               }`}
-             />
-             {errors.odNonCorrige && errors.odNonCorrige.message && (
-               <p className="text-red-500 text-sm mt-2">
-                 {errors.odNonCorrige.message}
-               </p>
-             )}
-           </motion.div>
-         )}
-         {!hiddenFields.has('ogCorrige') && (
-           <motion.div
-             key="ogCorrige"
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             exit={{ opacity: 0, y: 20 }}
-             transition={{ duration: 0.3 }}
-             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-           >
-             <div className="flex justify-between items-center mb-4">
-               <h2 className="text-lg font-semibold text-gray-800">
-                 OG Corrigé
-               </h2>
-             </div>
-             <input
-               {...register("ogCorrige")}
-               placeholder="Ex: 10/10"
-               disabled={!isEditMode || isHistory}
-               type="text"
-               className={`w-full px-4 py-3 border ${
-                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
-               } rounded-lg focus:outline-none focus:ring-2 ${
-                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
-               } transition-all ${
-                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
-               }`}
-             />
-             {errors.ogCorrige && errors.ogCorrige.message && (
-               <p className="text-red-500 text-sm mt-2">
-                 {errors.ogCorrige.message}
-               </p>
-             )}
-           </motion.div>
-         )}
-         {!hiddenFields.has('ogNonCorrige') && (
-           <motion.div
-             key="ogNonCorrige"
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             exit={{ opacity: 0, y: 20 }}
-             transition={{ duration: 0.3 }}
-             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-           >
-             <div className="flex justify-between items-center mb-4">
-               <h2 className="text-lg font-semibold text-gray-800">
-                 OG Non Corrigé
-               </h2>
-             </div>
-             <input
-               {...register("ogNonCorrige")}
-               placeholder="Ex: 7/10"
-               disabled={!isEditMode || isHistory}
-               type="text"
-               className={`w-full px-4 py-3 border ${
-                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
-               } rounded-lg focus:outline-none focus:ring-2 ${
-                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
-               } transition-all ${
-                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
-               }`}
-             />
-             {errors.ogNonCorrige && errors.ogNonCorrige.message && (
-               <p className="text-red-500 text-sm mt-2">
-                 {errors.ogNonCorrige.message}
-               </p>
-             )}
-           </motion.div>
-         )}
+        {!hiddenFields.has("paupieresEtCorneesNormale") && (
+          <motion.div
+            key="paupieresEtCorneesNormale"
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Paupières et cornées normales
+              </h2>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={!isEditMode || isHistory}
+                onClick={() =>
+                  handleToggle("paupieresEtCorneesNormale", "true")
+                }
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  watch("paupieresEtCorneesNormale") === "true"
+                    ? "bg-green-500 text-white shadow-inner"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                } ${
+                  !isEditMode || isHistory
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                Oui
+              </button>
+              <button
+                type="button"
+                disabled={!isEditMode || isHistory}
+                onClick={() =>
+                  handleToggle("paupieresEtCorneesNormale", "false")
+                }
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  watch("paupieresEtCorneesNormale") === "false"
+                    ? "bg-red-500 text-white shadow-inner"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                } ${
+                  !isEditMode || isHistory
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                Non
+              </button>
+            </div>
+            {errors.paupieresEtCorneesNormale &&
+              errors.paupieresEtCorneesNormale.message && (
+                <p className="text-red-500 text-sm mt-2">
+                  {errors.paupieresEtCorneesNormale.message}
+                </p>
+              )}
+          </motion.div>
+        )}
+        {!hiddenFields.has("odCorrige") && (
+          <motion.div
+            key="odCorrige"
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                OD Corrigé
+              </h2>
+            </div>
+            <input
+              {...register("odCorrige")}
+              placeholder="Ex: 10/10"
+              disabled={!isEditMode || isHistory}
+              type="text"
+              className={`w-full px-4 py-3 border ${
+                isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+              } rounded-lg focus:outline-none focus:ring-2 ${
+                isEditMode && !isHistory
+                  ? "focus:ring-blue-300"
+                  : "focus:ring-gray-300"
+              } transition-all ${
+                !isEditMode || isHistory ? "bg-gray-50 cursor-not-allowed" : ""
+              }`}
+            />
+            {errors.odCorrige && errors.odCorrige.message && (
+              <p className="text-red-500 text-sm mt-2">
+                {errors.odCorrige.message}
+              </p>
+            )}
+          </motion.div>
+        )}
+        {!hiddenFields.has("odNonCorrige") && (
+          <motion.div
+            key="odNonCorrige"
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                OD Non Corrigé
+              </h2>
+            </div>
+            <input
+              {...register("odNonCorrige")}
+              placeholder="Ex: 8/10"
+              disabled={!isEditMode || isHistory}
+              type="text"
+              className={`w-full px-4 py-3 border ${
+                isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+              } rounded-lg focus:outline-none focus:ring-2 ${
+                isEditMode && !isHistory
+                  ? "focus:ring-blue-300"
+                  : "focus:ring-gray-300"
+              } transition-all ${
+                !isEditMode || isHistory ? "bg-gray-50 cursor-not-allowed" : ""
+              }`}
+            />
+            {errors.odNonCorrige && errors.odNonCorrige.message && (
+              <p className="text-red-500 text-sm mt-2">
+                {errors.odNonCorrige.message}
+              </p>
+            )}
+          </motion.div>
+        )}
+        {!hiddenFields.has("ogCorrige") && (
+          <motion.div
+            key="ogCorrige"
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                OG Corrigé
+              </h2>
+            </div>
+            <input
+              {...register("ogCorrige")}
+              placeholder="Ex: 10/10"
+              disabled={!isEditMode || isHistory}
+              type="text"
+              className={`w-full px-4 py-3 border ${
+                isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+              } rounded-lg focus:outline-none focus:ring-2 ${
+                isEditMode && !isHistory
+                  ? "focus:ring-blue-300"
+                  : "focus:ring-gray-300"
+              } transition-all ${
+                !isEditMode || isHistory ? "bg-gray-50 cursor-not-allowed" : ""
+              }`}
+            />
+            {errors.ogCorrige && errors.ogCorrige.message && (
+              <p className="text-red-500 text-sm mt-2">
+                {errors.ogCorrige.message}
+              </p>
+            )}
+          </motion.div>
+        )}
+        {!hiddenFields.has("ogNonCorrige") && (
+          <motion.div
+            key="ogNonCorrige"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                OG Non Corrigé
+              </h2>
+            </div>
+            <input
+              {...register("ogNonCorrige")}
+              placeholder="Ex: 7/10"
+              disabled={!isEditMode || isHistory}
+              type="text"
+              className={`w-full px-4 py-3 border ${
+                isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
+              } rounded-lg focus:outline-none focus:ring-2 ${
+                isEditMode && !isHistory
+                  ? "focus:ring-blue-300"
+                  : "focus:ring-gray-300"
+              } transition-all ${
+                !isEditMode || isHistory ? "bg-gray-50 cursor-not-allowed" : ""
+              }`}
+            />
+            {errors.ogNonCorrige && errors.ogNonCorrige.message && (
+              <p className="text-red-500 text-sm mt-2">
+                {errors.ogNonCorrige.message}
+              </p>
+            )}
+          </motion.div>
+        )}
       </div>
-       {allFieldsAreHidden && !loading && (
-         <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center text-gray-500 italic mt-8"
-         >
-           Aucune donnée d'examen ophtalmologique enregistrée ou visible pour ce dossier.
-         </motion.div>
-       )}
+      {allFieldsAreHidden && !loading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-gray-500 italic mt-8"
+        >
+          Aucune donnée d'examen ophtalmologique enregistrée ou visible pour ce
+          dossier.
+        </motion.div>
+      )}
     </motion.form>
   );
 }

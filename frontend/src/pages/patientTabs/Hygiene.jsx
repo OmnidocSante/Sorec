@@ -124,6 +124,8 @@ export default function Hygiene() {
       fetchData(`/api/jockey/${id}/hygiene`);
       setIsEditMode(false);
     } catch (err) {
+      navigate("/unauthorized")
+
       console.error("Error saving Hygiene:", err);
     }
   };

@@ -35,8 +35,12 @@ Traitement: ${fields.Traitement}`;
   };
 
   const fetchData = async (url) => {
-    const response = await instance.get(url);
-    setConditions(response.data);
+    try {
+      const response = await instance.get(url);
+      setConditions(response.data);
+    } catch (error) {
+      navigate("/unauthorized");
+    }
   };
 
   useEffect(() => {

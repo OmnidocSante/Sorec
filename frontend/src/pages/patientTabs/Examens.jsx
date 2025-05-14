@@ -27,8 +27,12 @@ export default function Examens() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await instance.get(`/api/jockey/${id}`);
-      setJockey(response.data);
+      try {
+        const response = await instance.get(`/api/jockey/${id}`);
+        setJockey(response.data);
+      } catch (error) {
+        navigate("/unauthorized");
+      }
     };
     fetchData();
   }, [id]);

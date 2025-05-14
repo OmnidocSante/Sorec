@@ -48,6 +48,8 @@ export default function Medications() {
       const response = await instance.get(`/api/jockey/${id}/medication`);
       setExistingMedications(response.data);
     } catch (err) {
+      navigate("/unauthorized")
+
       console.error("Error fetching medications:", err);
     } finally {
       setLoading(false);

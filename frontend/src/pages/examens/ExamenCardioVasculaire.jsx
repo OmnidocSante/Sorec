@@ -31,7 +31,11 @@ export default function ExamenCardio() {
 
       const hidden = new Set();
       Object.entries(data).forEach(([key, value]) => {
-        if (key !== "parametresExamenCardioVasculaires" && key !== "id" && value === HIDE_VALUE) {
+        if (
+          key !== "parametresExamenCardioVasculaires" &&
+          key !== "id" &&
+          value === HIDE_VALUE
+        ) {
           hidden.add(key);
         }
       });
@@ -50,7 +54,12 @@ export default function ExamenCardio() {
   }, [id]);
 
   const handleToggle = (conditionId, value) => {
-    if (!isEditMode || isHistory || !conditions?.parametresExamenCardioVasculaires) return;
+    if (
+      !isEditMode ||
+      isHistory ||
+      !conditions?.parametresExamenCardioVasculaires
+    )
+      return;
     setConditions((prev) => ({
       ...prev,
       parametresExamenCardioVasculaires:
@@ -63,7 +72,12 @@ export default function ExamenCardio() {
   };
 
   const handleRemarksChange = (conditionId, value) => {
-    if (!isEditMode || isHistory || !conditions?.parametresExamenCardioVasculaires) return;
+    if (
+      !isEditMode ||
+      isHistory ||
+      !conditions?.parametresExamenCardioVasculaires
+    )
+      return;
     setConditions((prev) => ({
       ...prev,
       parametresExamenCardioVasculaires:
@@ -90,10 +104,11 @@ export default function ExamenCardio() {
     try {
       const payload = {
         ...conditions,
-        parametresExamenCardioVasculaires: conditions.parametresExamenCardioVasculaires
+        parametresExamenCardioVasculaires:
+          conditions.parametresExamenCardioVasculaires,
       };
 
-      hiddenFields.forEach(field => {
+      hiddenFields.forEach((field) => {
         delete payload[field];
       });
 
@@ -117,9 +132,9 @@ export default function ExamenCardio() {
         try {
           const response = await instance.get(`/api/jockey/${id}/historique`);
           setHistorique(response.data);
-        } catch(err) {
-           console.error("Error fetching history:", err);
-           setHistorique([]);
+        } catch (err) {
+          console.error("Error fetching history:", err);
+          setHistorique([]);
         }
       }
       setShowHistorique(true);
@@ -157,29 +172,30 @@ export default function ExamenCardio() {
       </motion.div>
     );
   } else if (!conditions) {
-       return (
-            <div className="min-h-screen flex items-center justify-center bg-bay-of-many-50 p-6">
-                 <Alert variant="destructive" className="max-w-sm">
-                    <Ban className="size-5" />
-                    <AlertTitle>Erreur de chargement</AlertTitle>
-                    <AlertDescription>
-                        Impossible de charger les données de l'examen cardiovasculaire.
-                    </AlertDescription>
-                 </Alert>
-            </div>
-       );
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-bay-of-many-50 p-6">
+        <Alert variant="destructive" className="max-w-sm">
+          <Ban className="size-5" />
+          <AlertTitle>Erreur de chargement</AlertTitle>
+          <AlertDescription>
+            Impossible de charger les données de l'examen cardiovasculaire.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
-  const visibleConditionsArray = conditions.parametresExamenCardioVasculaires || [];
-  const visibleTopLevelFields = Object.entries(conditions)
-      .filter(([key]) =>
-           key !== "parametresExamenCardioVasculaires" &&
-           key !== "id" &&
-           !hiddenFields.has(key)
-      );
+  const visibleConditionsArray =
+    conditions.parametresExamenCardioVasculaires || [];
+  const visibleTopLevelFields = Object.entries(conditions).filter(
+    ([key]) =>
+      key !== "parametresExamenCardioVasculaires" &&
+      key !== "id" &&
+      !hiddenFields.has(key)
+  );
 
-  const hasVisibleData = visibleConditionsArray.length > 0 || visibleTopLevelFields.length > 0;
-
+  const hasVisibleData =
+    visibleConditionsArray.length > 0 || visibleTopLevelFields.length > 0;
 
   return (
     <motion.div
@@ -213,7 +229,8 @@ export default function ExamenCardio() {
                     onClick={handleHistoriqueClick}
                     className="text-red-500 cursor-pointer hover:underline"
                   >
-                    {" "}restaurer
+                    {" "}
+                    restaurer
                   </span>
                 </div>
               </AlertDescription>
@@ -279,7 +296,9 @@ export default function ExamenCardio() {
               disabled={isEditMode || isHistory || !hasVisibleData}
             >
               <Edit className="h-6 w-6 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">Modifier</span>
+              <span className="text-sm font-medium text-blue-800">
+                Modifier
+              </span>
             </button>
           )}
 
@@ -303,163 +322,186 @@ export default function ExamenCardio() {
 
       {showHistorique && (
         <motion.div
-           initial={{ opacity: 0, y: -20 }}
-           animate={{ opacity: 1, y: 0 }}
-           exit={{ opacity: 0, y: -20 }}
-           transition={{ duration: 0.3 }}
-           className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
         >
-          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Versions Historiques</h3>
-          {historique.length > 0 ? historique.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => fetchItem(item.id)}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
-            >
-              <p className="text-sm font-medium text-gray-700">
-                <span className="mr-2 text-gray-500">Date du dossier:</span>
-                {new Date(item.date).toLocaleString("fr-FR", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                  hour12: false,
-                })}
-              </p>
-            </div>
-          )) : (
-             <p className="text-gray-500 text-sm italic">Aucun historique disponible.</p>
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+            Versions Historiques
+          </h3>
+          {historique.length > 0 ? (
+            historique.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => fetchItem(item.id)}
+                className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
+              >
+                <p className="text-sm font-medium text-gray-700">
+                  <span className="mr-2 text-gray-500">Date du dossier:</span>
+                  {new Date(item.date).toLocaleString("fr-FR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                  })}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm italic">
+              Aucun historique disponible.
+            </p>
           )}
         </motion.div>
       )}
 
       <div className="space-y-6">
         {visibleConditionsArray.length > 0 && (
-           <div className="space-y-6 mb-6">
-              {visibleConditionsArray.map((condition) => (
-                  <motion.div
-                     key={condition.id}
-                     initial={{ opacity: 0, y: 20 }}
-                     animate={{ opacity: 1, y: 0 }}
-                     exit={{ opacity: 0, y: 20 }}
-                     transition={{ duration: 0.3 }}
-                    className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-                  >
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-lg font-semibold text-gray-800">
-                        {condition.parametresCardioVasculaire?.nom
-                          ?.toLowerCase()
-                          .split("_")
-                          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                          .join(" ") || "Condition Inconnue"}
-                      </h2>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          disabled={!isEditMode || isHistory}
-                          onClick={() => handleToggle(condition.id, true)}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            condition.hasCondition === "true"
-                              ? "bg-green-500 text-white shadow-inner"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                          } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
-                        >
-                          Oui
-                        </button>
-                        <button
-                           type="button"
-                           disabled={!isEditMode || isHistory}
-                          onClick={() => handleToggle(condition.id, false)}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            condition.hasCondition === "false"
-                              ? "bg-red-500 text-white shadow-inner"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                          } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
-                        >
-                          Non
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                         <label htmlFor={`condition-${condition.id}-observations`} className="block text-sm font-medium text-gray-700 mb-1">Observations</label>
-                         <input
-                             id={`condition-${condition.id}-observations`}
-                             value={condition.observations || ""}
-                             onChange={(e) => handleRemarksChange(condition.id, e.target.value)}
-                             placeholder="Remarques..."
-                             disabled={!isEditMode || isHistory}
-                             className={`w-full px-4 py-3 border ${
-                                 isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
-                             } rounded-lg focus:outline-none focus:ring-2 ${
-                                 isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
-                             } transition-all ${
-                                 (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
-                             }`}
-                         />
-                     </div>
-                  </motion.div>
-              ))}
-            </div>
+          <div className="space-y-6 mb-6">
+            {visibleConditionsArray.map((condition) => (
+              <motion.div
+                key={condition.id}
+
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {condition.parametresCardioVasculaire?.nom
+                      ?.toLowerCase()
+                      .split("_")
+                      .map(
+                        (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                      )
+                      .join(" ") || "Condition Inconnue"}
+                  </h2>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={!isEditMode || isHistory}
+                      onClick={() => handleToggle(condition.id, true)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        condition.hasCondition === "true"
+                          ? "bg-green-500 text-white shadow-inner"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      } ${
+                        !isEditMode || isHistory
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
+                      Oui
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!isEditMode || isHistory}
+                      onClick={() => handleToggle(condition.id, false)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        condition.hasCondition === "false"
+                          ? "bg-red-500 text-white shadow-inner"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      } ${
+                        !isEditMode || isHistory
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
+                      Non
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <input
+                    id={`condition-${condition.id}-observations`}
+                    value={condition.observations || ""}
+                    onChange={(e) =>
+                      handleRemarksChange(condition.id, e.target.value)
+                    }
+                    placeholder="Remarques..."
+                    disabled={!isEditMode || isHistory}
+                    className={`w-full px-4 py-3 border ${
+                      isEditMode && !isHistory
+                        ? "border-blue-200"
+                        : "border-gray-200"
+                    } rounded-lg focus:outline-none focus:ring-2 ${
+                      isEditMode && !isHistory
+                        ? "focus:ring-blue-300"
+                        : "focus:ring-gray-300"
+                    } transition-all ${
+                      !isEditMode || isHistory
+                        ? "bg-gray-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
         )}
 
         {visibleTopLevelFields.length > 0 && (
-             <div className="space-y-6">
-                {visibleTopLevelFields.map(([key, value]) => {
-                     const label = key
-                                 .replace(/([A-Z])/g, " $1")
-                                 .trim()
-                                 .split(" ")
-                                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                                 .join(" ");
+          <div className="space-y-6">
+            {visibleTopLevelFields.map(([key, value]) => {
+              const label = key
+                .replace(/([A-Z])/g, " $1")
+                .trim()
+                .split(" ")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ");
 
-                     return (
-                        <motion.div
-                            key={key}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            transition={{ duration: 0.3 }}
-                            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-                        >
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-lg font-semibold text-gray-800">
-                                   {label}
-                                </h2>
-                            </div>
-                            <div>
+              return (
+                <motion.div
+                  key={key}
 
-                                 <input
-                                     id={`top-level-${key}`}
-                                     value={value || ""}
-                                     onChange={(e) => handleObject(key, e.target.value)}
-                                     placeholder={label + "..."}
-                                     disabled={!isEditMode || isHistory}
-                                     type={key.includes("valeur") ? "number" : "text"}
-                                     className={`w-full px-4 py-3 border ${
-                                         isEditMode && !isHistory ? "border-blue-200" : "border-gray-200"
-                                     } rounded-lg focus:outline-none focus:ring-2 ${
-                                         isEditMode && !isHistory ? "focus:ring-blue-300" : "focus:ring-gray-300"
-                                     } transition-all ${
-                                         (!isEditMode || isHistory) ? "bg-gray-50 cursor-not-allowed" : ""
-                                     }`}
-                                 />
-                            </div>
-                        </motion.div>
-                     );
-                })}
-            </div>
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold text-gray-800">
+                      {label}
+                    </h2>
+                  </div>
+                  <div>
+                    <input
+                      id={`top-level-${key}`}
+                      value={value || ""}
+                      onChange={(e) => handleObject(key, e.target.value)}
+                      placeholder={label + "..."}
+                      disabled={!isEditMode || isHistory}
+                      type={key.includes("valeur") ? "number" : "text"}
+                      className={`w-full px-4 py-3 border ${
+                        isEditMode && !isHistory
+                          ? "border-blue-200"
+                          : "border-gray-200"
+                      } rounded-lg focus:outline-none focus:ring-2 ${
+                        isEditMode && !isHistory
+                          ? "focus:ring-blue-300"
+                          : "focus:ring-gray-300"
+                      } transition-all ${
+                        !isEditMode || isHistory
+                          ? "bg-gray-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                    />
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
         )}
       </div>
 
       {!hasVisibleData && !loading && (
         <motion.div
-           initial={{ opacity: 0 }}
-           animate={{ opacity: 1 }}
-           className="text-center text-gray-500 italic mt-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-gray-500 italic mt-8"
         >
-          Aucune donnée d'examen cardiovasculaire enregistrée ou visible pour ce dossier.
+          Aucune donnée d'examen cardiovasculaire enregistrée ou visible pour ce
+          dossier.
         </motion.div>
       )}
     </motion.div>
