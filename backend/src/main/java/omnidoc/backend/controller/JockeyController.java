@@ -7,12 +7,19 @@ import omnidoc.backend.request.JockeyModificationRequest;
 import omnidoc.backend.service.JockeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URLConnection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/jockey")
@@ -34,6 +41,9 @@ public class JockeyController {
     }
 
 
+
+
+
     @PreAuthorize("hasAuthority('MEDECIN')")
     @PatchMapping("/{jockeyId}")
     public ResponseEntity<Void> changeJockey(@PathVariable int jockeyId, @RequestBody JockeyModificationRequest jockeyModificationRequest) throws Exception {
@@ -49,20 +59,38 @@ public class JockeyController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
+    @PatchMapping("/{userId}/image")
+    public ResponseEntity<Void> updateImage(@RequestParam("image") MultipartFile image, @PathVariable int userId) throws SQLException, IOException {
+        jockeyService.addImage(image, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-//    @PatchMapping("/{userId}")
-//    public ResponseEntity<Void> updateImage(@RequestParam("image") MultipartFile image, @PathVariable int userId) throws SQLException, IOException {
-//        jockeyService.addImage(image, userId);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/{userId}/image")
-//    public ResponseEntity<byte[]> viewImageJockey(@PathVariable int userId) throws SQLException, IOException {
-//        byte[] imageBytes = jockeyService.getJockeyImage(userId);
-//        String mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imageBytes));
-//        if (mimeType == null) mimeType = "application/octet-stream";
-//        return ResponseEntity.ok().contentType(MediaType.parseMediaType(mimeType)).body(imageBytes);
-//    }
-//
+    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
+    @GetMapping("/{userId}/image")
+    public ResponseEntity<byte[]> viewImageJockey(@PathVariable int userId) throws SQLException, IOException {
+        System.out.println("hi there");
+
+        Optional<byte[]> imageBytesOptional = jockeyService.getJockeyImage(userId);
+
+        if (imageBytesOptional.isPresent()) {
+            byte[] imageBytes = imageBytesOptional.get();
+            String mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imageBytes));
+
+            if (mimeType == null) {
+                mimeType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(mimeType))
+                    .body(imageBytes);
+        } else {
+            System.out.println("here 3");
+
+            return ResponseEntity.noContent().build();
+
+        }
+    }
+
 
 }

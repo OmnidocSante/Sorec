@@ -12,6 +12,8 @@ import omnidoc.backend.repository.*;
 import omnidoc.backend.request.RdvRequest;
 import omnidoc.backend.util.DossierMedicaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,6 +37,7 @@ public class RdvService {
     private DossierMedicaleUtil dossierMedicaleUtil;
     @Autowired
     private AccessRepo accessRepo;
+    private JavaMailSender javaMailSender;
 
 
     public void createRdv(@Valid RdvRequest rdvRequest) {
@@ -113,6 +116,14 @@ public class RdvService {
         Rdv rdv = rdvRepo.findById(rdvId).orElseThrow(() -> new ApiException("not found"));
         rdv.setStatusRDV(statusRDV);
         rdvRepo.save(rdv);
+        if (statusRDV.equals(StatusRDV.ANNULE)) {
+            emailService.sendEmail(rdv.getMedecin().getUser().getEmail(), "Annulation rdv", "le rendez vous avec " + rdv.getJockey().getUser().getNom() + " date " + rdv.getDate().format(java.time.format.DateTimeFormatter.ofPattern("yy-MM-dd HH:mm")) + " a été annulé");
+
+            emailService.sendEmail(rdv.getJockey().getUser().getEmail(), "Annulation rdv", "le rendez vous avec " + rdv.getMedecin().getUser().getNom() + " date " + rdv.getDate().format(java.time.format.DateTimeFormatter.ofPattern("yy-MM-dd HH:mm")) + " a été annulé");
+        }
+
+
     }
+
 
 }

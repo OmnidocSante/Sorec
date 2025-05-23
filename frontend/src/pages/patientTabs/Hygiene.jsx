@@ -1,4 +1,5 @@
 import instance from "@/auth/AxiosInstance";
+import useUser from "@/auth/useUser";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
@@ -20,6 +21,8 @@ const hygieneSchema = z.object({
 });
 
 export default function Hygiene() {
+  const user = useUser();
+
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
@@ -60,41 +63,64 @@ export default function Hygiene() {
 
       const hidden = new Set();
       const fieldsToCheck = [
-        "habitudesAlimentaire", "tabac", "alcool", "hydratation",
-        "sommeil", "autres", "allergiesAlimentaire",
+        "habitudesAlimentaire",
+        "tabac",
+        "alcool",
+        "hydratation",
+        "sommeil",
+        "autres",
+        "allergiesAlimentaire",
       ];
 
-      fieldsToCheck.forEach(key => {
-          if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
-              hidden.add(key);
-          }
+      fieldsToCheck.forEach((key) => {
+        if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
+          hidden.add(key);
+        }
       });
       setHiddenFields(hidden);
 
       const dataToReset = {
-          id: data.id,
-          habitudesAlimentaire: data.habitudesAlimentaire === HIDE_VALUE ? "" : (data.habitudesAlimentaire ?? ""),
-          tabac: data.tabac === HIDE_VALUE ? "" : (data.tabac ?? ""),
-          alcool: data.alcool === HIDE_VALUE ? "" : (data.alcool ?? ""),
-          hydratation: data.hydratation === HIDE_VALUE ? "" : (data.hydratation ?? ""),
-          sommeil: data.sommeil === HIDE_VALUE ? "" : (data.sommeil ?? ""),
-          autres: data.autres === HIDE_VALUE ? "" : (data.autres ?? ""),
-          allergiesAlimentaire: data.allergiesAlimentaire === HIDE_VALUE ? "" : (data.allergiesAlimentaire ?? ""),
+        id: data.id,
+        habitudesAlimentaire:
+          data.habitudesAlimentaire === HIDE_VALUE
+            ? ""
+            : data.habitudesAlimentaire ?? "",
+        tabac: data.tabac === HIDE_VALUE ? "" : data.tabac ?? "",
+        alcool: data.alcool === HIDE_VALUE ? "" : data.alcool ?? "",
+        hydratation:
+          data.hydratation === HIDE_VALUE ? "" : data.hydratation ?? "",
+        sommeil: data.sommeil === HIDE_VALUE ? "" : data.sommeil ?? "",
+        autres: data.autres === HIDE_VALUE ? "" : data.autres ?? "",
+        allergiesAlimentaire:
+          data.allergiesAlimentaire === HIDE_VALUE
+            ? ""
+            : data.allergiesAlimentaire ?? "",
       };
 
       reset(dataToReset);
-
     } catch (err) {
       console.error("Error fetching Hygiene:", err);
-        reset({
-          id: parseInt(id) || 0,
-          habitudesAlimentaire: "", tabac: "", alcool: "", hydratation: "",
-          sommeil: "", autres: "", allergiesAlimentaire: "",
-        });
-       setHiddenFields(new Set([
-         "habitudesAlimentaire", "tabac", "alcool", "hydratation",
-         "sommeil", "autres", "allergiesAlimentaire",
-       ]));
+      reset({
+        id: parseInt(id) || 0,
+        habitudesAlimentaire: "",
+        tabac: "",
+        alcool: "",
+        hydratation: "",
+        sommeil: "",
+        autres: "",
+        allergiesAlimentaire: "",
+      });
+      setHiddenFields(
+        new Set([
+          "habitudesAlimentaire",
+          "tabac",
+          "alcool",
+          "hydratation",
+          "sommeil",
+          "autres",
+          "allergiesAlimentaire",
+        ])
+      );
     } finally {
       setLoading(false);
     }
@@ -110,13 +136,22 @@ export default function Hygiene() {
       const payload = { id: data.id };
       console.log(hiddenFields);
 
-      if (!hiddenFields.has("habitudesAlimentaire")) payload.habitudesAlimentaire = data.habitudesAlimentaire === "" ? null : data.habitudesAlimentaire;
-      if (!hiddenFields.has("tabac")) payload.tabac = data.tabac === "" ? null : data.tabac;
-      if (!hiddenFields.has("alcool")) payload.alcool = data.alcool === "" ? null : data.alcool;
-      if (!hiddenFields.has("hydratation")) payload.hydratation = data.hydratation === "" ? null : data.hydratation;
-      if (!hiddenFields.has("sommeil")) payload.sommeil = data.sommeil === "" ? null : data.sommeil;
-      if (!hiddenFields.has("autres")) payload.autres = data.autres === "" ? null : data.autres;
-      if (!hiddenFields.has("allergiesAlimentaire")) payload.allergiesAlimentaire = data.allergiesAlimentaire === "" ? null : data.allergiesAlimentaire;
+      if (!hiddenFields.has("habitudesAlimentaire"))
+        payload.habitudesAlimentaire =
+          data.habitudesAlimentaire === "" ? null : data.habitudesAlimentaire;
+      if (!hiddenFields.has("tabac"))
+        payload.tabac = data.tabac === "" ? null : data.tabac;
+      if (!hiddenFields.has("alcool"))
+        payload.alcool = data.alcool === "" ? null : data.alcool;
+      if (!hiddenFields.has("hydratation"))
+        payload.hydratation = data.hydratation === "" ? null : data.hydratation;
+      if (!hiddenFields.has("sommeil"))
+        payload.sommeil = data.sommeil === "" ? null : data.sommeil;
+      if (!hiddenFields.has("autres"))
+        payload.autres = data.autres === "" ? null : data.autres;
+      if (!hiddenFields.has("allergiesAlimentaire"))
+        payload.allergiesAlimentaire =
+          data.allergiesAlimentaire === "" ? null : data.allergiesAlimentaire;
 
       console.log(payload);
 
@@ -124,7 +159,7 @@ export default function Hygiene() {
       fetchData(`/api/jockey/${id}/hygiene`);
       setIsEditMode(false);
     } catch (err) {
-      navigate("/unauthorized")
+      navigate("/unauthorized");
 
       console.error("Error saving Hygiene:", err);
     }
@@ -186,8 +221,8 @@ export default function Hygiene() {
 
   const fieldConfigs = [
     { key: "habitudesAlimentaire", label: "Habitudes Alimentaires" },
-    { key: "tabac", label: "Tabac"},
-    { key: "alcool", label: "Alcool"},
+    { key: "tabac", label: "Tabac" },
+    { key: "alcool", label: "Alcool" },
     { key: "hydratation", label: "Hydratation" },
     { key: "sommeil", label: "Sommeil" },
     { key: "autres", label: "Autres Observations" },
@@ -249,73 +284,77 @@ export default function Hygiene() {
         <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">
           Hygiène
         </h1>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={handleHistoriqueClick}
-            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode || isHistory || !hasVisibleData
-                ? "bg-gray-200 cursor-not-allowed"
-                : "hover:bg-blue-50 hover:-translate-y-0.5"
-            }`}
-            disabled={isEditMode || isHistory || !hasVisibleData}
-          >
-            <History className="h-6 w-6 text-gray-600" />
-            <span className="text-sm font-medium text-gray-800">
-              {showHistorique ? "Cacher l'historique" : "Voir historique"}
-            </span>
-          </button>
-
-          {isEditMode ? (
+        {user.role === "MEDECIN" && (
+          <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => {
-                 fetchData(`/api/jockey/${id}/hygiene`);
-                 setIsEditMode(false);
-               }}
-              className={`p-2 pl-4 ${
-                isHistory && "cursor-not-allowed"
-              } rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
-              }`}
-              disabled={isHistory || !hasVisibleData}
-            >
-              <Ban className="h-6 w-6 text-red-600" />
-              <span className="text-sm font-medium text-red-800">Annuler</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsEditMode(true)}
-              className={`p-2 pl-4 ${
-                isHistory && "cursor-not-allowed"
-              } rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+              onClick={handleHistoriqueClick}
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode || isHistory || !hasVisibleData
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
               disabled={isEditMode || isHistory || !hasVisibleData}
             >
-              <Edit className="h-6 w-6 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">
-                Modifier
+              <History className="h-6 w-6 text-gray-600" />
+              <span className="text-sm font-medium text-gray-800">
+                {showHistorique ? "Cacher l'historique" : "Voir historique"}
               </span>
             </button>
-          )}
 
-          <button
-            type="submit"
-            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              !isEditMode || isHistory || !hasVisibleData
-                ? "bg-gray-200 cursor-not-allowed"
-                : "hover:bg-green-50 hover:-translate-y-0.5"
-            } `}
-            disabled={!isEditMode || isHistory || !hasVisibleData}
-          >
-            <Save className="h-6 w-6 text-green-600" />
-            <span className="text-sm font-medium text-green-800">
-              Enregistrer
-            </span>
-          </button>
-        </div>
+            {isEditMode ? (
+              <button
+                type="button"
+                onClick={() => {
+                  fetchData(`/api/jockey/${id}/hygiene`);
+                  setIsEditMode(false);
+                }}
+                className={`p-2 pl-4 ${
+                  isHistory && "cursor-not-allowed"
+                } rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
+                }`}
+                disabled={isHistory || !hasVisibleData}
+              >
+                <Ban className="h-6 w-6 text-red-600" />
+                <span className="text-sm font-medium text-red-800">
+                  Annuler
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsEditMode(true)}
+                className={`p-2 pl-4 ${
+                  isHistory && "cursor-not-allowed"
+                } rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+                }`}
+                disabled={isEditMode || isHistory || !hasVisibleData}
+              >
+                <Edit className="h-6 w-6 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">
+                  Modifier
+                </span>
+              </button>
+            )}
+
+            <button
+              type="submit"
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                !isEditMode || isHistory || !hasVisibleData
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-green-50 hover:-translate-y-0.5"
+              } `}
+              disabled={!isEditMode || isHistory || !hasVisibleData}
+            >
+              <Save className="h-6 w-6 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Enregistrer
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {showHistorique && (
@@ -360,49 +399,45 @@ export default function Hygiene() {
 
       {hasVisibleData && (
         <div className="space-y-6">
-          {fieldConfigs.map(
-            (
-              { key, label }
-            ) => (
-              <motion.div
-                key={key}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
-                </div>
+          {fieldConfigs.map(({ key, label }) => (
+            <motion.div
+              key={key}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">{label}</h2>
+              </div>
 
-                <input
-                  {...register(key)}
-                  placeholder={label + "..."}
-                  disabled={!isEditMode || isHistory}
-                  className={`w-full px-4 py-3 border ${
-                    isEditMode && !isHistory
-                      ? "border-blue-200"
-                      : "border-gray-200"
-                  } rounded-lg focus:outline-none focus:ring-2 ${
-                    isEditMode && !isHistory
-                      ? "focus:ring-blue-300"
-                      : "focus:ring-gray-300"
-                  } transition-all ${
-                    !isEditMode || isHistory
-                      ? "bg-gray-50 cursor-not-allowed"
-                      : ""
-                  }`}
-                />
+              <input
+                {...register(key)}
+                placeholder={label + "..."}
+                disabled={!isEditMode || isHistory}
+                className={`w-full px-4 py-3 border ${
+                  isEditMode && !isHistory
+                    ? "border-blue-200"
+                    : "border-gray-200"
+                } rounded-lg focus:outline-none focus:ring-2 ${
+                  isEditMode && !isHistory
+                    ? "focus:ring-blue-300"
+                    : "focus:ring-gray-300"
+                } transition-all ${
+                  !isEditMode || isHistory
+                    ? "bg-gray-50 cursor-not-allowed"
+                    : ""
+                }`}
+              />
 
-                {errors[key] && errors[key].message && (
-                  <p className="text-red-500 text-sm mt-2">
-                    {errors[key].message}
-                  </p>
-                )}
-              </motion.div>
-            )
-          )}
+              {errors[key] && errors[key].message && (
+                <p className="text-red-500 text-sm mt-2">
+                  {errors[key].message}
+                </p>
+              )}
+            </motion.div>
+          ))}
         </div>
       )}
 

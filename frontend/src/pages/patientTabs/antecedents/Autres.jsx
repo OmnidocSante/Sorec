@@ -6,8 +6,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { Ban, HistoryIcon, History } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import useUser from "@/auth/useUser";
 
 export default function Autres() {
+  const user = useUser();
+
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
@@ -15,13 +18,9 @@ export default function Autres() {
     try {
       const response = await instance.get(url);
       setConditions(response.data);
-      
     } catch (error) {
-      navigate("/unauthorized")
-
-      
+      navigate("/unauthorized");
     }
-   
   };
   useEffect(() => {
     fetchData(`/api/jockey/${id}/antecedent-personnel/autres`);
@@ -83,7 +82,9 @@ export default function Autres() {
   const [isHistory, setIsHistory] = useState(false);
 
   const fetchItem = async (dossierid) => {
-    fetchData(`/api/jockey/${id}/antecedent-personnel/autres/historique/${dossierid}`);
+    fetchData(
+      `/api/jockey/${id}/antecedent-personnel/autres/historique/${dossierid}`
+    );
     setIsHistory(true);
     setIsEditMode(false);
   };
@@ -162,95 +163,97 @@ export default function Autres() {
             <ArrowLeft className="h-6 w-6 text-gray-700" />
           </button>
           <h1 className="text-2xl font-bold text-gray-800">Autres</h1>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={handleHistoriqueClick}
-              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "hover:bg-blue-50 hover:-translate-y-0.5"
-              }`}
-              disabled={isEditMode}
-            >
-              <History className="h-6 w-6 text-gray-600" />
-              <span className="text-sm font-medium text-gray-800">
-                {showHistorique ? "Cacher l'historique" : "Voir historique"}
-              </span>
-            </button>
-
-            {isEditMode ? (
+          {user.role === "MEDECIN" && (
+            <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => setIsEditMode(false)}
-                className={`p-2 pl-4 ${
-                  isHistory && "cursor-not-allowed"
-                } rounded-lg flex items-center gap-2 transition-all ${
-                  isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
+                onClick={handleHistoriqueClick}
+                className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "hover:bg-blue-50 hover:-translate-y-0.5"
                 }`}
-                disabled={isHistory}
+                disabled={isEditMode}
               >
-                <Ban className="h-6 w-6 text-red-600" />
-                <span className="text-sm font-medium text-red-800">
-                  Annuler
+                <History className="h-6 w-6 text-gray-600" />
+                <span className="text-sm font-medium text-gray-800">
+                  {showHistorique ? "Cacher l'historique" : "Voir historique"}
                 </span>
               </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsEditMode(true)}
-                className={`p-2 pl-4 ${
-                  isHistory && "cursor-not-allowed"
-                } rounded-lg flex items-center gap-2 transition-all ${
-                  isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
-                }`}
-                disabled={isEditMode || isHistory}
-              >
-                <Edit className="h-6 w-6 text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">
-                  Modifier
-                </span>
-              </button>
-            )}
 
-            <button
-              onClick={handleSave}
-              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-                !isEditMode && isHistory
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "hover:bg-green-50 hover:-translate-y-0.5"
-              } `}
-              disabled={!isEditMode || isHistory}
-            >
-              <Save className="h-6 w-6 text-green-600" />
-              <span className="text-sm font-medium text-green-800">
-                Enregistrer
-              </span>
-            </button>
-          </div>
+              {isEditMode ? (
+                <button
+                  type="button"
+                  onClick={() => setIsEditMode(false)}
+                  className={`p-2 pl-4 ${
+                    isHistory && "cursor-not-allowed"
+                  } rounded-lg flex items-center gap-2 transition-all ${
+                    isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
+                  }`}
+                  disabled={isHistory}
+                >
+                  <Ban className="h-6 w-6 text-red-600" />
+                  <span className="text-sm font-medium text-red-800">
+                    Annuler
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsEditMode(true)}
+                  className={`p-2 pl-4 ${
+                    isHistory && "cursor-not-allowed"
+                  } rounded-lg flex items-center gap-2 transition-all ${
+                    isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+                  }`}
+                  disabled={isEditMode || isHistory}
+                >
+                  <Edit className="h-6 w-6 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">
+                    Modifier
+                  </span>
+                </button>
+              )}
+
+              <button
+                onClick={handleSave}
+                className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                  !isEditMode && isHistory
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "hover:bg-green-50 hover:-translate-y-0.5"
+                } `}
+                disabled={!isEditMode || isHistory}
+              >
+                <Save className="h-6 w-6 text-green-600" />
+                <span className="text-sm font-medium text-green-800">
+                  Enregistrer
+                </span>
+              </button>
+            </div>
+          )}
         </div>
         {showHistorique && (
           <div className="my-4 space-y-2">
             {historique.map((item) => (
               <div
-              key={item.id}
-              onClick={() => fetchItem(item.id)}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer"
-            >
-            <p className="text-sm font-medium">
-              <span className="mr-2">rdv date:</span>
+                key={item.id}
+                onClick={() => fetchItem(item.id)}
+                className="p-3 bg-gray-50 rounded-lg cursor-pointer"
+              >
+                <p className="text-sm font-medium">
+                  <span className="mr-2">rdv date:</span>
 
-              {new Date(item.date).toLocaleString("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false,
-              })}
-            </p>
-            </div>
+                  {new Date(item.date).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                  })}
+                </p>
+              </div>
             ))}
           </div>
         )}

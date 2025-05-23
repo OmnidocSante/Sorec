@@ -1,4 +1,5 @@
 import instance from "@/auth/AxiosInstance";
+import useUser from "@/auth/useUser";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -86,9 +87,7 @@ export default function AntecedentPersonnel() {
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-2 p-2 px-4 bg-gray-50 rounded-xl shadow-sm border border-bay-of-many-200 text-bay-of-many-600 hover:text-bay-of-many-800 transition-colors cursor-pointer"
           >
-            <div className="bg-bay-of-many-100 p-3 rounded-full">
-              <User className="w-6 h-6 text-bay-of-many-600" />
-            </div>
+
             <div>
               <h1 className="text-2xl font-bold text-bay-of-many-900">
                 {jockey.nom} {jockey.prénom}
@@ -122,7 +121,7 @@ export default function AntecedentPersonnel() {
             whileHover={{ y: -5 }}
             onClick={() =>
               navigate(
-                `/medecin/jockey/${id}/antecedent_personel/appareil-cardiovasculaire`
+                `/jockey/${id}/antecedent_personel/appareil-cardiovasculaire`
               )
             }
             className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl shadow-sm border border-red-200 cursor-pointer transition-all hover:shadow-md"
@@ -145,7 +144,7 @@ export default function AntecedentPersonnel() {
             whileHover={{ y: -5 }}
             onClick={() =>
               navigate(
-                `/medecin/jockey/${id}/antecedent_personel/appareil-respiratoire`
+                `/jockey/${id}/antecedent_personel/appareil-respiratoire`
               )
             }
             className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm border border-blue-200 cursor-pointer transition-all hover:shadow-md"
@@ -168,7 +167,7 @@ export default function AntecedentPersonnel() {
             whileHover={{ y: -5 }}
             onClick={() =>
               navigate(
-                `/medecin/jockey/${id}/antecedent_personel/systeme-nerveux`
+                `/jockey/${id}/antecedent_personel/systeme-nerveux`
               )
             }
             className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 cursor-pointer transition-all hover:shadow-md"
@@ -190,7 +189,7 @@ export default function AntecedentPersonnel() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel/orl`)
+              navigate(`/jockey/${id}/antecedent_personel/orl`)
             }
             className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -209,7 +208,7 @@ export default function AntecedentPersonnel() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel/allergies`)
+              navigate(`/jockey/${id}/antecedent_personel/allergies`)
             }
             className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl shadow-sm border border-yellow-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -231,7 +230,7 @@ export default function AntecedentPersonnel() {
             whileHover={{ y: -5 }}
             onClick={() =>
               navigate(
-                `/medecin/jockey/${id}/antecedent_personel/traumatologie`
+                `/jockey/${id}/antecedent_personel/traumatologie`
               )
             }
             className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl shadow-sm border border-orange-200 cursor-pointer transition-all hover:shadow-md"
@@ -254,7 +253,7 @@ export default function AntecedentPersonnel() {
             whileHover={{ y: -5 }}
             onClick={() =>
               navigate(
-                `/medecin/jockey/${id}/antecedent_personel/appareil-digestif`
+                `/jockey/${id}/antecedent_personel/appareil-digestif`
               )
             }
             className="bg-gradient-to-br from-pink-50 to-pink-100 p-6 rounded-xl shadow-sm border border-pink-200 cursor-pointer transition-all hover:shadow-md"
@@ -275,7 +274,7 @@ export default function AntecedentPersonnel() {
             whileHover={{ y: -5 }}
             onClick={() =>
               navigate(
-                `/medecin/jockey/${id}/antecedent_personel/endocrinologie`
+                `/jockey/${id}/antecedent_personel/endocrinologie`
               )
             }
             className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl shadow-sm border border-indigo-200 cursor-pointer transition-all hover:shadow-md"
@@ -297,7 +296,7 @@ export default function AntecedentPersonnel() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/antecedent_personel/autres`)
+              navigate(`/jockey/${id}/antecedent_personel/autres`)
             }
             className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl shadow-sm border border-gray-200 cursor-pointer transition-all hover:shadow-md"
           >

@@ -2,12 +2,11 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./pages/App.jsx";
-import { BrowserRouter, Route, Router, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./pages/auth/Login";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import AdminPanel from "./pages/panels/AdminPanel";
 import DoctorPanel from "./pages/panels/DoctorPanel";
-import UserPanel from "./pages/panels/UserPanel";
 import Unauthorized from "./pages/auth/Unauthorized";
 import NotFound from "./pages/NotFound";
 import { atom } from "jotai";
@@ -83,106 +82,91 @@ createRoot(document.getElementById("root")).render(
         </Route>
 
         {/* Doctor */}
-        <Route element={<ProtectedRoute allowedRoles={["MEDECIN"]} />}>
+        <Route
+          element={<ProtectedRoute allowedRoles={["MEDECIN", "JOCKEY"]} />}
+        >
           <Route path="/medecin" Component={DoctorPanel} />
-          <Route path="/medecin/jockey/:id" Component={PatientTab} />
-          <Route path="/medecin/jockey/:id/conclusion" Component={Conclusion} />
-          <Route path="/medecin/jockey/:id/examens" Component={Examens} />
+          <Route path="/jockey/:id" Component={PatientTab} />
+          <Route path="/jockey/:id/conclusion" Component={Conclusion} />
+          <Route path="/jockey/:id/examens" Component={Examens} />
           <Route
-            path="/medecin/jockey/:id/examens/locomoteur"
+            path="/jockey/:id/examens/locomoteur"
             Component={ExamenLocomoteur}
           />
+          <Route path="/jockey/:id/medications" Component={Medications} />
+          <Route path="/jockey/:id/examens/ecg-repos" Component={ECR} />
           <Route
-            path="/medecin/jockey/:id/medications"
-            Component={Medications}
-          />
-          <Route path="/medecin/jockey/:id/examens/ecg-repos" Component={ECR} />
-          <Route
-            path="/medecin/jockey/:id/antecedent_familiaux"
+            path="/jockey/:id/antecedent_familiaux"
             Component={AntecedentFamiliaux}
           />
-          <Route path="/medecin/jockey/:id/hygiene" Component={Hygiene} />
+          <Route path="/jockey/:id/hygiene" Component={Hygiene} />
+          <Route path="/jockey/:id/examens/ecg-effort" Component={ECE} />
           <Route
-            path="/medecin/jockey/:id/examens/ecg-effort"
-            Component={ECE}
-          />
-          <Route
-            path="/medecin/jockey/:id/examens/autres-paracliniques"
+            path="/jockey/:id/examens/autres-paracliniques"
             Component={ExamenParaclinique}
           />
           <Route
-            path="/medecin/jockey/:id/examens/genito-urinaire"
+            path="/jockey/:id/examens/genito-urinaire"
             Component={ExamenGenitoUrinaire}
           />
           <Route
-            path="/medecin/jockey/:id/examens/neurologique"
+            path="/jockey/:id/examens/neurologique"
             Component={ExamenNeurologique}
           />
           <Route
-            path="/medecin/jockey/:id/examens/abdominal"
+            path="/jockey/:id/examens/abdominal"
             Component={ExamenAbdominal}
           />
           <Route
-            path="/medecin/jockey/:id/examens/cardiovasculaire"
+            path="/jockey/:id/examens/cardiovasculaire"
             Component={ExamenCardioVasculaire}
           />
           <Route
-            path="/medecin/jockey/:id/examens/pleuropulmonaire"
+            path="/jockey/:id/examens/pleuropulmonaire"
             Component={ExamenPleuroPulmonaire}
           />
           <Route
-            path="/medecin/jockey/:id/examens/ophtalmologique"
+            path="/jockey/:id/examens/ophtalmologique"
             Component={ExamenOphtalmogique}
           />
+          <Route path="/jockey/:id/examens/auditif" Component={ExamenAuditif} />
           <Route
-            path="/medecin/jockey/:id/examens/auditif"
-            Component={ExamenAuditif}
-          />
-          <Route
-            path="/medecin/jockey/:id/antecedent_personel"
+            path="/jockey/:id/antecedent_personel"
             Component={AntecedentPersonnel}
           />
           <Route
-            path="/medecin/jockey/:id/antecedent_personel/autres"
+            path="/jockey/:id/antecedent_personel/autres"
             Component={Autres}
           />
           <Route
-            path="/medecin/jockey/:id/antecedent_personel/appareil-cardiovasculaire"
+            path="/jockey/:id/antecedent_personel/appareil-cardiovasculaire"
             Component={AppareilCardioVasculaire}
           />
           <Route
-            path="/medecin/jockey/:id/antecedent_personel/appareil-respiratoire"
+            path="/jockey/:id/antecedent_personel/appareil-respiratoire"
             Component={AppareilRespiratoire}
           />
           <Route
-            path="/medecin/jockey/:id/antecedent_personel/systeme-nerveux"
+            path="/jockey/:id/antecedent_personel/systeme-nerveux"
             Component={SystemeNerveux}
           />
+          <Route path="/jockey/:id/antecedent_personel/orl" Component={ORL} />
           <Route
-            path="/medecin/jockey/:id/antecedent_personel/orl"
-            Component={ORL}
-          />
-          <Route
-            path="/medecin/jockey/:id/antecedent_personel/allergies"
+            path="/jockey/:id/antecedent_personel/allergies"
             Component={Allergies}
           />
           <Route
-            path="/medecin/jockey/:id/antecedent_personel/traumatologie"
+            path="/jockey/:id/antecedent_personel/traumatologie"
             Component={Traumatologie}
           />
           <Route
-            path="/medecin/jockey/:id/antecedent_personel/appareil-digestif"
+            path="/jockey/:id/antecedent_personel/appareil-digestif"
             Component={AppareilDigestif}
           />
           <Route
-            path="/medecin/jockey/:id/antecedent_personel/endocrinologie"
+            path="/jockey/:id/antecedent_personel/endocrinologie"
             Component={Endocrinologie}
           />
-        </Route>
-
-        {/* User */}
-        <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
-          <Route path="/user" Component={UserPanel} />
         </Route>
       </Routes>
     </BrowserRouter>

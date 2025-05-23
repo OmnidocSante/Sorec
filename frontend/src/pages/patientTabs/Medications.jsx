@@ -1,4 +1,5 @@
 import instance from "@/auth/AxiosInstance";
+import useUser from "@/auth/useUser";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { ArrowLeft, Ban, Edit, Plus, Save, Trash } from "lucide-react";
@@ -14,6 +15,8 @@ const medicationSchema = z.object({
 });
 
 export default function Medications() {
+  const user = useUser();
+
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
@@ -48,7 +51,7 @@ export default function Medications() {
       const response = await instance.get(`/api/jockey/${id}/medication`);
       setExistingMedications(response.data);
     } catch (err) {
-      navigate("/unauthorized")
+      navigate("/unauthorized");
 
       console.error("Error fetching medications:", err);
     } finally {
@@ -129,68 +132,70 @@ export default function Medications() {
         <h1 className="text-2xl font-bold text-gray-800">
           Gestion des Médicaments
         </h1>
-        <div className="flex gap-3">
-          {isEditMode ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setIsEditMode(false)}
-                className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all `}
-              >
-                <>
-                  <Ban className="h-6 w-6 text-red-600" />
-                  <span className="text-sm font-medium text-red-800">
-                    Annuler
-                  </span>
-                </>
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => setIsEditMode(true)}
-                className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-                  isEditMode
-                    ? "bg-gray-200 cursor-not-allowed"
-                    : "hover:bg-blue-50 hover:-translate-y-0.5"
-                }`}
-                disabled={isEditMode}
-              >
-                {existingMedications.length > 0 ? (
+        {user.role === "MEDECIN" && (
+          <div className="flex gap-3">
+            {isEditMode ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsEditMode(false)}
+                  className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all `}
+                >
                   <>
-                    <Edit className="h-6 w-6 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-800">
-                      Modifier
+                    <Ban className="h-6 w-6 text-red-600" />
+                    <span className="text-sm font-medium text-red-800">
+                      Annuler
                     </span>
                   </>
-                ) : (
-                  <>
-                    <Plus className="h-6 w-6 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">
-                      Ajouter
-                    </span>
-                  </>
-                )}
-              </button>
-            </>
-          )}
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsEditMode(true)}
+                  className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                    isEditMode
+                      ? "bg-gray-200 cursor-not-allowed"
+                      : "hover:bg-blue-50 hover:-translate-y-0.5"
+                  }`}
+                  disabled={isEditMode}
+                >
+                  {existingMedications.length > 0 ? (
+                    <>
+                      <Edit className="h-6 w-6 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-800">
+                        Modifier
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-6 w-6 text-green-600" />
+                      <span className="text-sm font-medium text-green-800">
+                        Ajouter
+                      </span>
+                    </>
+                  )}
+                </button>
+              </>
+            )}
 
-          <button
-            type="submit"
-            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              !isEditMode
-                ? "bg-gray-200 cursor-not-allowed"
-                : "hover:bg-green-50 hover:-translate-y-0.5"
-            }`}
-            disabled={!isEditMode}
-          >
-            <Save className="h-6 w-6 text-green-600" />
-            <span className="text-sm font-medium text-green-800">
-              Enregistrer
-            </span>
-          </button>
-        </div>
+            <button
+              type="submit"
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                !isEditMode
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-green-50 hover:-translate-y-0.5"
+              }`}
+              disabled={!isEditMode}
+            >
+              <Save className="h-6 w-6 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Enregistrer
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Existing Medications */}
@@ -232,6 +237,17 @@ export default function Medications() {
             </div>
           ))}
       </div>
+      {existingMedications.length == 0 && !isEditMode && (
+        <div className="w-full p-4 bg-white   text-blue-600 hover:text-blue-700">
+          <div className="flex items-center justify-center gap-2">
+            <span className="font-medium">
+              {user.role === "MEDECIN"
+                ? "Aucun médicament n’a encore été attribué. Cliquez sur « + » pour en ajouter un."
+                : "Aucun médicament n’a encore été attribué. "}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* New Medications Form */}
       {isEditMode && (

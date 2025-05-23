@@ -13,8 +13,17 @@ import omnidoc.backend.request.JockeyModificationRequest;
 import omnidoc.backend.util.AESUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.sql.rowset.serial.SerialBlob;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class JockeyService {
@@ -32,9 +41,9 @@ public class JockeyService {
         return userRecords.stream().filter(userRecord -> userRecord.role() == Role.JOCKEY).toList();
     }
 
+
     public JockeyRecord getJockey(int jockeyId) throws Exception {
-        accessService
-                .verifyAccess(jockeyId);
+        accessService.verifyAccess(jockeyId);
 
         Jockey jockey = jockeyRepo.findById(jockeyId).orElseThrow(() -> new ApiException("Not found"));
         User user = jockey.getUser();
@@ -49,6 +58,7 @@ public class JockeyService {
             DecryptedPlisGauche = Float.parseFloat(AESUtil.decrypt(jockey.getPlisGauche()));
         if (jockey.getPlisDroit() != null)
             DecryptedPlisDroit = Float.parseFloat(AESUtil.decrypt(jockey.getPlisDroit()));
+
 
         return new JockeyRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole(), jockey.getStatus(), DecryptedPlisDroit, DecryptedPlisGauche, DecryptedMatieresGrasses);
     }
@@ -72,40 +82,44 @@ public class JockeyService {
         jockeyRepo.save(jockey);
     }
 
-//
-//    public void addImage(MultipartFile image, int jockeyId) throws IOException, SQLException {
-//        try {
-//            Jockey jockey = jockeyRepo.findByUser_Id(jockeyId).orElseThrow(() -> new ApiException("User not found"));
-//            byte[] imageBytes = image.getBytes();
-//            Blob imageBlob = new SerialBlob(imageBytes);
-//            jockey.setImage(imageBlob);
-//            jockeyRepo.save(jockey);
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//            throw new ApiException("erreur lors de télechargement d'image");
-//        }
-//
-//    }
-//
-//
-//    public String detectContentType(byte[] imageBytes) throws IOException {
-//        try (InputStream is = new ByteArrayInputStream(imageBytes)) {
-//            return URLConnection.guessContentTypeFromStream(is);
-//        }
-//    }
-//
-//
-//    public byte[] getJockeyImage(int userId) throws SQLException, IOException {
-//        Jockey jockey = jockeyRepo.findByUser_Id(userId).orElseThrow(() -> new ApiException("User not found"));
-//
-//        Blob imageBlob = jockey.getImage();
-//
-//        if (imageBlob == null || imageBlob.length() == 0) {
-//            throw new ApiException("No image found for this jockey");
-//        }
-//
-//        return imageBlob.getBinaryStream().readAllBytes();
-//    }
+
+    public void addImage(MultipartFile image, int jockeyId) throws IOException, SQLException {
+        try {
+            Jockey jockey = jockeyRepo.findById(jockeyId).orElseThrow(() -> new ApiException("User not found"));
+            byte[] imageBytes = image.getBytes();
+            Blob imageBlob = new SerialBlob(imageBytes);
+            jockey.setImage(imageBlob);
+            jockeyRepo.save(jockey);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new ApiException("erreur lors de télechargement d'image");
+        }
+
+    }
+
+
+    public String detectContentType(byte[] imageBytes) throws IOException {
+        try (InputStream is = new ByteArrayInputStream(imageBytes)) {
+            return URLConnection.guessContentTypeFromStream(is);
+        }
+    }
+
+
+    public Optional<byte[]> getJockeyImage(int userId) throws SQLException, IOException {
+        Jockey jockey = jockeyRepo.findById(userId)
+                .orElseThrow(() -> new ApiException("User not found"));
+
+        Blob imageBlob = jockey.getImage();
+
+        if (imageBlob == null || imageBlob.length() == 0) {
+            System.out.println("here 1");
+            return Optional.empty();
+        } else {
+            System.out.println("here 2");
+
+            return Optional.of(imageBlob.getBinaryStream().readAllBytes());
+        }
+    }
 
 
 }

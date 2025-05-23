@@ -1,7 +1,10 @@
 package omnidoc.backend.service;
 
+import omnidoc.backend.entity.enums.Role;
+import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.User;
 import omnidoc.backend.exceptions.ApiException;
+import omnidoc.backend.repository.JockeyRepo;
 import omnidoc.backend.repository.UserRepo;
 import omnidoc.backend.response.AuthenticationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,26 +27,32 @@ public class AuthenticationService {
 
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private JockeyRepo jockeyRepo;
 
     public AuthenticationResponse login(User user) {
-        User user1 = userRepo.findByEmail(user.getEmail()).orElseThrow(()->new ApiException("Email invalide."));
-        if (user1.getPassword() == null ) {
+        User user1 = userRepo.findByEmail(user.getEmail()).orElseThrow(() -> new ApiException("Email invalide."));
+        if (user1.getPassword() == null) {
             throw new ApiException("Mot de passe non encore créé. Un email contenant un lien de création de mot de passe vous a été envoyé. Veuillez consulter votre boîte mail.");
         }
 
         try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
-            );
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
         } catch (Exception e) {
             throw new ApiException("Email ou mot de passe invalide.");
         }
 
-        User authenticatedUser = userRepo.findByEmail(user.getEmail())
-                .orElseThrow(() -> new ApiException("Utilisateur introuvable."));
+        User authenticatedUser = userRepo.findByEmail(user.getEmail()).orElseThrow(() -> new ApiException("Utilisateur introuvable."));
 
         Map<String, Object> role = new HashMap<>();
         role.put("role", authenticatedUser.getRole());
+        if (authenticatedUser.getRole() == Role.JOCKEY) {
+            Jockey jockey = jockeyRepo.findByUser_Id(authenticatedUser.getId()).orElseThrow();
+            role.put("id", jockey.getId());
+        } else {
+            role.put("id", authenticatedUser.getId());
+        }
+
 
         String token = jwtService.generateToken(role, authenticatedUser);
 

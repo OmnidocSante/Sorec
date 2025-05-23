@@ -6,8 +6,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AnimatePresence } from "framer-motion";
 import { Ban, HistoryIcon, History } from "lucide-react";
+import useUser from "@/auth/useUser";
 
 export default function ExamenCardio() {
+  const user = useUser();
+
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
@@ -250,74 +253,78 @@ export default function ExamenCardio() {
         <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">
           Examen CardioVasculaire
         </h1>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={handleHistoriqueClick}
-            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode || isHistory || !hasVisibleData
-                ? "bg-gray-200 cursor-not-allowed"
-                : "hover:bg-blue-50 hover:-translate-y-0.5"
-            }`}
-            disabled={isEditMode || isHistory || !hasVisibleData}
-          >
-            <History className="h-6 w-6 text-gray-600" />
-            <span className="text-sm font-medium text-gray-800">
-              {showHistorique ? "Cacher l'historique" : "Voir historique"}
-            </span>
-          </button>
-
-          {isEditMode ? (
+        {user.role === "MEDECIN" && (
+          <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => {
-                fetchData(`/api/jockey/${id}/examen-cardio`);
-                setIsEditMode(false);
-              }}
-              className={`p-2 pl-4 ${
-                isHistory && "cursor-not-allowed"
-              } rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
-              }`}
-              disabled={isHistory || !hasVisibleData}
-            >
-              <Ban className="h-6 w-6 text-red-600" />
-              <span className="text-sm font-medium text-red-800">Annuler</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsEditMode(true)}
-              className={`p-2 pl-4 ${
-                isHistory && "cursor-not-allowed"
-              } rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+              onClick={handleHistoriqueClick}
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode || isHistory || !hasVisibleData
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
               disabled={isEditMode || isHistory || !hasVisibleData}
             >
-              <Edit className="h-6 w-6 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">
-                Modifier
+              <History className="h-6 w-6 text-gray-600" />
+              <span className="text-sm font-medium text-gray-800">
+                {showHistorique ? "Cacher l'historique" : "Voir historique"}
               </span>
             </button>
-          )}
 
-          <button
-            type="button"
-            onClick={handleSave}
-            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              !isEditMode || isHistory || !hasVisibleData
-                ? "bg-gray-200 cursor-not-allowed"
-                : "hover:bg-green-50 hover:-translate-y-0.5"
-            } `}
-            disabled={!isEditMode || isHistory || !hasVisibleData}
-          >
-            <Save className="h-6 w-6 text-green-600" />
-            <span className="text-sm font-medium text-green-800">
-              Enregistrer
-            </span>
-          </button>
-        </div>
+            {isEditMode ? (
+              <button
+                type="button"
+                onClick={() => {
+                  fetchData(`/api/jockey/${id}/examen-cardio`);
+                  setIsEditMode(false);
+                }}
+                className={`p-2 pl-4 ${
+                  isHistory && "cursor-not-allowed"
+                } rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
+                }`}
+                disabled={isHistory || !hasVisibleData}
+              >
+                <Ban className="h-6 w-6 text-red-600" />
+                <span className="text-sm font-medium text-red-800">
+                  Annuler
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsEditMode(true)}
+                className={`p-2 pl-4 ${
+                  isHistory && "cursor-not-allowed"
+                } rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+                }`}
+                disabled={isEditMode || isHistory || !hasVisibleData}
+              >
+                <Edit className="h-6 w-6 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">
+                  Modifier
+                </span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleSave}
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                !isEditMode || isHistory || !hasVisibleData
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-green-50 hover:-translate-y-0.5"
+              } `}
+              disabled={!isEditMode || isHistory || !hasVisibleData}
+            >
+              <Save className="h-6 w-6 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Enregistrer
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {showHistorique && (
@@ -366,7 +373,6 @@ export default function ExamenCardio() {
             {visibleConditionsArray.map((condition) => (
               <motion.div
                 key={condition.id}
-
                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
               >
                 <div className="flex justify-between items-center mb-4">
@@ -456,7 +462,6 @@ export default function ExamenCardio() {
               return (
                 <motion.div
                   key={key}
-
                   className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
                 >
                   <div className="flex justify-between items-center mb-4">

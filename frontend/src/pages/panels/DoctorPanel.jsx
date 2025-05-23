@@ -33,83 +33,114 @@ export default function DoctorPanel() {
 
   return (
     <div className="min-h-screen bg-bay-of-many-50 overflow-hidden">
-      <div className="md:hidden bg-bay-of-many-900 text-white p-4 flex justify-between items-center">
-        <h2 className="text-xl font-bold">SOREC M{"é"}decin</h2>
+      {/* Mobile Header */}
+      <div className="md:hidden bg-gradient-to-r from-bay-of-many-800 to-bay-of-many-900 text-white p-4 flex justify-between items-center shadow-xl">
+        <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
+          <svg
+            className="w-6 h-6 text-blue-300"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          SOREC Médecin
+        </h2>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="text-2xl"
+          className="p-2 rounded-lg hover:bg-white/10 transition-all duration-300"
         >
           {isMobileMenuOpen ? (
-            <div className="cursor-pointer hover:rounded-xl hover:bg-white/20 transition-all duration-500 w-fit h-fit p-2 grid place-items-center">
-              <X />
-            </div>
+            <X className="w-6 h-6" />
           ) : (
-            <div className="cursor-pointer hover:rounded-xl hover:bg-white/20 transition-all duration-500 w-fit h-fit p-2 grid place-items-center">
-              <Menu />
-            </div>
+            <Menu className="w-6 h-6" />
           )}
         </button>
       </div>
 
+      {/* Desktop Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full w-64 bg-bay-of-many-900 text-white p-4 transition-transform duration-500 ease-in-out z-50
+        className={`fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-bay-of-many-800 to-bay-of-many-900 text-white p-6 transition-all duration-500 ease-in-out z-50 shadow-2xl
           ${
             isMobileMenuOpen
               ? "translate-x-0"
               : "-translate-x-full md:translate-x-0"
           }`}
       >
-        <h2 className="text-xl font-bold mb-8 hidden md:block">
-          SOREC M{"é"}decin
+        <h2 className="text-2xl font-bold mb-10 hidden md:block flex items-center gap-3">
+          SOREC
         </h2>
-        <nav>
+        <nav className="space-y-2">
           <button
             onClick={() => {
               setActiveTab("dashboard");
               setIsMobileMenuOpen(false);
             }}
-            className={`w-full cursor-pointer transition-all duration-500 text-left p-3 rounded-lg mb-2 ${
-              activeTab === "dashboard"
-                ? "bg-bay-of-many-700"
-                : "hover:bg-bay-of-many-800"
-            }`}
+            className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-300 group
+              ${
+                activeTab === "dashboard"
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg"
+                  : "hover:bg-bay-of-many-700/50 hover:pl-5"
+              }`}
           >
+            <svg
+              className={`w-5 h-5 ${
+                activeTab === "dashboard" ? "text-white" : "text-blue-300"
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              ></path>
+            </svg>
             Tableau de Bord
           </button>
-{/* 
-          <button
-            onClick={() => {
-              setActiveTab("data");
-              setIsMobileMenuOpen(false);
-            }}
-            className={`w-full cursor-pointer transition-all duration-500 text-left p-3 rounded-lg mb-2 ${
-              activeTab === "data"
-                ? "bg-bay-of-many-700"
-                : "hover:bg-bay-of-many-800"
-            }`}
-          >
-            Correction des Données
-          </button> */}
 
           <button
             onClick={() => {
               setActiveTab("appointments");
               setIsMobileMenuOpen(false);
             }}
-            className={`w-full cursor-pointer transition-all duration-500 text-left p-3 rounded-lg mb-8 ${
-              activeTab === "appointments"
-                ? "bg-bay-of-many-700"
-                : "hover:bg-bay-of-many-800"
-            }`}
+            className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-300 group
+              ${
+                activeTab === "appointments"
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg"
+                  : "hover:bg-bay-of-many-700/50 hover:pl-5"
+              }`}
           >
+            <svg
+              className={`w-5 h-5 ${
+                activeTab === "appointments" ? "text-white" : "text-blue-300"
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              ></path>
+            </svg>
             Rendez-vous
           </button>
 
           <button
             onClick={handleLogout}
-            className="w-full cursor-pointer transition-all duration-500 text-left p-3 rounded-lg hover:bg-bay-of-many-800 flex items-center gap-2 mt-auto absolute float-end bottom-4 left-0"
+            className="w-9/12 hover:bg-bay-of-many-700/50 transition-all duration-300 flex items-center gap-3 p-3.5 mt-24 rounded-xl hover:pl-5 absolute bottom-8 left-6 right-6"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="w-5 h-5" />
             Déconnexion
           </button>
         </nav>
@@ -117,7 +148,7 @@ export default function DoctorPanel() {
 
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-gray-300/80 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}

@@ -87,9 +87,9 @@ export default function Examens() {
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-2 p-2 px-4 bg-gray-50 rounded-xl shadow-sm border border-bay-of-many-200 text-bay-of-many-600 hover:text-bay-of-many-800 transition-colors cursor-pointer"
           >
-            <div className="bg-bay-of-many-100 p-3 rounded-full">
+            {/* <div className="bg-bay-of-many-100 p-3 rounded-full">
               <User className="w-6 h-6 text-bay-of-many-600" />
-            </div>
+            </div> */}
             <div>
               <h1 className="text-2xl font-bold text-bay-of-many-900">
                 {jockey.nom} {jockey.prénom}
@@ -121,7 +121,7 @@ export default function Examens() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/examens/cardiovasculaire`)
+              navigate(`/jockey/${id}/examens/cardiovasculaire`)
             }
             className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl shadow-sm border border-red-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -141,7 +141,7 @@ export default function Examens() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/examens/pleuropulmonaire`)
+              navigate(`/jockey/${id}/examens/pleuropulmonaire`)
             }
             className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm border border-blue-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -161,7 +161,7 @@ export default function Examens() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/examens/ophtalmologique`)
+              navigate(`/jockey/${id}/examens/ophtalmologique`)
             }
             className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl shadow-sm border border-indigo-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -180,7 +180,7 @@ export default function Examens() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/examens/auditif`)}
+            onClick={() => navigate(`/jockey/${id}/examens/auditif`)}
             className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 cursor-pointer transition-all hover:shadow-md"
           >
             <div className="flex justify-between items-start mb-4">
@@ -198,7 +198,7 @@ export default function Examens() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/examens/locomoteur`)}
+            onClick={() => navigate(`/jockey/${id}/examens/locomoteur`)}
             className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl shadow-sm border border-amber-200 cursor-pointer transition-all hover:shadow-md"
           >
             <div className="flex justify-between items-start mb-4">
@@ -217,7 +217,7 @@ export default function Examens() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/examens/neurologique`)
+              navigate(`/jockey/${id}/examens/neurologique`)
             }
             className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -234,7 +234,7 @@ export default function Examens() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/examens/abdominal`)}
+            onClick={() => navigate(`/jockey/${id}/examens/abdominal`)}
             className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl shadow-sm border border-emerald-200 cursor-pointer transition-all hover:shadow-md"
           >
             <div className="flex justify-between items-start mb-4">
@@ -253,7 +253,7 @@ export default function Examens() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/examens/genito-urinaire`)
+              navigate(`/jockey/${id}/examens/genito-urinaire`)
             }
             className="bg-gradient-to-br from-pink-50 to-pink-100 p-6 rounded-xl shadow-sm border border-pink-200 cursor-pointer transition-all hover:shadow-md"
           >
@@ -271,7 +271,7 @@ export default function Examens() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/examens/ecg-repos`)}
+            onClick={() => navigate(`/jockey/${id}/examens/ecg-repos`)}
             className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-xl shadow-sm border border-cyan-200 cursor-pointer transition-all hover:shadow-md"
           >
             <div className="flex justify-between items-start mb-4">
@@ -289,7 +289,7 @@ export default function Examens() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -5 }}
-            onClick={() => navigate(`/medecin/jockey/${id}/examens/ecg-effort`)}
+            onClick={() => navigate(`/jockey/${id}/examens/ecg-effort`)}
             className="bg-gradient-to-br from-teal-50 to-teal-100 p-6 rounded-xl shadow-sm border border-teal-200 cursor-pointer transition-all hover:shadow-md"
           >
             <div className="flex justify-between items-start mb-4">
@@ -308,7 +308,7 @@ export default function Examens() {
             variants={cardVariants}
             whileHover={{ y: -5 }}
             onClick={() =>
-              navigate(`/medecin/jockey/${id}/examens/autres-paracliniques`)
+              navigate(`/jockey/${id}/examens/autres-paracliniques`)
             }
             className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-xl shadow-sm border border-slate-200 cursor-pointer transition-all hover:shadow-md"
           >

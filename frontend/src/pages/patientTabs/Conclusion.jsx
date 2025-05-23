@@ -1,4 +1,5 @@
 import instance from "@/auth/AxiosInstance";
+import useUser from "@/auth/useUser";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
@@ -21,6 +22,8 @@ const conclusionSchema = z.object({
 });
 
 export default function Conclusion() {
+  const user = useUser();
+
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
@@ -63,45 +66,74 @@ export default function Conclusion() {
 
       const hidden = new Set();
       const fieldsToCheck = [
-        'cardioVasculaire', 'pleuropulmonaire', 'ophtalmique',
-        'auditif', 'neurologique', 'abdominal', 'urogénital', 'paraclinique'
+        "cardioVasculaire",
+        "pleuropulmonaire",
+        "ophtalmique",
+        "auditif",
+        "neurologique",
+        "abdominal",
+        "urogénital",
+        "paraclinique",
       ];
 
-      fieldsToCheck.forEach(key => {
-          if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
-              hidden.add(key);
-          }
+      fieldsToCheck.forEach((key) => {
+        if (data.hasOwnProperty(key) && data[key] === HIDE_VALUE) {
+          hidden.add(key);
+        }
       });
       setHiddenFields(hidden);
 
-       const dataToReset = {
-           id: data.id,
-           cardioVasculaire: data.cardioVasculaire === HIDE_VALUE ? null : (data.cardioVasculaire ?? null),
-           pleuropulmonaire: data.pleuropulmonaire === HIDE_VALUE ? null : (data.pleuropulmonaire ?? null),
-           ophtalmique: data.ophtalmique === HIDE_VALUE ? null : (data.ophtalmique ?? null),
-           auditif: data.auditif === HIDE_VALUE ? null : (data.auditif ?? null),
-           neurologique: data.neurologique === HIDE_VALUE ? null : (data.neurologique ?? null),
-           abdominal: data.abdominal === HIDE_VALUE ? null : (data.abdominal ?? null),
-           urogénital: data.urogénital === HIDE_VALUE ? null : (data.urogénital ?? null),
-           paraclinique: data.paraclinique === HIDE_VALUE ? null : (data.paraclinique ?? null),
-       };
-
+      const dataToReset = {
+        id: data.id,
+        cardioVasculaire:
+          data.cardioVasculaire === HIDE_VALUE
+            ? null
+            : data.cardioVasculaire ?? null,
+        pleuropulmonaire:
+          data.pleuropulmonaire === HIDE_VALUE
+            ? null
+            : data.pleuropulmonaire ?? null,
+        ophtalmique:
+          data.ophtalmique === HIDE_VALUE ? null : data.ophtalmique ?? null,
+        auditif: data.auditif === HIDE_VALUE ? null : data.auditif ?? null,
+        neurologique:
+          data.neurologique === HIDE_VALUE ? null : data.neurologique ?? null,
+        abdominal:
+          data.abdominal === HIDE_VALUE ? null : data.abdominal ?? null,
+        urogénital:
+          data.urogénital === HIDE_VALUE ? null : data.urogénital ?? null,
+        paraclinique:
+          data.paraclinique === HIDE_VALUE ? null : data.paraclinique ?? null,
+      };
 
       reset(dataToReset);
-
     } catch (err) {
-      navigate("/unauthorized")
+      navigate("/unauthorized");
 
       console.error("Error fetching Conclusion:", err);
-       reset({
-         id: parseInt(id) || 0,
-         cardioVasculaire: null, pleuropulmonaire: null, ophtalmique: null,
-         auditif: null, neurologique: null, abdominal: null, urogénital: null, paraclinique: null,
-       });
-       setHiddenFields(new Set([
-         'cardioVasculaire', 'pleuropulmonaire', 'ophtalmique',
-         'auditif', 'neurologique', 'abdominal', 'urogénital', 'paraclinique'
-       ]));
+      reset({
+        id: parseInt(id) || 0,
+        cardioVasculaire: null,
+        pleuropulmonaire: null,
+        ophtalmique: null,
+        auditif: null,
+        neurologique: null,
+        abdominal: null,
+        urogénital: null,
+        paraclinique: null,
+      });
+      setHiddenFields(
+        new Set([
+          "cardioVasculaire",
+          "pleuropulmonaire",
+          "ophtalmique",
+          "auditif",
+          "neurologique",
+          "abdominal",
+          "urogénital",
+          "paraclinique",
+        ])
+      );
     } finally {
       setLoading(false);
     }
@@ -124,14 +156,19 @@ export default function Conclusion() {
       const payload = { id: data.id };
       console.log(hiddenFields);
 
-      if (!hiddenFields.has('cardioVasculaire')) payload.cardioVasculaire = data.cardioVasculaire;
-      if (!hiddenFields.has('pleuropulmonaire')) payload.pleuropulmonaire = data.pleuropulmonaire;
-      if (!hiddenFields.has('ophtalmique')) payload.ophtalmique = data.ophtalmique;
-      if (!hiddenFields.has('auditif')) payload.auditif = data.auditif;
-      if (!hiddenFields.has('neurologique')) payload.neurologique = data.neurologique;
-      if (!hiddenFields.has('abdominal')) payload.abdominal = data.abdominal;
-      if (!hiddenFields.has('urogénital')) payload.urogénital = data.urogénital;
-      if (!hiddenFields.has('paraclinique')) payload.paraclinique = data.paraclinique;
+      if (!hiddenFields.has("cardioVasculaire"))
+        payload.cardioVasculaire = data.cardioVasculaire;
+      if (!hiddenFields.has("pleuropulmonaire"))
+        payload.pleuropulmonaire = data.pleuropulmonaire;
+      if (!hiddenFields.has("ophtalmique"))
+        payload.ophtalmique = data.ophtalmique;
+      if (!hiddenFields.has("auditif")) payload.auditif = data.auditif;
+      if (!hiddenFields.has("neurologique"))
+        payload.neurologique = data.neurologique;
+      if (!hiddenFields.has("abdominal")) payload.abdominal = data.abdominal;
+      if (!hiddenFields.has("urogénital")) payload.urogénital = data.urogénital;
+      if (!hiddenFields.has("paraclinique"))
+        payload.paraclinique = data.paraclinique;
 
       console.log(payload);
 
@@ -156,9 +193,9 @@ export default function Conclusion() {
         try {
           const response = await instance.get(`/api/jockey/${id}/historique`);
           setHistorique(response.data);
-        } catch(err) {
-           console.error("Error fetching history:", err);
-           setHistorique([]);
+        } catch (err) {
+          console.error("Error fetching history:", err);
+          setHistorique([]);
         }
       }
       setShowHistorique(true);
@@ -263,175 +300,193 @@ export default function Conclusion() {
         <h1 className="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-2xl font-bold text-gray-800">
           Conclusion Médicale
         </h1>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={handleHistoriqueClick}
-            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              isEditMode || isHistory || !hasVisibleData
-                ? "bg-gray-200 cursor-not-allowed"
-                : "hover:bg-blue-50 hover:-translate-y-0.5"
-            }`}
-            disabled={isEditMode || isHistory || !hasVisibleData}
-          >
-            <History className="h-6 w-6 text-gray-600" />
-            <span className="text-sm font-medium text-gray-800">
-              {showHistorique ? "Cacher l'historique" : "Voir historique"}
-            </span>
-          </button>
-
-          {isEditMode ? (
+        {user.role === "MEDECIN" && (
+          <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => {
-                 fetchData(`/api/jockey/${id}/conclusion`);
-                 setIsEditMode(false);
-               }}
-              className={`p-2 pl-4 ${
-                isHistory && "cursor-not-allowed"
-              } rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
-              }`}
-              disabled={isHistory || !hasVisibleData}
-            >
-              <Ban className="h-6 w-6 text-red-600" />
-              <span className="text-sm font-medium text-red-800">Annuler</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsEditMode(true)}
-              className={`p-2 pl-4 ${
-                isHistory && "cursor-not-allowed"
-              } rounded-lg flex items-center gap-2 transition-all ${
-                isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+              onClick={handleHistoriqueClick}
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                isEditMode || isHistory || !hasVisibleData
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-blue-50 hover:-translate-y-0.5"
               }`}
               disabled={isEditMode || isHistory || !hasVisibleData}
             >
-              <Edit className="h-6 w-6 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">
-                Modifier
+              <History className="h-6 w-6 text-gray-600" />
+              <span className="text-sm font-medium text-gray-800">
+                {showHistorique ? "Cacher l'historique" : "Voir historique"}
               </span>
             </button>
-          )}
 
-          <button
-            type="submit"
-            className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
-              !isEditMode || isHistory || !hasVisibleData
-                ? "bg-gray-200 cursor-not-allowed"
-                : "hover:bg-green-50 hover:-translate-y-0.5"
-            } `}
-            disabled={!isEditMode || isHistory || !hasVisibleData}
-          >
-            <Save className="h-6 w-6 text-green-600" />
-            <span className="text-sm font-medium text-green-800">
-              Enregistrer
-            </span>
-          </button>
-        </div>
+            {isEditMode ? (
+              <button
+                type="button"
+                onClick={() => {
+                  fetchData(`/api/jockey/${id}/conclusion`);
+                  setIsEditMode(false);
+                }}
+                className={`p-2 pl-4 ${
+                  isHistory && "cursor-not-allowed"
+                } rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode ? " " : "hover:bg-blue-50 hover:-translate-y-0.5"
+                }`}
+                disabled={isHistory || !hasVisibleData}
+              >
+                <Ban className="h-6 w-6 text-red-600" />
+                <span className="text-sm font-medium text-red-800">
+                  Annuler
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsEditMode(true)}
+                className={`p-2 pl-4 ${
+                  isHistory && "cursor-not-allowed"
+                } rounded-lg flex items-center gap-2 transition-all ${
+                  isEditMode ? "" : "hover:bg-blue-50 hover:-translate-y-0.5"
+                }`}
+                disabled={isEditMode || isHistory || !hasVisibleData}
+              >
+                <Edit className="h-6 w-6 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">
+                  Modifier
+                </span>
+              </button>
+            )}
+
+            <button
+              type="submit"
+              className={`p-2 pl-4 rounded-lg flex items-center gap-2 transition-all ${
+                !isEditMode || isHistory || !hasVisibleData
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "hover:bg-green-50 hover:-translate-y-0.5"
+              } `}
+              disabled={!isEditMode || isHistory || !hasVisibleData}
+            >
+              <Save className="h-6 w-6 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Enregistrer
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {showHistorique && (
         <motion.div
-           initial={{ opacity: 0, y: -20 }}
-           animate={{ opacity: 1, y: 0 }}
-           exit={{ opacity: 0, y: -20 }}
-           transition={{ duration: 0.3 }}
-           className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="my-4 space-y-2 bg-white p-4 rounded-xl shadow-inner"
         >
-          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Versions Historiques</h3>
-          {historique.length > 0 ? historique.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => fetchItem(item.id)}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
-            >
-              <p className="text-sm font-medium text-gray-700">
-                <span className="mr-2 text-gray-500">Date du dossier:</span>
-                {new Date(item.date).toLocaleString("fr-FR", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                  hour12: false,
-                })}
-              </p>
-            </div>
-          )) : (
-             <p className="text-gray-500 text-sm italic">Aucun historique disponible.</p>
+          <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+            Versions Historiques
+          </h3>
+          {historique.length > 0 ? (
+            historique.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => fetchItem(item.id)}
+                className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
+              >
+                <p className="text-sm font-medium text-gray-700">
+                  <span className="mr-2 text-gray-500">Date du dossier:</span>
+                  {new Date(item.date).toLocaleString("fr-FR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                  })}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm italic">
+              Aucun historique disponible.
+            </p>
           )}
         </motion.div>
       )}
 
       {hasVisibleData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-             {fieldConfigs.map(({ key, label }) => (
-                 <motion.div
-                     key={key}
-                     initial={{ opacity: 0, y: 20 }}
-                     animate={{ opacity: 1, y: 0 }}
-                     exit={{ opacity: 0, y: 20 }}
-                     transition={{ duration: 0.3 }}
-                     className="h-full bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-                 >
-                     <div className="flex flex-col h-full justify-between">
-                         <div className="mb-4">
-                             <h2 className="text-lg font-semibold text-gray-800">
-                                 Examen {label}
-                             </h2>
-                         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {fieldConfigs.map(({ key, label }) => (
+            <motion.div
+              key={key}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="h-full bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+            >
+              <div className="flex flex-col h-full justify-between">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Examen {label}
+                  </h2>
+                </div>
 
-                         <div className="flex flex-col gap-4">
-                             <div className="flex gap-4">
-                                 <button
-                                     type="button"
-                                     disabled={!isEditMode || isHistory}
-                                     onClick={() => handleToggle(key, true)}
-                                     className={`w-full px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                         watch(key) === "true"
-                                             ? "bg-green-500 text-white shadow-inner"
-                                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                     } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
-                                 >
-                                     Favorable
-                                 </button>
-                                 <button
-                                     type="button"
-                                     disabled={!isEditMode || isHistory}
-                                     onClick={() => handleToggle(key, false)}
-                                     className={`w-full px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                         watch(key) === "false"
-                                             ? "bg-red-500 text-white shadow-inner"
-                                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                     } ${(!isEditMode || isHistory) ? "opacity-50 cursor-not-allowed" : ""}`}
-                                 >
-                                     Non-Favorable
-                                 </button>
-                             </div>
-                             {errors[key] && errors[key].message && (
-                                 <p className="text-red-500 text-sm mt-2">
-                                     {errors[key].message}
-                                 </p>
-                             )}
-                         </div>
-                     </div>
-                 </motion.div>
-             ))}
-          </div>
-       )}
+                <div className="flex flex-col gap-4">
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      disabled={!isEditMode || isHistory}
+                      onClick={() => handleToggle(key, true)}
+                      className={`w-full px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        watch(key) === "true"
+                          ? "bg-green-500 text-white shadow-inner"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      } ${
+                        !isEditMode || isHistory
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
+                      Favorable
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!isEditMode || isHistory}
+                      onClick={() => handleToggle(key, false)}
+                      className={`w-full px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        watch(key) === "false"
+                          ? "bg-red-500 text-white shadow-inner"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      } ${
+                        !isEditMode || isHistory
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
+                      Non-Favorable
+                    </button>
+                  </div>
+                  {errors[key] && errors[key].message && (
+                    <p className="text-red-500 text-sm mt-2">
+                      {errors[key].message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
-       {!hasVisibleData && !loading && (
-           <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center text-gray-500 italic mt-8"
-           >
-             Aucune donnée de conclusion enregistrée ou visible pour ce dossier.
-           </motion.div>
-       )}
+      {!hasVisibleData && !loading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-gray-500 italic mt-8"
+        >
+          Aucune donnée de conclusion enregistrée ou visible pour ce dossier.
+        </motion.div>
+      )}
     </motion.form>
   );
 }

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AccessService {
     @Autowired
@@ -17,20 +19,29 @@ public class AccessService {
     @Autowired
     private MedecinRepo medecinRepo;
     @Autowired
-    private JwtService jwtService;
-    @Autowired
     private JockeyRepo jockeyRepo;
 
-    public void verifyAccess(int jockeyId){
+    public void verifyAccess(int jockeyId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Medecin medecin = medecinRepo.findByUser_Email(email).orElseThrow(()->new ApiException("not found"));
-        Jockey jockey = jockeyRepo.findById(jockeyId).orElseThrow(()->new ApiException("not found"));
-        boolean hasAccess = accessRepo.existsByMedecinAndJockey(medecin, jockey);
-        System.out.println(hasAccess);
-        if (!hasAccess){
-            throw new ApiException("not allowed");
+        Optional<Medecin> medecin = medecinRepo.findByUser_Email(email);
+        Jockey jockey = jockeyRepo.findById(jockeyId).orElseThrow(() -> new ApiException("not found"));
 
+        if (medecin.isPresent()) {
+            boolean hasAccess = accessRepo.existsByMedecinAndJockey(medecin.get(), jockey);
+            System.out.println(hasAccess);
+            if (!hasAccess) {
+                throw new ApiException("not allowed");
+
+            }
+        } else {
+            Jockey accessJockey = jockeyRepo.findByUser_Email(email);
+            if (accessJockey.getId() != jockeyId) {
+                throw new ApiException("not allowed");
+
+            }
         }
+
+
     }
 
 }
