@@ -35,7 +35,7 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       const response = await axios.post(
-        "http://dmp.omnidoc.ma/api/auth/login",
+        "http://dmp.omnidoc.ma:4000/api/auth/login",
         data
       );
       const receivedToken = response.data.token;
