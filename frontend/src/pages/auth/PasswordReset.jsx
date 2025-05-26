@@ -51,7 +51,7 @@ export default function PasswordReset() {
   const onSubmit = async (data) => {
     try {
       await axios.patch(
-        `http://dmp.omnidoc.ma:4000/api/auth/reset-password?token=${token}`,
+        `https://dmp.omnidoc.ma/api/auth/reset-password?token=${token}`,
         {
           password: data.password,
         }

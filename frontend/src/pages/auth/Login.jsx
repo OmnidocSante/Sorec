@@ -35,7 +35,7 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       const response = await axios.post(
-        "http://dmp.omnidoc.ma:4000/api/auth/login",
+        "https://dmp.omnidoc.ma/api/auth/login",
         data
       );
       const receivedToken = response.data.token;
@@ -149,7 +149,7 @@ export default function Login() {
                 Mot de passe
               </label>
               <div className="mt-1">
-                <input
+                <input 
                   {...register("password")}
                   id="password"
                   name="password"

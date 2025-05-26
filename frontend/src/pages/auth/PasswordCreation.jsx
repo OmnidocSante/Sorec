@@ -51,7 +51,7 @@ export default function CreatePassword() {
   const onSubmit = async (data) => {
     try {
       await axios.patch(
-        `http://dmp.omnidoc.ma:4000/api/auth/create-password?token=${token}`,
+        `https://dmp.omnidoc.ma/api/auth/create-password?token=${token}`,
         {
           password: data.password,
         }

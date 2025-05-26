@@ -1,13 +1,15 @@
 import axios from "axios";
 
-const token = localStorage.getItem("token") || null;
-console.log(token);
-
 const instance = axios.create({
-  baseURL: "http://dmp.omnidoc.ma:4000",
-  headers: {
-    Authorization: token ? `Bearer ${token}` : "",
-  },
+  baseURL: "https://dmp.omnidoc.ma",
+});
+
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token"); 
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export default instance;
