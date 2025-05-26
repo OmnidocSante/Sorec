@@ -24,7 +24,7 @@ export default function ForgotPassword() {
 
   const onSubmit = async (data) => {
     try {
-      await axios.post("http://localhost:4000/api/auth/request-password-reset", {
+      await axios.post("http://dmp.omnidoc.ma:4000/api/auth/request-password-reset", {
         email: data.email,
       });
 
