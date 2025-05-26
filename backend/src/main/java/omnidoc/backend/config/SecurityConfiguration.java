@@ -34,22 +34,16 @@ public class SecurityConfiguration {
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
-        return new CorsConfigurationSource() {
-            @Override
-            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                CorsConfiguration cfg = new CorsConfiguration();
-                cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173", "http://localhost:8080", "http://localhost:3001"));
-                cfg.setAllowedMethods(Collections.singletonList("*"));
-                cfg.setAllowCredentials(true);
-                cfg.setAllowedHeaders(Collections.singletonList("*"));
-                cfg.setExposedHeaders(List.of("Authorization"));
-                cfg.setMaxAge(3600L);
-                return cfg;
-            }
-
-
+        return request -> {
+            CorsConfiguration cfg = new CorsConfiguration();
+            cfg.addAllowedOriginPattern("*");
+            cfg.addAllowedMethod("*");
+            cfg.addAllowedHeader("*");
+            cfg.setAllowCredentials(true);
+            cfg.setExposedHeaders(List.of("Authorization"));
+            cfg.setMaxAge(3600L);
+            return cfg;
         };
-
     }
 
 
