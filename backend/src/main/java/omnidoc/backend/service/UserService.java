@@ -72,7 +72,7 @@ public class UserService {
         User createdUser = userRepo.save(user);
 
         String subject = "Création de votre mot de passe";
-        String body = "Bonjour,\n\n" + "Un compte vient d'être créé pour vous sur notre plateforme.\n" + "Veuillez cliquer sur le lien suivant pour définir votre mot de passe :\n\n" + "http://localhost:5173/create-password?token=" + rawPasswordCreationToken + "\n\n";
+        String body = "Bonjour,\n\n" + "Un compte vient d'être créé pour vous sur notre plateforme.\n" + "Veuillez cliquer sur le lien suivant pour définir votre mot de passe :\n\n" + "https://dmp.omnidoc.ma/create-password?token=" + rawPasswordCreationToken + "\n\n";
 
         emailService.sendEmail(user.getEmail(), subject, body);
 
@@ -124,7 +124,7 @@ public class UserService {
         user.setPasswordResetToken(HmacUtil.hmac(rawToken));
         userRepo.save(user);
 
-        String resetLink = "http://localhost:5173/reset-password?token=" + rawToken;
+        String resetLink = "https://dmp.omnidoc.ma/reset-password?token=" + rawToken;
         String body = "Bonjour,\n\nNous avons reçu une demande de réinitialisation...\n" + resetLink + "\n\nCordialement,\nL'équipe.";
         emailService.sendEmail(email, "Réinitialisation de votre mot de passe", body);
     }
