@@ -27,6 +27,14 @@ import { toLocalISOString } from "@/utils/toLocalISOString";
 import { STATUS_RDV } from "@/utils/enums";
 import { isSameDate } from "@/utils/isSameDate";
 import { CalendarT } from "@/components/CalendarT";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 
 const appointmentSchema = z.object({
   medecinId: z.string().min(1, "Médecin est requis"),
@@ -74,6 +82,7 @@ export default function AppointmentsTab() {
     return Array.from(cities).filter((city) => city && city.trim() !== "");
   }, [jockeys]);
 
+  const navigate = useNavigate();
   const filteredDoctors = useMemo(() => {
     return doctors.filter((doctor) => {
       const matchesSearch =
@@ -118,6 +127,8 @@ export default function AppointmentsTab() {
     setAppointments(response.data);
   };
 
+  const [isModalLoading, setIsModalLoading] = useState(false);
+
   const onSubmit = async (data) => {
     try {
       const payload = {
@@ -125,7 +136,7 @@ export default function AppointmentsTab() {
         jockeyId: data.jockeyId,
         date: toLocalISOString(data.date),
       };
-
+      setIsModalLoading(true);
       await instance.post("/api/rdvs", payload);
 
       setAlertContent({
@@ -133,6 +144,7 @@ export default function AppointmentsTab() {
         status: "success",
       });
       fetchAppointments();
+      setIsModalLoading(false);
     } catch (error) {
       setAlertContent({
         content: error?.response?.data?.message || error.message,
@@ -140,6 +152,18 @@ export default function AppointmentsTab() {
       });
     }
   };
+
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+  const [openStates, setOpenStates] = useState({});
+
+  const handleStatusUpdate = async (appointmentId, newStatus) => {
+    await instance.patch(`/api/rdvs/${appointmentId}`, { status: newStatus });
+    setOpenStates({});
+    fetchAppointments();
+    setIsDialogOpen(false);
+  };
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchAppointments();
@@ -172,6 +196,16 @@ export default function AppointmentsTab() {
           </motion.div>
         )}
       </AnimatePresence>
+      {isModalLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent bg-opacity-50">
+          <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center space-y-4 animate-fade-in">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-800 font-medium">
+              Planification en cours...
+            </p>
+          </div>
+        </div>
+      )}
 
       <h1 className="text-2xl font-bold text-bay-of-many-900">
         Gestion des Rendez-vous
@@ -399,90 +433,222 @@ export default function AppointmentsTab() {
           </h1>
           <CalendarT onDateSelect={setDateSelect} className="w-fit" />
         </div>
+        <div className="w-full h-full flex-1">
+          <div className="bg-white p-6 rounded-lg shadow md:col-span-3">
+            <h3 className="text-lg font-semibold text-bay-of-many-800 mb-4">
+              Rendez-vous à venir
+            </h3>
+            {filteredAppointments.length > 0 ? (
+              <div className="bg-white p-6 rounded-lg shadow">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y w-full divide-gray-200">
+                    <thead className="bg-bay-of-many-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
+                        >
+                          Date et Heure
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
+                        >
+                          Patient
+                        </th>
 
-        <div className="bg-white p-6 rounded-lg shadow w-full">
-          <h3 className="text-lg font-semibold text-bay-of-many-800 mb-4">
-            Rendez-vous à venir
-          </h3>
-          {filteredAppointments.length > 0 ? (
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y w-full divide-gray-200">
-                  <thead className="bg-bay-of-many-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
-                      >
-                        Date et Heure
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
-                      >
-                        Patient
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
-                      >
-                        Médecin
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
-                      >
-                        Statut
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredAppointments.map((appointment, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {format(new Date(appointment.dateTime), "PPPp", {
-                            locale: fr,
-                          })}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {appointment.userLastName} {appointment.userName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          Dr. {appointment.doctorLastName}{" "}
-                          {appointment.doctorName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {appointment.statusRDV === STATUS_RDV.PLANIFIE && (
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                              Plannifié
-                            </span>
-                          )}
-                          {appointment.statusRDV ===
-                            STATUS_RDV.PATIENT_ABSENT && (
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-500">
-                              patient absent
-                            </span>
-                          )}
-                          {appointment.statusRDV === STATUS_RDV.TERMINE && (
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-500">
-                              Terminé
-                            </span>
-                          )}
-                          {appointment.statusRDV === STATUS_RDV.ANNULE && (
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-500">
-                              Annulé
-                            </span>
-                          )}
-                        </td>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider"
+                        >
+                          Statut
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredAppointments.map((appointment, index) => (
+                        <tr key={index}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {format(new Date(appointment.dateTime), "PPPp", {
+                              locale: fr,
+                            })}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {appointment.userName.toUpperCase()}{" "}
+                            {appointment.userLastName}
+                          </td>
+
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Dialog
+                              key={appointment.id}
+                              open={openStates[appointment.id] || false}
+                              onOpenChange={(open) =>
+                                setOpenStates((prev) => ({
+                                  ...prev,
+                                  [appointment.id]: open,
+                                }))
+                              }
+                            >
+                              <DialogTrigger
+                                onClick={() => {
+                                  setSelectedAppointmentId(appointment.id);
+                                  setSelectedStatus(appointment.statusRDV);
+                                }}
+                                asChild
+                              >
+                                <button
+                                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                                    appointment.statusRDV ===
+                                    STATUS_RDV.PLANIFIE
+                                      ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                      : appointment.statusRDV ===
+                                        STATUS_RDV.PATIENT_ABSENT
+                                      ? "bg-red-100 text-red-600 hover:bg-red-200"
+                                      : appointment.statusRDV ===
+                                        STATUS_RDV.TERMINE
+                                      ? "bg-green-100 text-green-600 hover:bg-green-200"
+                                      : appointment.statusRDV ===
+                                        STATUS_RDV.ANNULE
+                                      ? "bg-red-100 text-red-600 hover:bg-red-200"
+                                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                  }`}
+                                >
+                                  {appointment.statusRDV === STATUS_RDV.PLANIFIE
+                                    ? "Plannifié"
+                                    : appointment.statusRDV ===
+                                      STATUS_RDV.PATIENT_ABSENT
+                                    ? "Patient absent"
+                                    : appointment.statusRDV ===
+                                      STATUS_RDV.TERMINE
+                                    ? "Terminé"
+                                    : appointment.statusRDV ===
+                                      STATUS_RDV.ANNULE
+                                    ? "Annulé"
+                                    : "Inconnu"}
+                                </button>
+                              </DialogTrigger>
+                              <DialogContent className="bg-white rounded-lg shadow-lg border border-gray-200 max-w-md">
+                                <DialogTitle className="text-lg font-semibold text-bay-of-many-900 pb-3 border-b border-gray-200">
+                                  Changer le statut
+                                </DialogTitle>
+                                <div className="py-4">
+                                  <p className="text-gray-600 mb-4">
+                                    Pour {appointment.userName.toUpperCase()}{" "}
+                                    {appointment.userLastName}
+                                  </p>
+
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                      onClick={() =>
+                                        setSelectedStatus(STATUS_RDV.PLANIFIE)
+                                      }
+                                      className={`p-3 rounded-lg border text-left transition-colors ${
+                                        selectedStatus === STATUS_RDV.PLANIFIE
+                                          ? "border-green-500 bg-green-50"
+                                          : "border-gray-200 hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                        <span className="text-sm font-medium">
+                                          Plannifié
+                                        </span>
+                                      </div>
+                                    </button>
+
+                                    <button
+                                      onClick={() =>
+                                        setSelectedStatus(STATUS_RDV.TERMINE)
+                                      }
+                                      className={`p-3 rounded-lg border text-left transition-colors ${
+                                        selectedStatus === STATUS_RDV.TERMINE
+                                          ? "border-green-500 bg-green-50"
+                                          : "border-gray-200 hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                        <span className="text-sm font-medium">
+                                          Terminé
+                                        </span>
+                                      </div>
+                                    </button>
+
+                                    <button
+                                      onClick={() =>
+                                        setSelectedStatus(STATUS_RDV.ANNULE)
+                                      }
+                                      className={`p-3 rounded-lg border text-left transition-colors ${
+                                        selectedStatus === STATUS_RDV.ANNULE
+                                          ? "border-red-500 bg-red-50"
+                                          : "border-gray-200 hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                        <span className="text-sm font-medium">
+                                          Annulé
+                                        </span>
+                                      </div>
+                                    </button>
+
+                                    <button
+                                      onClick={() =>
+                                        setSelectedStatus(
+                                          STATUS_RDV.PATIENT_ABSENT
+                                        )
+                                      }
+                                      className={`p-3 rounded-lg border text-left transition-colors ${
+                                        selectedStatus ===
+                                        STATUS_RDV.PATIENT_ABSENT
+                                          ? "border-red-500 bg-red-50"
+                                          : "border-gray-200 hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                        <span className="text-sm font-medium">
+                                          Patient absent
+                                        </span>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                                <DialogFooter className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                                  <button
+                                    onClick={() => setIsDialogOpen(false)}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500"
+                                  >
+                                    Annuler
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleStatusUpdate(
+                                        selectedAppointmentId,
+                                        selectedStatus
+                                      )
+                                    }
+                                    disabled={!selectedStatus}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-bay-of-many-600 rounded-md hover:bg-bay-of-many-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bay-of-many-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    Confirmer
+                                  </button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          ) : (
-            <p className="text-bay-of-many-600">Aucun rendez-vous planifié aujourd'hui</p>
-          )}
+            ) : (
+              <p className="text-bay-of-many-600">
+                Aucun rendez-vous planifié aujourd'hui
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -24,6 +24,7 @@ export default function Medications() {
   const [existingMedications, setExistingMedications] = useState([]);
   const [toDelete, setToDelete] = useState([]);
 
+
   const {
     control,
     register,
@@ -49,6 +50,7 @@ export default function Medications() {
   const fetchData = async () => {
     try {
       const response = await instance.get(`/api/jockey/${id}/medication`);
+      console.log(response.data);
       setExistingMedications(response.data);
     } catch (err) {
       navigate("/unauthorized");
@@ -200,42 +202,44 @@ export default function Medications() {
 
       {/* Existing Medications */}
       <div className="space-y-6 mb-12">
-        {existingMedications
-          .filter((med) => !toDelete.includes(med.id))
-          .map((medication) => (
-            <div
-              key={medication.id}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {medication.medicament}
-                </h2>
-                {isEditMode && (
-                  <button
-                    type="button"
-                    onClick={() => setToDelete([...toDelete, medication.id])}
-                    className="p-2 hover:bg-red-50 rounded-full transition-colors"
-                  >
-                    <Trash className="h-5 w-5 text-red-600" />
-                  </button>
-                )}
+        {existingMedications.length > 0 &&
+          existingMedications
+            .filter((med) => !toDelete.includes(med.id))
+            .map((medication) => (
+              <div
+                key={medication.id}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {medication.medicament}
+                  </h2>
+                  {isEditMode && (
+                    <button
+                      type="button"
+                      onClick={() => setToDelete([...toDelete, medication.id])}
+                      className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                    >
+                      <Trash className="h-5 w-5 text-red-600" />
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <p className="text-gray-600">
+                    <span className="font-medium">Dose:</span> {medication.dose}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Raison:</span>{" "}
+                    {medication.causeDuTraitement}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Docteur</span>{" "}
+                    {medication.medecin.user.nom}{" "}
+                    {medication.medecin.user.prénom}
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <p className="text-gray-600">
-                  <span className="font-medium">Dose:</span> {medication.dose}
-                </p>
-                <p className="text-gray-600">
-                  <span className="font-medium">Raison:</span>{" "}
-                  {medication.causeDuTraitement}
-                </p>
-                <p className="text-gray-600">
-                  <span className="font-medium">Docteur</span>{" "}
-                  {medication.medecin.user.nom} {medication.medecin.user.prénom}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
       </div>
       {existingMedications.length == 0 && !isEditMode && (
         <div className="w-full p-4 bg-white   text-blue-600 hover:text-blue-700">

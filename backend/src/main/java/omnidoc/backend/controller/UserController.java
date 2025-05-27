@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -41,6 +42,11 @@ public class UserController {
     public ResponseEntity<Void> changeUser(@RequestBody @Valid ModificationUserRequest user, @PathVariable int userId) {
         userService.modifyUser(user, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<HashMap<String,String>> getUser(@RequestHeader("Authorization") String jwt){
+        return ResponseEntity.ok(userService.getUserName(jwt));
     }
 
 

@@ -31,6 +31,7 @@ public class Medication {
     @Column(columnDefinition = "TEXT")
     private String causeDuTraitement;
 
+
     @ManyToOne
     @JoinColumn(referencedColumnName = "id", name = "medecin_id")
     private Medecin medecin;

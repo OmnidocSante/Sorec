@@ -45,6 +45,7 @@ public class MedicationService {
 
     private List<Medication> getMedications(DossierMedicale dossierMedicale) throws Exception {
         List<Medication> medications = dossierMedicale.getMedications();
+        System.out.println(medications);
 
         for (Medication medication : medications) {
             medication.setMedicament(decryptIfNotNull(medication.getMedicament()));
@@ -54,6 +55,7 @@ public class MedicationService {
 
         return medications;
     }
+
 
 
     public void addMedication(int jockeyId, List<Medication> medications, String jwt) throws Exception {

@@ -40,8 +40,12 @@ public class JockeyController {
         return ResponseEntity.ok(jockeyService.getJockey(jockeyId));
     }
 
-
-
+    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN')")
+    @GetMapping("/aptes-stats")
+    public ResponseEntity<HashMap<String, Integer>> getAptesStats() {
+        List<HashMap<String, Integer>> statsList = jockeyService.getAptes();
+        return ResponseEntity.ok(statsList.get(0));
+    }
 
 
     @PreAuthorize("hasAuthority('MEDECIN')")

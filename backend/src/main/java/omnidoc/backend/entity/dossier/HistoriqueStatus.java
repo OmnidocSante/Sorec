@@ -11,6 +11,7 @@ import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.Medecin;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -41,5 +42,11 @@ public class HistoriqueStatus {
     private Medecin medecin;
 
     private String status;
+
+    private String signature;
+
+    @JsonIgnore
+    @Lob
+    private Blob certificate;
 
 }

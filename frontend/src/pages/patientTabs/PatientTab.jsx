@@ -26,11 +26,15 @@ import {
   FileText,
   Camera,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
+import CertificatePDF from "../adminTabs/Certificate";
+import { Font, pdf, PDFDownloadLink } from "@react-pdf/renderer";
+import roboto from "../../components/fonts/Roboto.ttf";
 
 export default function PatientTab() {
   const user = useUser();
@@ -38,8 +42,12 @@ export default function PatientTab() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [jockey, setJockey] = useState(null);
+  console.log(jockey?.status);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [status, setStatus] = useState();
+  console.log(jockey);
+
   const detailsSchema = z.object({
     plisDroit: z.number(),
     plisGauche: z.number(),
@@ -73,6 +81,8 @@ export default function PatientTab() {
         setJockey({ ...jockeyData, image: imageData });
       }
 
+      setStatus(jockeyData.status);
+
       setValue("plisDroit", jockeyData.plisDroit);
       setValue("plisGauche", jockeyData.plisGauche);
       setValue("matieresGrasses", jockeyData.matieresGrasses);
@@ -81,11 +91,11 @@ export default function PatientTab() {
       navigate("/unauthorized");
     }
   };
+  console.log("status", status);
 
   useEffect(() => {
     fetchData();
   }, [id]);
-  console.log(jockey);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -104,6 +114,11 @@ export default function PatientTab() {
     setIsDialogOpen(false);
     fetchData();
   };
+
+  Font.register({
+    family: "Roboto",
+    src: roboto,
+  });
 
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
 
@@ -151,12 +166,71 @@ export default function PatientTab() {
       console.error("Error uploading image:", error);
     }
   };
-  console.log("here");
-  console.log(user);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
+  };
+  console.log(jockey);
+
+  const sendCertificate = async () => {
+    const response = await instance.get("/api/users/user");
+    console.log(response.data);
+
+    const { firstName, lastName } = response.data;
+    const signature = localStorage.getItem("token")?.split(".")[2];
+    const blob = await pdf(
+      <CertificatePDF
+        jockeyFirstName={jockey.nom}
+        jockeyLastName={jockey.prénom}
+        gender={jockey.sexe}
+        status={jockey.status}
+        firstName={firstName}
+        lastName={lastName}
+        jockeyCin={jockey.cinId}
+        signature={signature}
+      />
+    ).toBlob();
+    const formData = new FormData();
+    formData.append("signature", signature);
+    formData.append("certificateFile", blob);
+
+    try {
+      const response = await instance.post(
+        `/api/jockey/${id}/historique/status/certificate`,
+        formData,
+        {
+          responseType: "blob",
+        }
+      );
+
+      const contentDisposition = response.headers["content-disposition"];
+      const filenameMatch =
+        contentDisposition && contentDisposition.match(/filename="(.+)"/);
+      const filename = filenameMatch ? filenameMatch[1] : "certificate.pdf";
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error uploading signature or getting certificate:", error);
+
+      if (error.response && error.response.data) {
+        const reader = new FileReader();
+        reader.onload = () => alert(`Server error: ${reader.result}`);
+        reader.readAsText(error.response.data);
+      } else {
+        alert("An unexpected error occurred.");
+      }
+    }
   };
 
   if (!jockey) {
@@ -217,7 +291,7 @@ export default function PatientTab() {
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row gap-6 mb-8">
+        <div className="flex-1 flex-col md:flex-row gap-6 mb-8">
           <motion.div
             variants={cardVariants}
             initial="hidden"
@@ -256,7 +330,7 @@ export default function PatientTab() {
                 </div>
               </div>
               {user.role === "MEDECIN" && (
-                <div className="space-x-4">
+                <div className="space-x-4 flex">
                   <Dialog
                     open={isStatusDialogOpen}
                     onOpenChange={setIsStatusDialogOpen}
@@ -447,6 +521,16 @@ export default function PatientTab() {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
+                  <button
+                    onClick={sendCertificate}
+                    disabled={
+                      jockey.status !== "APTE" && jockey.status !== "NON_APTE"
+                    }
+                    className="px-4 py-2 bg-transparent border border-bay-of-many-600 text-bay-of-many-600 rounded-lg text-sm font-medium hover:bg-bay-of-many-300 duration-300 transition-all flex items-center justify-around gap-x-4 cursor-pointer disabled:pointer-events-none disabled:opacity-50 "
+                  >
+                    <ShieldCheck className="size-4" />
+                    <p>Générer certificat</p>
+                  </button>
                 </div>
               )}
             </div>

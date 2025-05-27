@@ -15,6 +15,7 @@ const Role = {
   MEDECIN: "MEDECIN",
   USER: "USER",
   JOCKEY: "JOCKEY",
+  ADMIN: "ADMIN",
 };
 
 const userSchema = z.object({
@@ -89,9 +90,15 @@ const userSchema = z.object({
     .min(10, "Numéro de téléphone invalide")
     .max(10, "Numéro de téléphone invalide"),
   email: z.string().email("Email invalide"),
-  sorecId: z.string().max(8, "SOREC ID doit avoir max 8 caractères"),
+  sorecId: z
+    .string()
+    .max(8, { message: "SOREC ID doit avoir max 8 caractères" })
+    .nullable()
+    .transform((val) => (val === "" ? null : val)),
 
-  role: z.enum(["USER", "MEDECIN", "JOCKEY"], { message: "Rôle invalide" }),
+  role: z.enum(["USER", "MEDECIN", "JOCKEY", "ADMIN"], {
+    message: "Rôle invalide",
+  }),
 });
 
 export default function UserCreationTab() {

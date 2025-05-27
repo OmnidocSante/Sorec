@@ -24,7 +24,7 @@ const examGU_Schema = z.object({
 
 export default function ExamenGenitoUrinaire() {
   const user = useUser();
-
+  
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();

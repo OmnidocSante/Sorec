@@ -4,6 +4,7 @@ import omnidoc.backend.entity.antecedents_familiaux.AntecedentFamiliaux;
 import omnidoc.backend.entity.antecent_personnel.AntecedentPersonnel;
 import omnidoc.backend.entity.antecent_personnel.Condition;
 import omnidoc.backend.entity.dossier.DossierMedicale;
+import omnidoc.backend.entity.dossier.HistoriqueStatus;
 import omnidoc.backend.entity.dossier.Hygiene;
 import omnidoc.backend.entity.dossier.Medication;
 import omnidoc.backend.entity.enums.Status;
@@ -76,6 +77,8 @@ public class DossierMedicaleUtil {
     private ConclusionRepo conclusionRepo;
     @Autowired
     private AntecedentFamiliauxRepo antecedentFamiliauxRepo;
+    @Autowired
+    private HistoriqueStatusRepo historiqueStatusRepo;
 
 
     public void createDossier(User createdUser) throws Exception {
@@ -88,6 +91,15 @@ public class DossierMedicaleUtil {
         dossierMedicale.setJockey(jockey);
         dossierMedicale.setIsCurrent(true);
         dossierMedicaleRepo.save(dossierMedicale);
+
+        HistoriqueStatus historiqueStatus = new HistoriqueStatus();
+        historiqueStatus.setStatus("NON_APTE");
+        historiqueStatus.setCertificate(null);
+        historiqueStatus.setSignature(null);
+        historiqueStatus.setMedecin(null);
+        historiqueStatus.setJockey(jockey);
+        historiqueStatusRepo.save(historiqueStatus);
+
 
         List<Condition> conditions = conditionRepo.findAll();
         List<AntecedentPersonnel> defaultAntecedents = new ArrayList<>();

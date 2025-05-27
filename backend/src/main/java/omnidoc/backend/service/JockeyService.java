@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,25 @@ public class JockeyService {
     public List<UserRecord> getJockeys() {
         List<UserRecord> userRecords = userService.getUsers();
         return userRecords.stream().filter(userRecord -> userRecord.role() == Role.JOCKEY).toList();
+    }
+
+    public List<HashMap<String, Integer>> getAptes() {
+        List<Jockey> jockeys = jockeyRepo.findAll();
+
+        int apteCount = 0;
+        int nonApteCount = 0;
+
+        for (Jockey jockey : jockeys) {
+            if (jockey.getStatus().equals(Status.APTE)) {
+                apteCount++;
+            } else {
+                nonApteCount++;
+            }
+        }
+        HashMap<String, Integer> result = new HashMap<>();
+        result.put("APTE", apteCount);
+        result.put("NON_APTE", nonApteCount);
+        return List.of(result);
     }
 
 
@@ -106,8 +126,7 @@ public class JockeyService {
 
 
     public Optional<byte[]> getJockeyImage(int userId) throws SQLException, IOException {
-        Jockey jockey = jockeyRepo.findById(userId)
-                .orElseThrow(() -> new ApiException("User not found"));
+        Jockey jockey = jockeyRepo.findById(userId).orElseThrow(() -> new ApiException("User not found"));
 
         Blob imageBlob = jockey.getImage();
 

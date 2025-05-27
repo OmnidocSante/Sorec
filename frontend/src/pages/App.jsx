@@ -7,10 +7,19 @@ import Footer from "@/components/Footer";
 
 const App = () => {
   const navigate = useNavigate();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     document.title = "Sorec - Système de Gestion des Jockeys";
   }, []);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setImageLoaded(true);
+    img.src = jockey;
+  }, [jockey]);
+
+  
 
   const handleLogin = () => {
     navigate("/login");
@@ -33,100 +42,62 @@ const App = () => {
       },
     },
   };
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-sans">
       <Header />
-
-      {/* Hero section */}
-      {/* Hero section */}
-      <section className="pt-28 pb-24 px-4 md:px-8 bg-gradient-to-br from-blue-50/30 to-indigo-50/30">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-left space-y-8"
-          >
+      <div className="relative overflow-hidden min-h-screen">
+        <div
+          className={`absolute inset-0 bg-cover bg-center transform scale-105 transition-opacity duration-500 ${
+            imageLoaded ? "opacity-100 blur-sm" : "opacity-0"
+          }`}
+          style={{ backgroundImage: `url(${jockey})` }}
+        ></div>
+        <div className="relative flex items-center justify-center min-h-screen px-6 md:px-12 lg:px-24 xl:px-32">
+          <div className="max-w-3xl text-center backdrop-blur-md bg-white/30 rounded-xl py-16 px-8 md:px-16">
             <motion.div
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
-              className="space-y-6"
+              className="space-y-10"
             >
               <motion.div variants={fadeIn}>
-                <div className="mb-4 inline-flex items-center px-4 py-2 rounded-full bg-blue-100/80 backdrop-blur-sm">
-                  <span className="w-2 h-2 rounded-full bg-blue-600 mr-2"></span>
-                  <span className="text-sm font-medium text-blue-800">
-                    Gestion Médicale Optimisée
+                <div className="inline-flex items-center px-5 py-3 rounded-full bg-blue-200/80 backdrop-blur-sm">
+                  <span className="w-3 h-3 rounded-full bg-blue-600 animate-pulse mr-3"></span>
+                  <span className="text-lg font-medium text-blue-800">
+                    Optimisation & Sécurité
                   </span>
                 </div>
               </motion.div>
-
               <motion.h1
                 variants={fadeIn}
-                className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent leading-tight"
+                className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4"
               >
-                Suivi Médical des Jockeys
+                Gestion universelle des dossiers médicaux des jockeys{" "}
               </motion.h1>
-
               <motion.p
                 variants={fadeIn}
-                className="text-xl text-gray-700 md:pr-12 leading-relaxed"
+                className="text-base md:text-lg lg:text-xl text-gray-900 leading-relaxed opacity-80"
               >
-                Plateforme sécurisée pour une gestion centralisée des dossiers
-                médicaux, rendez-vous et suivis santé des professionnels
-                équestres.
+                Une plateforme intuitive pour le suivi médical, la planification
+                de rendez-vous et la sécurisation des informations de santé des
+                professionnels équestres.
               </motion.p>
-
-              <motion.div
-                variants={fadeIn}
-                className="flex flex-col sm:flex-row gap-4 mt-8"
-              >
+              <motion.div variants={fadeIn}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLogin}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-blue-200/50"
+                  className="bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-blue-300/50"
                 >
-                  Accéder au Portail
+                  Accéder au Portail Médical
                 </motion.button>
               </motion.div>
             </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={imageLoaded ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative group"
-          >
-            <div className="relative overflow-hidden rounded-2xl shadow-2xl transform group-hover:shadow-3xl transition-shadow duration-300">
-              <img
-                src={jockey}
-                alt="Jockey professionnel"
-                onLoad={() => setImageLoaded(true)}
-                className={`w-full object-cover h-[600px] transform transition-transform duration-300 ${
-                  imageLoaded ? "group-hover:scale-105" : "opacity-0"
-                }`}
-              />
-              {imageLoaded && (
-                <div className="absolute inset-0 bg-gradient-to-b from-blue-600/10 to-indigo-600/20" />
-              )}
-            </div>
-
-            {imageLoaded && (
-              <>
-                <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-blue-600/10 blur-xl" />
-                <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-indigo-600/10 blur-xl" />
-              </>
-            )}
-          </motion.div>
+          </div>
         </div>
-      </section>
-
-      <section className="py-24 bg-white relative overflow-hidden">
+      </div>
+      <section className="py-24 relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial="hidden"

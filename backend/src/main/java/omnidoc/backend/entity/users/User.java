@@ -67,9 +67,8 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "SOREC ID is required")
     @Size(max = 8, message = "SOREC ID must be max 8 characters")
-    @Column(nullable = false, length = 8)
+    @Column(length = 8)
     private String sorecId;
 
 

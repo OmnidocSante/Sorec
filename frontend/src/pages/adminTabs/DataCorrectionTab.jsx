@@ -160,57 +160,59 @@ export default function DataCorrectionTab() {
           </button>
         </div>
         {historique.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-bay-of-many-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
-                  Docteur
-                </th>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-bay-of-many-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
+                    Docteur
+                  </th>
 
-                <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
-                  Jockey
-                </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
+                    Jockey
+                  </th>
 
-                <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
-                  Statut
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {historique.map((entry, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {entry.doctorLastName.trim()} {entry.doctorName}
-                  </td>
-
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {entry.jockeyLastName} {entry.jockeyName}
-                  </td>
-
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(entry.date)}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {statusTranslations[entry.status]}
-                    </span>
-                  </td>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-bay-of-many-700 uppercase tracking-wider">
+                    Statut
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="text-bay-of-many-700 ">
-          Sélectionnez un jockey pour voir son historique
-        </p>
-      )}
-      </form>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {historique.map(
+                  (entry, index) =>
+                    entry.doctorLastName && (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {entry.doctorLastName.trim()} {entry.doctorName}
+                        </td>
 
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {entry.jockeyLastName} {entry.jockeyName}
+                        </td>
+
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatDate(entry.date)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            {statusTranslations[entry.status]}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-bay-of-many-700 ">
+            Sélectionnez un jockey pour voir son historique
+          </p>
+        )}
+      </form>
     </div>
   );
 }

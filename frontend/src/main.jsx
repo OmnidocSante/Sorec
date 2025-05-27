@@ -41,6 +41,9 @@ import AntecedentFamiliaux from "./pages/patientTabs/AntecedentFamiliaux";
 import ExamenLocomoteur from "./pages/examens/ExamenLocomoteur";
 import Medications from "./pages/patientTabs/Medications";
 import Conclusion from "./pages/patientTabs/Conclusion";
+import UserPanel from "./pages/panels/UserPanel";
+import { Buffer } from "buffer";
+window.Buffer = Buffer;
 
 const usersAsyncAtom = atom([]);
 
@@ -48,8 +51,6 @@ export const usersAtom = atom(
   (get) => get(usersAsyncAtom),
   async (get, set, action) => {
     let refreshed;
-    console.log("hi");
-
     switch (action) {
       case "REFRESH": {
         refreshed = await instance.get("/api/users");
@@ -79,6 +80,10 @@ createRoot(document.getElementById("root")).render(
         {/* Admin */}
         <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
           <Route path="/admin" Component={AdminPanel} />
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
+          <Route path="/user" Component={UserPanel} />
         </Route>
 
         {/* Doctor */}

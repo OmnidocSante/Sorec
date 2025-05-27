@@ -43,6 +43,8 @@ public class Jockey {
     @Column(columnDefinition = "TEXT")
     private String plisGauche;
 
+
+    @JsonIgnore
     @OneToMany(mappedBy = "jockey", cascade = CascadeType.ALL)
     private List<Access> accessList;
 

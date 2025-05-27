@@ -18,11 +18,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, AlertCircleIcon } from "lucide-react";
 import { VILLES } from "@/utils/enums";
+import useUser from "@/auth/useUser";
 
 const userFormSchema = z.object({
   email: z.string().email("Email invalide"),
 
-  role: z.enum(["MEDECIN", "JOCKEY", "USER"]),
+  role: z.enum(["MEDECIN", "JOCKEY", "USER","ADMIN"]),
   sexe: z.enum(["M", "F"]),
   ville: z.enum([
     "CASABLANCA",
@@ -165,6 +166,8 @@ export default function UsersTab() {
     }
   };
 
+  const user = useUser();
+
   return (
     <div className="min-h-full p-6">
       <motion.h1
@@ -172,7 +175,9 @@ export default function UsersTab() {
         animate={{ opacity: 1, y: 0 }}
         className="text-2xl font-bold text-bay-of-many-900 mb-6"
       >
-        Gestion des Utilisateurs
+        {user.role === "ADMIN"
+          ? "Gestion des Utilisateurs"
+          : "Portail Utilisateurs "}
       </motion.h1>
 
       <motion.div
@@ -190,301 +195,358 @@ export default function UsersTab() {
               <th className="p-3 text-left text-bay-of-many-700 font-medium">
                 Rôle
               </th>
-              <th className="p-3 text-left text-bay-of-many-700 font-medium">
-                Actions
-              </th>
+              {user.role === "ADMIN" && (
+                <th className="p-3 text-left text-bay-of-many-700 font-medium">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
-          <tbody>
-            <AnimatePresence>
-              {users.length > 0 ? (
-                users.map((user) => (
-                  <motion.tr
-                    key={user.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="border-b border-bay-of-many-100 hover:bg-bay-of-many-50"
-                  >
-                    <td className="p-3 text-bay-of-many-800">
-                      {user.nom + " " + user.prénom}
-                    </td>
-                    <td className="p-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          user.role === "MEDECIN"
-                            ? "bg-bay-of-many-100 text-bay-of-many-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {user.role.toLowerCase()}
-                      </span>
-                    </td>
-                    <td className="p-3 space-x-2">
-                      <Dialog
-                        open={isEditDialogOpen && currentUser?.id === user.id}
-                        onOpenChange={setIsEditDialogOpen}
-                      >
-                        <DialogTrigger asChild>
-                          <motion.button
-                            onClick={() => handleEditClick(user)}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="text-bay-of-many-600 hover:text-bay-of-many-800 text-sm"
-                          >
-                            Modifier
-                          </motion.button>
-                        </DialogTrigger>
-                        <DialogContent className="bg-white p-6 rounded-lg shadow-lg border border-bay-of-many-200 max-w-[600px]">
-                          <AnimatePresence>
-                            {alertContent && (
-                              <motion.div
-                                initial={{ opacity: 0, y: -20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="mt-5"
-                              >
-                                <Alert
-                                  className={`${
-                                    alertContent.status === "error"
-                                      ? "text-red-500"
-                                      : "text-green-500"
-                                  }`}
+          {user.role === "ADMIN" ? (
+            <tbody>
+              <AnimatePresence>
+                {users.length > 0 ? (
+                  users.map((user) => (
+                    <motion.tr
+                      key={user.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="border-b border-bay-of-many-100 hover:bg-bay-of-many-50"
+                    >
+                      <td className="p-3 text-bay-of-many-800">
+                        {user.nom + " " + user.prénom}
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            user.role === "MEDECIN"
+                              ? "bg-bay-of-many-100 text-bay-of-many-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {user.role.toLowerCase()}
+                        </span>
+                      </td>
+                      <td className="p-3 space-x-2">
+                        <Dialog
+                          open={isEditDialogOpen && currentUser?.id === user.id}
+                          onOpenChange={setIsEditDialogOpen}
+                        >
+                          <DialogTrigger asChild>
+                            <motion.button
+                              onClick={() => handleEditClick(user)}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="text-bay-of-many-600 hover:text-bay-of-many-800 text-sm"
+                            >
+                              Modifier
+                            </motion.button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-white p-6 rounded-lg shadow-lg border border-bay-of-many-200 max-w-[600px]">
+                            <AnimatePresence>
+                              {alertContent && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="mt-5"
                                 >
-                                  <AlertCircleIcon className="size-4" />
-                                  <AlertTitle>{alertContent.status}</AlertTitle>
-                                  <AlertDescription>
-                                    {alertContent.content}
-                                  </AlertDescription>
-                                </Alert>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-
-                          <DialogHeader>
-                            <DialogTitle className="text-xl font-bold text-bay-of-many-900">
-                              Modifier l'utilisateur
-                            </DialogTitle>
-                            <DialogDescription className="text-bay-of-many-600">
-                              Modifier les détails de {user.nom} {user.prénom}
-                            </DialogDescription>
-                          </DialogHeader>
-
-                          <form
-                            onSubmit={handleSubmit(onSubmit)}
-                            className="space-y-4 mt-4"
-                          >
-                            <div>
-                              <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
-                                Email
-                              </label>
-                              <input
-                                {...register("email")}
-                                className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
-                              />
-                              {errors.email && (
-                                <p className="text-red-500 text-sm mt-1">
-                                  {errors.email.message}
-                                </p>
+                                  <Alert
+                                    className={`${
+                                      alertContent.status === "error"
+                                        ? "text-red-500"
+                                        : "text-green-500"
+                                    }`}
+                                  >
+                                    <AlertCircleIcon className="size-4" />
+                                    <AlertTitle>
+                                      {alertContent.status}
+                                    </AlertTitle>
+                                    <AlertDescription>
+                                      {alertContent.content}
+                                    </AlertDescription>
+                                  </Alert>
+                                </motion.div>
                               )}
-                            </div>
+                            </AnimatePresence>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <DialogHeader>
+                              <DialogTitle className="text-xl font-bold text-bay-of-many-900">
+                                Modifier l'utilisateur
+                              </DialogTitle>
+                              <DialogDescription className="text-bay-of-many-600">
+                                Modifier les détails de {user.nom} {user.prénom}
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            <form
+                              onSubmit={handleSubmit(onSubmit)}
+                              className="space-y-4 mt-4"
+                            >
                               <div>
                                 <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
-                                  Rôle
+                                  Email
+                                </label>
+                                <input
+                                  {...register("email")}
+                                  className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
+                                />
+                                {errors.email && (
+                                  <p className="text-red-500 text-sm mt-1">
+                                    {errors.email.message}
+                                  </p>
+                                )}
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
+                                    Rôle
+                                  </label>
+                                  <select
+                                    {...register("role")}
+                                    className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
+                                  >
+                                    <option value="MEDECIN">Médecin</option>
+                                    <option value="JOCKEY">Jockey</option>
+                                    <option value="USER">
+                                      Utilisateur de consultation
+                                    </option>
+                                    <option value="ADMIN">Admin</option>
+                                  </select>
+                                  {errors.role && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                      {errors.role.message}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
+                                    Sexe
+                                  </label>
+                                  <select
+                                    {...register("sexe")}
+                                    className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
+                                  >
+                                    <option value="M">Masculin</option>
+                                    <option value="F">Féminin</option>
+                                  </select>
+                                  {errors.sexe && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                      {errors.sexe.message}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-bay-of-many-700 mb-1">
+                                  Ville
                                 </label>
                                 <select
-                                  {...register("role")}
-                                  className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
+                                  {...register("ville")}
+                                  className="w-full p-2  border rounded focus:ring-2 focus:ring-bay-of-many-400"
                                 >
-                                  <option value="MEDECIN">Médecin</option>
-                                  <option value="JOCKEY">Jockey</option>
-                                  <option value="USER">
-                                    Utilisateur de consultation
-                                  </option>
+                                  {VILLES.map((ville) => (
+                                    <option
+                                      key={ville.value}
+                                      value={ville.value}
+                                    >
+                                      {ville.label}
+                                    </option>
+                                  ))}
                                 </select>
                                 {errors.role && (
-                                  <p className="text-red-500 text-sm mt-1">
-                                    {errors.role.message}
+                                  <p className="text-red-600 text-sm">
+                                    {errors.ville.message}
                                   </p>
                                 )}
                               </div>
-
                               <div>
                                 <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
-                                  Sexe
+                                  Adresse
                                 </label>
-                                <select
-                                  {...register("sexe")}
+                                <input
+                                  {...register("adresse")}
                                   className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
-                                >
-                                  <option value="M">Masculin</option>
-                                  <option value="F">Féminin</option>
-                                </select>
-                                {errors.sexe && (
+                                />
+                                {errors.adresse && (
                                   <p className="text-red-500 text-sm mt-1">
-                                    {errors.sexe.message}
+                                    {errors.adresse.message}
                                   </p>
                                 )}
                               </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-bay-of-many-700 mb-1">
-                                Ville
-                              </label>
-                              <select
-                                {...register("ville")}
-                                className="w-full p-2  border rounded focus:ring-2 focus:ring-bay-of-many-400"
+                              <DialogFooter className="mt-6">
+                                <motion.button
+                                  type="button"
+                                  onClick={() => setIsEditDialogOpen(false)}
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className="px-4 py-2 border border-bay-of-many-300 rounded-md hover:bg-bay-of-many-50 transition-colors"
+                                >
+                                  Annuler
+                                </motion.button>
+                                <motion.button
+                                  type="submit"
+                                  disabled={isSubmitting}
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className="px-4 py-2 bg-bay-of-many-600 text-white rounded-md hover:bg-bay-of-many-700 transition-colors disabled:opacity-50"
+                                >
+                                  {isSubmitting
+                                    ? "Enregistrement..."
+                                    : "Enregistrer"}
+                                </motion.button>
+                              </DialogFooter>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
+                        <Dialog
+                          open={
+                            isDeleteDialogOpen && currentUser?.id === user.id
+                          }
+                          onOpenChange={setIsDeleteDialogOpen}
+                        >
+                          <DialogTrigger asChild>
+                            <motion.button
+                              onClick={() => handleCloseClick(user)}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="text-red-500 hover:text-red-800 text-sm"
+                            >
+                              Supprimer
+                            </motion.button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-white p-6 rounded-lg shadow-lg border border-bay-of-many-200 max-w-[600px]">
+                            <AnimatePresence>
+                              {alertContent && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="mt-5"
+                                >
+                                  <Alert
+                                    className={`${
+                                      alertContent.status === "error"
+                                        ? "text-red-500"
+                                        : "text-green-500"
+                                    }`}
+                                  >
+                                    <AlertCircleIcon className="size-4" />
+                                    <AlertTitle>Erreur</AlertTitle>
+                                    <AlertDescription>
+                                      {alertContent.content}
+                                    </AlertDescription>
+                                  </Alert>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            <DialogHeader>
+                              <DialogTitle className="text-xl font-bold text-bay-of-many-900">
+                                Confirmation de suppression
+                              </DialogTitle>
+                              <DialogDescription className="text-bay-of-many-600">
+                                Vous êtes sur le point de supprimer {user.nom}
+                                {user.prénom}
+                              </DialogDescription>
+                            </DialogHeader>
+                            Êtes-vous sûr de vouloir continuer ?
+                            <DialogFooter>
+                              <motion.button
+                                type="submit"
+                                disabled={isSubmitting}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="px-4 py-2 w-fit bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+                                onClick={handleCloseConfirm}
                               >
-                                {VILLES.map((ville) => (
-                                  <option key={ville.value} value={ville.value}>
-                                    {ville.label}
-                                  </option>
-                                ))}
-                              </select>
-                              {errors.role && (
-                                <p className="text-red-600 text-sm">
-                                  {errors.ville.message}
-                                </p>
-                              )}
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-bay-of-many-700 mb-1">
-                                Adresse
-                              </label>
-                              <input
-                                {...register("adresse")}
-                                className="w-full p-2 border border-bay-of-many-300 rounded-md focus:ring-2 focus:ring-bay-of-many-400 focus:border-transparent"
-                              />
-                              {errors.adresse && (
-                                <p className="text-red-500 text-sm mt-1">
-                                  {errors.adresse.message}
-                                </p>
-                              )}
-                            </div>
-                            <DialogFooter className="mt-6">
+                                {isSubmitting
+                                  ? "Suppression en cours..."
+                                  : "Confirmer la suppression"}
+                              </motion.button>
                               <motion.button
                                 type="button"
-                                onClick={() => setIsEditDialogOpen(false)}
+                                onClick={() => setIsDeleteDialogOpen(false)}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="px-4 py-2 border border-bay-of-many-300 rounded-md hover:bg-bay-of-many-50 transition-colors"
                               >
                                 Annuler
                               </motion.button>
-                              <motion.button
-                                type="submit"
-                                disabled={isSubmitting}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="px-4 py-2 bg-bay-of-many-600 text-white rounded-md hover:bg-bay-of-many-700 transition-colors disabled:opacity-50"
-                              >
-                                {isSubmitting
-                                  ? "Enregistrement..."
-                                  : "Enregistrer"}
-                              </motion.button>
                             </DialogFooter>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
-                      <Dialog
-                        open={isDeleteDialogOpen && currentUser?.id === user.id}
-                        onOpenChange={setIsDeleteDialogOpen}
-                      >
-                        <DialogTrigger asChild>
-                          <motion.button
-                            onClick={() => handleCloseClick(user)}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="text-red-500 hover:text-red-800 text-sm"
-                          >
-                            Supprimer
-                          </motion.button>
-                        </DialogTrigger>
-                        <DialogContent className="bg-white p-6 rounded-lg shadow-lg border border-bay-of-many-200 max-w-[600px]">
-                          <AnimatePresence>
-                            {alertContent && (
-                              <motion.div
-                                initial={{ opacity: 0, y: -20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="mt-5"
-                              >
-                                <Alert
-                                  className={`${
-                                    alertContent.status === "error"
-                                      ? "text-red-500"
-                                      : "text-green-500"
-                                  }`}
-                                >
-                                  <AlertCircleIcon className="size-4" />
-                                  <AlertTitle>Erreur</AlertTitle>
-                                  <AlertDescription>
-                                    {alertContent.content}
-                                  </AlertDescription>
-                                </Alert>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                          <DialogHeader>
-                            <DialogTitle className="text-xl font-bold text-bay-of-many-900">
-                              Confirmation de suppression
-                            </DialogTitle>
-                            <DialogDescription className="text-bay-of-many-600">
-                              Vous êtes sur le point de supprimer {user.nom}
-                              {user.prénom}
-                            </DialogDescription>
-                          </DialogHeader>
-                          Êtes-vous sûr de vouloir continuer ?
-                          <DialogFooter>
-                            <motion.button
-                              type="submit"
-                              disabled={isSubmitting}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="px-4 py-2 w-fit bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
-                              onClick={handleCloseConfirm}
-                            >
-                              {isSubmitting
-                                ? "Suppression en cours..."
-                                : "Confirmer la suppression"}
-                            </motion.button>
-                            <motion.button
-                              type="button"
-                              onClick={() => setIsDeleteDialogOpen(false)}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="px-4 py-2 border border-bay-of-many-300 rounded-md hover:bg-bay-of-many-50 transition-colors"
-                            >
-                              Annuler
-                            </motion.button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
+                          </DialogContent>
+                        </Dialog>
+                      </td>
+                    </motion.tr>
+                  ))
+                ) : (
+                  <motion.tr
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4"
+                  >
+                    <td
+                      colSpan={3}
+                      className="text-center text-bay-of-many-600 py-4"
+                    >
+                      Aucun utilisateur n'est trouvé
                     </td>
                   </motion.tr>
-                ))
-              ) : (
-                <motion.tr
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="p-4"
-                >
-                  <td
-                    colSpan={3}
-                    className="text-center text-bay-of-many-600 py-4"
+                )}
+              </AnimatePresence>
+            </tbody>
+          ) : (
+            <tbody>
+              <AnimatePresence>
+                {users.length > 0 ? (
+                  users.map((user) => (
+                    <motion.tr
+                      key={user.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="border-b border-bay-of-many-100 hover:bg-bay-of-many-50"
+                    >
+                      <td className="p-3 text-bay-of-many-800">
+                        {user.nom + " " + user.prénom}
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            user.role === "MEDECIN"
+                              ? "bg-bay-of-many-100 text-bay-of-many-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {user.role.toLowerCase()}
+                        </span>
+                      </td>
+                    </motion.tr>
+                  ))
+                ) : (
+                  <motion.tr
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4"
                   >
-                    Aucun utilisateur n'est trouvé
-                  </td>
-                </motion.tr>
-              )}
-            </AnimatePresence>
-          </tbody>
+                    <td
+                      colSpan={3}
+                      className="text-center text-bay-of-many-600 py-4"
+                    >
+                      Aucun utilisateur n'est trouvé
+                    </td>
+                  </motion.tr>
+                )}
+              </AnimatePresence>
+            </tbody>
+          )}
         </table>
       </motion.div>
     </div>

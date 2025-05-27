@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +39,8 @@ public class UserService {
 
     @Autowired
     private DossierMedicaleUtil dossierMedicaleUtil;
+    @Autowired
+    private JwtService jwtService;
 
     public List<UserRecord> getUsers() {
         return userRepo.findAll().stream().map(user -> new UserRecord(user.getId(), user.getNom(), user.getPrénom(), user.getSexe(), user.getDateNaissance(), user.getCinId(), user.getVille(), user.getAdresse(), user.getTelephone(), user.getEmail(), user.getSorecId(), user.getRole())).toList();
@@ -79,9 +82,20 @@ public class UserService {
         if (user.getRole() == Role.JOCKEY) {
             System.out.println("testHere");
             dossierMedicaleUtil.createDossier(createdUser);
+
         } else if (user.getRole() == Role.MEDECIN) {
             medecinRepo.save(new Medecin(createdUser));
         }
+    }
+
+    public HashMap<String, String> getUserName(String jwt) {
+        String token = jwt.substring(7);
+        String username = jwtService.extractUsername(token);
+        User user = userRepo.findByEmail(username).orElseThrow(() -> new ApiException("Doctor not found"));
+        HashMap<String, String> result = new HashMap<>();
+        result.put("firstName", user.getNom());
+        result.put("lastName", user.getPrénom());
+        return result;
     }
 
 

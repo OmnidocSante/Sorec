@@ -1,6 +1,7 @@
 package omnidoc.backend.service;
 
 import jakarta.validation.Valid;
+import omnidoc.backend.entity.dossier.HistoriqueStatus;
 import omnidoc.backend.entity.enums.StatusRDV;
 import omnidoc.backend.entity.rdv.Rdv;
 import omnidoc.backend.entity.users.Access;
@@ -37,7 +38,10 @@ public class RdvService {
     private DossierMedicaleUtil dossierMedicaleUtil;
     @Autowired
     private AccessRepo accessRepo;
-    private JavaMailSender javaMailSender;
+    @Autowired
+    private SmsService smsService;
+    @Autowired
+    private HistoriqueStatusRepo historiqueStatusRepo;
 
 
     public void createRdv(@Valid RdvRequest rdvRequest) {
@@ -61,6 +65,8 @@ public class RdvService {
             rdv.setMedecin(medecin);
             rdvRepo.save(rdv);
             emailService.sendEmail(medecin.getUser().getEmail(), "Nouveau rendez-vous médical programmé", "Bonjour Dr " + medecin.getUser().getNom() + ",\n\n" + "Un nouveau rendez-vous a été fixé avec le jockey " + jockey.getUser().getNom() + " " + jockey.getUser().getPrénom() + " le " + rdv.getDate().toString() + ".\n\n" + "Merci de bien vouloir le noter dans votre agenda.\n\n" + "Cordialement,\nL'équipe Omnidoc");
+            smsService.sendSms(jockey.getUser().getTelephone(), "Bonjour " + jockey.getUser().getNom() + " " + jockey.getUser().getPrénom() + ", " + "Votre rendez-vous médical a été programmé avec le Dr " + medecin.getUser().getNom() + ". " + "La date du rendez-vous est fixée au " + rdv.getDate().toString() + ". " + "Merci de bien vouloir noter cette date dans votre agenda. " + "Cordialement, L'équipe Omnidoc");
+
 
         } catch (Exception e) {
             throw new ApiException(e.getMessage());
@@ -103,6 +109,8 @@ public class RdvService {
             rdv.setDate(rdvRequest.getDate());
             rdv.setJockey(jockey);
             rdv.setMedecin(medecin);
+            smsService.sendSms(jockey.getUser().getTelephone(), "Bonjour " + jockey.getUser().getNom() + " " + jockey.getUser().getPrénom() + ", " + "Votre rendez-vous médical a été programmé avec le Dr " + medecin.getUser().getNom() + ". " + "La date du rendez-vous est fixée au " + rdv.getDate().toString() + ". " + "Merci de bien vouloir noter cette date dans votre agenda. " + "Cordialement, L'équipe Omnidoc");
+
             rdvRepo.save(rdv);
         } catch (Exception e) {
             throw new ApiException(e.getMessage());
@@ -118,7 +126,6 @@ public class RdvService {
         rdvRepo.save(rdv);
         if (statusRDV.equals(StatusRDV.ANNULE)) {
             emailService.sendEmail(rdv.getMedecin().getUser().getEmail(), "Annulation rdv", "le rendez vous avec " + rdv.getJockey().getUser().getNom() + " date " + rdv.getDate().format(java.time.format.DateTimeFormatter.ofPattern("yy-MM-dd HH:mm")) + " a été annulé");
-
             emailService.sendEmail(rdv.getJockey().getUser().getEmail(), "Annulation rdv", "le rendez vous avec " + rdv.getMedecin().getUser().getNom() + " date " + rdv.getDate().format(java.time.format.DateTimeFormatter.ofPattern("yy-MM-dd HH:mm")) + " a été annulé");
         }
 
