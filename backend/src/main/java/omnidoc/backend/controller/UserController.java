@@ -39,7 +39,7 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> changeUser(@RequestBody @Valid ModificationUserRequest user, @PathVariable int userId) {
+    public ResponseEntity<Void> changeUser(@RequestBody @Valid ModificationUserRequest user, @PathVariable int userId) throws Exception {
         userService.modifyUser(user, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

@@ -35,6 +35,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String prénom;
 
+
+
     @NotNull(message = "Sexe is required")
     @Column(nullable = false)
     private Character sexe;

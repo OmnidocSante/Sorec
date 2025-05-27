@@ -73,7 +73,7 @@ const App = () => {
                 variants={fadeIn}
                 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4"
               >
-                Gestion universelle des dossiers médicaux des jockeys{" "}
+                Dossier médicale universelle des Jockeys
               </motion.h1>
               <motion.p
                 variants={fadeIn}

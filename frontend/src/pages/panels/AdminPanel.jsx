@@ -264,7 +264,7 @@ export default function AdminPanel({ tab }) {
             onClick={handleLogout}
             className="w-9/12 hover:bg-bay-of-many-700/50 transition-all duration-300 flex items-center gap-3 p-3.5 mt-8 rounded-xl hover:pl-5 absolute bottom-8 left-6 right-6"
           >
-            <LogOut className="w-5 h-5 text-transparent " />
+            <LogOut className="w-5 h-5  " />
             Déconnexion
           </button>
         </nav>

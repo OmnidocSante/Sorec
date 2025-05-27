@@ -93,7 +93,7 @@ public class DossierMedicaleUtil {
         dossierMedicaleRepo.save(dossierMedicale);
 
         HistoriqueStatus historiqueStatus = new HistoriqueStatus();
-        historiqueStatus.setStatus("NON_APTE");
+        historiqueStatus.setStatus(Util.encryptIfNotNull(Status.NON_APTE.name()));
         historiqueStatus.setCertificate(null);
         historiqueStatus.setSignature(null);
         historiqueStatus.setMedecin(null);

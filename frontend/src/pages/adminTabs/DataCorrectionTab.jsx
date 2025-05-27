@@ -17,6 +17,7 @@ export default function DataCorrectionTab() {
   const [jockeySearch, setJockeySearch] = useState("");
   const [jockeyCityFilter, setJockeyCityFilter] = useState("all");
   const [users] = useAtom(usersAtom);
+  const [hasFetched, setHasFatched] = useState(false);
 
   const jockeySchema = z.object({
     jockeyId: z.string().min(1, "Jockey est requis"),
@@ -60,10 +61,14 @@ export default function DataCorrectionTab() {
       `/api/jockey/${data.jockeyId}/historique/status`
     );
     setHistorique(response.data);
+    console.log(historique);
+    
+    setHasFatched(true);
   };
   const statusTranslations = {
     EXAMEN_ANNUEL_A_PREVOIR: "Examen annuel à prévoir",
     APTE: "Apte",
+    NON_APTE: "Non Apte",
     EN_ATTENTE_DE_REEVALUATION: "En attente de réévaluation",
   };
   const formatDate = (isoString) => {
@@ -159,7 +164,7 @@ export default function DataCorrectionTab() {
             Sélectionner
           </button>
         </div>
-        {historique.length > 0 ? (
+        {historique.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-bay-of-many-50">
@@ -207,9 +212,15 @@ export default function DataCorrectionTab() {
               </tbody>
             </table>
           </div>
-        ) : (
+        )}
+        {historique.length < 1 && hasFetched === false && (
           <p className="text-bay-of-many-700 ">
             Sélectionnez un jockey pour voir son historique
+          </p>
+        )}
+        {historique.length <1 && hasFetched && (
+          <p className="text-bay-of-many-700 ">
+            Cet utilisateur n'a pas d'historique.
           </p>
         )}
       </form>

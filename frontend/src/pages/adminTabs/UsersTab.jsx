@@ -144,6 +144,8 @@ export default function UsersTab() {
 
   const handleCloseConfirm = async () => {
     try {
+      console.log(currentUser.id);
+      
       await instance.delete(`/api/users/${currentUser.id}`);
       setAlertContent({
         status: "success",

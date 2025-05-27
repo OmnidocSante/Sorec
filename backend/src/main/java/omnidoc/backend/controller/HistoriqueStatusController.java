@@ -22,7 +22,6 @@ public class HistoriqueStatusController {
 
     @PostMapping
     public ResponseEntity<Void> addStatus(@PathVariable int jockeyId, @RequestHeader("Authorization") String jwt, @RequestBody HashMap<String, Status> statusHashMap) throws Exception {
-
         Status status = statusHashMap.get("status");
         System.out.println(status);
         historiqueStatusService.addStatus(status, jockeyId, jwt);

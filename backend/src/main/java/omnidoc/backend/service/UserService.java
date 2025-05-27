@@ -1,6 +1,8 @@
 package omnidoc.backend.service;
 
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import omnidoc.backend.entity.enums.Role;
 import omnidoc.backend.entity.users.Jockey;
 import omnidoc.backend.entity.users.Medecin;
@@ -23,6 +25,8 @@ import java.util.UUID;
 
 @Service
 public class UserService {
+    @PersistenceContext
+    private EntityManager em;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -144,39 +148,49 @@ public class UserService {
     }
 
     @Transactional
-    public void modifyUser(ModificationUserRequest user, int userId) {
-        System.out.println(user.getVille());
-
+    public void modifyUser(ModificationUserRequest user, int userId) throws Exception {
         User foundUser = userRepo.findById(userId).orElseThrow(() -> new ApiException("User not found"));
-        boolean isRoleChanging = !foundUser.getRole().name().equals(user.getRole().name());
 
+        boolean isRoleChanging = !foundUser.getRole().equals(user.getRole());
 
         foundUser.setEmail(user.getEmail());
         foundUser.setRole(user.getRole());
         foundUser.setSexe(user.getSexe());
         foundUser.setVille(user.getVille());
         foundUser.setAdresse(user.getAdresse());
+
         User savedUser = userRepo.save(foundUser);
-        if (isRoleChanging && (user.getRole() == Role.MEDECIN || user.getRole() == Role.JOCKEY)) {
+
+        if (isRoleChanging) {
+            jockeyRepo.deleteByUser_Id(savedUser.getId());
+            medecinRepo.deleteByUser_Id(savedUser.getId());
+
             if (user.getRole() == Role.MEDECIN) {
-                jockeyRepo.deleteByUser_Id(userId);
                 medecinRepo.save(new Medecin(savedUser));
-            } else {
-                medecinRepo.deleteByUser_Id(userId);
+            } else if (user.getRole() == Role.JOCKEY) {
                 jockeyRepo.save(new Jockey(savedUser));
+                dossierMedicaleUtil.createDossier(savedUser);
             }
         }
     }
 
 
+    @Transactional
     public void deleteUser(int userId) {
         User user = userRepo.findById(userId).orElseThrow(() -> new ApiException("User not found"));
         Role role = user.getRole();
-        if (role.name().equals(Role.MEDECIN.name())) {
+
+        em.createNativeQuery("SET FOREIGN_KEY_CHECKS=0").executeUpdate();
+
+        if (role == Role.MEDECIN) {
             medecinRepo.deleteByUser_Id(userId);
-        } else if (role.name().equals(Role.JOCKEY.name())) {
+        } else if (role == Role.JOCKEY) {
             jockeyRepo.deleteByUser_Id(userId);
         }
+
         userRepo.deleteById(userId);
+
+        em.createNativeQuery("SET FOREIGN_KEY_CHECKS=1").executeUpdate();
     }
+
 }

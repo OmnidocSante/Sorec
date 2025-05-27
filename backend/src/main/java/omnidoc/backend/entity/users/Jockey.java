@@ -24,7 +24,7 @@ public class Jockey {
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id",unique = true)
     private User user;
 
 
@@ -47,6 +47,7 @@ public class Jockey {
     @JsonIgnore
     @OneToMany(mappedBy = "jockey", cascade = CascadeType.ALL)
     private List<Access> accessList;
+
 
 
 
