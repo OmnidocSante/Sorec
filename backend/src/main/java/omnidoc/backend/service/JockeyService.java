@@ -131,10 +131,8 @@ public class JockeyService {
         Blob imageBlob = jockey.getImage();
 
         if (imageBlob == null || imageBlob.length() == 0) {
-            System.out.println("here 1");
             return Optional.empty();
         } else {
-            System.out.println("here 2");
 
             return Optional.of(imageBlob.getBinaryStream().readAllBytes());
         }

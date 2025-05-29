@@ -57,6 +57,19 @@ public class RdvController {
         rdvService.changeStatusRDV(statusRDV, rdvId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    @GetMapping("/jockey")
+    @PreAuthorize("hasAnyAuthority('ADMIN','MEDECIN','JOCKEY')")
+    public ResponseEntity<Rdv> getLatestRdv() {
+        System.out.println("I'm here");
+        Rdv latestRdv = rdvService.getLatestRdv();
+        System.out.println(latestRdv);
+        if (latestRdv == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(latestRdv);
+    }
+
+
 
 
 }

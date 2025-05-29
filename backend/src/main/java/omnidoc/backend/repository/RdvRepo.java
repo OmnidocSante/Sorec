@@ -17,10 +17,9 @@ public interface RdvRepo extends JpaRepository<Rdv, Integer> {
     List<Rdv> findRdvsByMedecin(Medecin medecin);
 
     @Query("SELECT r FROM Rdv r WHERE r.statusRDV <> :excludedStatus AND r.date BETWEEN :now AND :soon")
-    List<Rdv> findUpcomingValidRdv(
-            @Param("now") LocalDateTime now,
-            @Param("soon") LocalDateTime soon,
-            @Param("excludedStatus") StatusRDV excludedStatus
-    );
+    List<Rdv> findUpcomingValidRdv(@Param("now") LocalDateTime now, @Param("soon") LocalDateTime soon, @Param("excludedStatus") StatusRDV excludedStatus);
+
+    @Query("SELECT r FROM Rdv r " + "WHERE r.statusRDV = :status " + "AND r.jockey.user.email = :email " + "AND r.date > CURRENT_TIMESTAMP " + "ORDER BY r.date ASC")
+    Optional<Rdv> findNextPlannedRdvByJockeyEmail(@Param("status") StatusRDV status, @Param("email") String email);
 
 }

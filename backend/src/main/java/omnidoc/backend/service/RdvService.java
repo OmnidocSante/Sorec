@@ -15,9 +15,11 @@ import omnidoc.backend.util.DossierMedicaleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RdvService {
@@ -131,6 +133,14 @@ public class RdvService {
 
 
     }
+    public Rdv getLatestRdv() {
+        System.out.println("here");
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        System.out.println(email);
+        return rdvRepo.findNextPlannedRdvByJockeyEmail(StatusRDV.PLANIFIE, email)
+                .orElse(null);
+    }
+
 
 
 }
